@@ -1,0 +1,319 @@
+<!-- templates/usuarios/configuracion.html -->
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_configuracion.css' %}">
+
+<main class="contenido">
+    <header>
+        <h1><i class="fa-solid fa-cog"></i> <b>Configuración del Sistema</b></h1>
+        <p class="subtitulo">Gestiona la configuración general del sistema Biometrika</p>
+    </header>
+
+    <!-- Modal de Exportación -->
+    <div id="modalExportar" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-file-export"></i> Exportar Configuración</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <div class="export-option">
+                        <input type="radio" id="formato-cfg" name="formato-export" value="cfg" checked>
+                        <label for="formato-cfg">
+                            <i class="fa-solid fa-gear"></i>
+                            <strong>Archivo .cfg</strong>
+                            <span>Formato de configuración del sistema</span>
+                        </label>
+                    </div>
+                    <div class="export-option">
+                        <input type="radio" id="formato-json" name="formato-export" value="json">
+                        <label for="formato-json">
+                            <i class="fa-solid fa-code"></i>
+                            <strong>Archivo .json</strong>
+                            <span>Formato JSON para desarrollo</span>
+                        </label>
+                    </div>
+                    <div class="export-option">
+                        <input type="radio" id="formato-xml" name="formato-export" value="xml">
+                        <label for="formato-xml">
+                            <i class="fa-solid fa-file-code"></i>
+                            <strong>Archivo .xml</strong>
+                            <span>Formato XML estándar</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="export-sections">
+                    <h4>Secciones a exportar:</h4>
+                    <div class="sections-grid">
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="section-general" checked>
+                            <label for="section-general">Configuración General</label>
+                        </div>
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="section-horarios" checked>
+                            <label for="section-horarios">Configuración de Horarios</label>
+                        </div>
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="section-seguridad" checked>
+                            <label for="section-seguridad">Configuración de Seguridad</label>
+                        </div>
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="section-backup" checked>
+                            <label for="section-backup">Configuración de Backup</label>
+                        </div>
+                        <div class="section-checkbox">
+                            <input type="checkbox" id="section-notificaciones" checked>
+                            <label for="section-notificaciones">Configuración de Notificaciones</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="export-actions">
+                    <button id="btnExportarAhora" class="btn-exportar">
+                        <i class="fa-solid fa-download"></i> Exportar Ahora
+                    </button>
+                    <button id="btnProgramarExport" class="btn-programar">
+                        <i class="fa-solid fa-calendar"></i> Programar Exportación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuraciones Principales -->
+    <section class="configuraciones-principales">
+        <!-- Configuración General -->
+        <div class="config-card">
+            <div class="config-header">
+                <i class="fa-solid fa-sliders"></i>
+                <h3>Configuración General</h3>
+            </div>
+            <div class="config-body">
+                <div class="config-group">
+                    <label for="nombre-sistema">Nombre del Sistema</label>
+                    <input type="text" id="nombre-sistema" value="Biometrika S.A" placeholder="Nombre del sistema">
+                </div>
+                <div class="config-group">
+                    <label for="timezone">Zona Horaria</label>
+                    <select id="timezone">
+                        <option value="america-buenos_aires" selected>América/Buenos Aires (GMT-3)</option>
+                        <option value="america-santiago">América/Santiago (GMT-3)</option>
+                        <option value="america-lima">América/Lima (GMT-5)</option>
+                        <option value="america-mexico_city">América/Mexico_City (GMT-6)</option>
+                    </select>
+                </div>
+                <div class="config-group">
+                    <label for="idioma">Idioma del Sistema</label>
+                    <select id="idioma">
+                        <option value="es" selected>Español</option>
+                        <option value="en">English</option>
+                        <option value="pt">Português</option>
+                    </select>
+                </div>
+            </div>
+            <div class="config-footer">
+                <button class="btn-guardar">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+
+        <!-- Configuración de Horarios -->
+        <div class="config-card">
+            <div class="config-header">
+                <i class="fa-solid fa-clock"></i>
+                <h3>Configuración de Horarios</h3>
+            </div>
+            <div class="config-body">
+                <div class="config-group">
+                    <label for="hora-entrada">Hora de Entrada Estándar</label>
+                    <input type="time" id="hora-entrada" value="08:00">
+                </div>
+                <div class="config-group">
+                    <label for="hora-salida">Hora de Salida Estándar</label>
+                    <input type="time" id="hora-salida" value="17:00">
+                </div>
+                <div class="config-group">
+                    <label for="tolerancia">Tolerancia de Llegada (minutos)</label>
+                    <input type="number" id="tolerancia" value="15" min="0" max="60">
+                </div>
+                <div class="config-group checkbox-group">
+                    <input type="checkbox" id="horario-flexible" checked>
+                    <label for="horario-flexible">Permitir horario flexible</label>
+                </div>
+            </div>
+            <div class="config-footer">
+                <button class="btn-guardar">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Configuraciones de Seguridad -->
+    <section class="configuraciones-seguridad">
+        <h2><i class="fa-solid fa-shield-halved"></i> Configuración de Seguridad</h2>
+        
+        <div class="config-grid">
+            <!-- Autenticación -->
+            <div class="config-card">
+                <div class="config-header">
+                    <i class="fa-solid fa-fingerprint"></i>
+                    <h3>Autenticación</h3>
+                </div>
+                <div class="config-body">
+                    <div class="config-group checkbox-group">
+                        <input type="checkbox" id="huella-digital" checked>
+                        <label for="huella-digital">Habilitar autenticación por huella digital</label>
+                    </div>
+                    <div class="config-group checkbox-group">
+                        <input type="checkbox" id="reconocimiento-facial">
+                        <label for="reconocimiento-facial">Habilitar reconocimiento facial</label>
+                    </div>
+                    <div class="config-group checkbox-group">
+                        <input type="checkbox" id="tarjeta-rfid" checked>
+                        <label for="tarjeta-rfid">Habilitar tarjetas RFID</label>
+                    </div>
+                    <div class="config-group">
+                        <label for="intentos-fallidos">Intentos fallidos permitidos</label>
+                        <input type="number" id="intentos-fallidos" value="3" min="1" max="10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contraseñas -->
+            <div class="config-card">
+                <div class="config-header">
+                    <i class="fa-solid fa-key"></i>
+                    <h3>Política de Contraseñas</h3>
+                </div>
+                <div class="config-body">
+                    <div class="config-group">
+                        <label for="longitud-password">Longitud mínima de contraseña</label>
+                        <input type="number" id="longitud-password" value="8" min="6" max="20">
+                    </div>
+                    <div class="config-group checkbox-group">
+                        <input type="checkbox" id="mayusculas" checked>
+                        <label for="mayusculas">Requerir mayúsculas</label>
+                    </div>
+                    <div class="config-group checkbox-group">
+                        <input type="checkbox" id="numeros" checked>
+                        <label for="numeros">Requerir números</label>
+                    </div>
+                    <div class="config-group checkbox-group">
+                        <input type="checkbox" id="caracteres-especiales">
+                        <label for="caracteres-especiales">Requerir caracteres especiales</label>
+                    </div>
+                    <div class="config-group">
+                        <label for="caducidad-password">Caducidad de contraseña (días)</label>
+                        <input type="number" id="caducidad-password" value="90" min="30" max="365">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notificaciones -->
+            <div class="config-card">
+                <div class="config-header">
+                    <i class="fa-solid fa-bell"></i>
+                    <h3>Notificaciones</h3>
+                </div>
+                <div class="config-body">
+                    <div class="config-group checkbox-group">
+                        <input type="checkbox" id="notificaciones-email" checked>
+                        <label for="notificaciones-email">Notificaciones por Email</label>
+                    </div>
+                    <div class="config-group checkbox-group">
+                        <input type="checkbox" id="notificaciones-sms">
+                        <label for="notificaciones-sms">Notificaciones por SMS</label>
+                    </div>
+                    <div class="config-group checkbox-group">
+                        <input type="checkbox" id="alertas-tiempo-real" checked>
+                        <label for="alertas-tiempo-real">Alertas en tiempo real</label>
+                    </div>
+                    <div class="config-group">
+                        <label for="intervalo-notificaciones">Intervalo de notificaciones (minutos)</label>
+                        <input type="number" id="intervalo-notificaciones" value="5" min="1" max="60">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backup -->
+            <div class="config-card">
+                <div class="config-header">
+                    <i class="fa-solid fa-database"></i>
+                    <h3>Backup y Respaldo</h3>
+                </div>
+                <div class="config-body">
+                    <div class="config-group checkbox-group">
+                        <input type="checkbox" id="backup-automatico" checked>
+                        <label for="backup-automatico">Backup automático</label>
+                    </div>
+                    <div class="config-group">
+                        <label for="frecuencia-backup">Frecuencia de backup</label>
+                        <select id="frecuencia-backup">
+                            <option value="diario">Diario</option>
+                            <option value="semanal" selected>Semanal</option>
+                            <option value="mensual">Mensual</option>
+                        </select>
+                    </div>
+                    <div class="config-group">
+                        <label for="hora-backup">Hora de backup</label>
+                        <input type="time" id="hora-backup" value="02:00">
+                    </div>
+                    <div class="config-group">
+                        <label for="retencion-backup">Retención de backups (días)</label>
+                        <input type="number" id="retencion-backup" value="30" min="7" max="365">
+                    </div>
+                </div>
+                <div class="config-footer">
+                    <button class="btn-backup">
+                        <i class="fa-solid fa-download"></i> Backup Manual
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Acciones del Sistema -->
+    <section class="acciones-sistema">
+        <h2><i class="fa-solid fa-tools"></i> Acciones del Sistema</h2>
+        
+        <div class="acciones-grid">
+            <button class="btn-accion btn-reiniciar">
+                <i class="fa-solid fa-rotate"></i>
+                <span>Reiniciar Servicios</span>
+            </button>
+            <button class="btn-accion btn-limpiar-cache">
+                <i class="fa-solid fa-broom"></i>
+                <span>Limpiar Caché</span>
+            </button>
+            <button class="btn-accion btn-test-sistema">
+                <i class="fa-solid fa-vial"></i>
+                <span>Test del Sistema</span>
+            </button>
+            <button class="btn-accion btn-exportar-config" id="btnAbrirExportar">
+                <i class="fa-solid fa-file-export"></i>
+                <span>Exportar Configuración</span>
+            </button>
+            <button class="btn-accion btn-reset-config">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Restablecer Configuración</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Información de Soporte -->
+    <div class="soporte-info">
+        <i class="fa-solid fa-headset"></i>
+        <strong>¿Necesita ayuda con la configuración?</strong><br>
+        Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
+        <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+    </div>
+</main>
+
+<script src="{% static 'js/configuracion.js' %}"></script>
+{% endblock %}

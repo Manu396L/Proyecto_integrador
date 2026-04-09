@@ -1,0 +1,143 @@
+<!-- templates/dashboard/index.html -->
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_dashboard.css' %}">
+
+<!-- Paneles de estadísticas -->
+<div class="panels">
+    <div class="panel">
+        <h3><i class="fa-solid fa-users"></i> Total Personal</h3>
+        <p>{{ total_personal|default:"320" }}</p>
+    </div>
+    <div class="panel">
+        <h3><i class="fa-solid fa-door-open"></i> Accesos Hoy</h3>
+        <p>{{ accesos_hoy|default:"156" }}</p>
+    </div>
+    <div class="panel">
+        <h3><i class="fa-solid fa-microchip"></i> Dispositivos Activos</h3>
+        <p>{{ dispositivos_activos|default:"57" }}</p>
+    </div>
+    <div class="panel">
+        <h3><i class="fa-solid fa-bell"></i> Alertas</h3>
+        <p>{{ alertas_activas|default:"8" }}</p>
+    </div>
+</div>
+
+<!-- Gráficos del Dashboard -->
+<div class="graficos-dashboard">
+    <div class="grafico-card">
+        <h3><i class="fa-solid fa-chart-pie"></i> Estado de Dispositivos</h3>
+        <div class="grafico-container">
+            <canvas id="dispositivosChart"></canvas>
+        </div>
+        <div class="leyenda-grafico">
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #2ecc71;"></span> Online (57)</div>
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #e74c3c;"></span> Offline (8)</div>
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #f39c12;"></span> No Autorizado (2)</div>
+        </div>
+    </div>
+    
+    <div class="grafico-card">
+        <h3><i class="fa-solid fa-calendar-check"></i> Asistencia General</h3>
+        <div class="grafico-container">
+            <canvas id="asistenciaChart"></canvas>
+        </div>
+        <div class="estadisticas-resumen">
+            <div class="estadistica-item">
+                <div class="estadistica-valor">245</div>
+                <div class="estadistica-label">Presentes</div>
+            </div>
+            <div class="estadistica-item">
+                <div class="estadistica-valor">45</div>
+                <div class="estadistica-label">Ausentes</div>
+            </div>
+            <div class="estadistica-item">
+                <div class="estadistica-valor">30</div>
+                <div class="estadistica-label">Tardanzas</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="grafico-card">
+        <h3><i class="fa-solid fa-chart-line"></i> Presentismo</h3>
+        <div class="grafico-container">
+            <canvas id="presentismoChart"></canvas>
+        </div>
+        <div class="leyenda-grafico">
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #2ecc71;"></span> Presentes</div>
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #e74c3c;"></span> Ausentes</div>
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #3498db;"></span> Tardanzas</div>
+        </div>
+    </div>
+    
+    <div class="grafico-card">
+        <h3><i class="fa-solid fa-chart-bar"></i> Excepciones por Día</h3>
+        <div class="grafico-container">
+            <canvas id="excepcionesChart"></canvas>
+        </div>
+        <div class="leyenda-grafico">
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #3498db;"></span> Llegadas tarde</div>
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #e74c3c;"></span> Salidas temprano</div>
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #f39c12;"></span> Ausencias</div>
+        </div>
+    </div>
+</div>
+
+<!-- Actividad Reciente -->
+<div class="actividad">
+    <h2><i class="fa-solid fa-clock"></i> Actividad Reciente</h2>
+    <div class="desplazamiento">
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                    <th>Dispositivo</th>
+                    <th>Fecha/Hora</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for acceso in ultimos_accesos|slice:":10" %}
+                <tr>
+                    <td>{{ acceso.persona.nombre_completo|default:"Usuario" }}</td>
+                    <td>{{ acceso.get_tipo_acceso_display|default:"Acceso" }}</td>
+                    <td>{{ acceso.dispositivo.nombre|default:"BIO-001" }}</td>
+                    <td>{{ acceso.fecha_hora|date:"d/m/Y H:i:s" }}</td>
+                    <td>
+                        <span class="estado {% if acceso.tipo_acceso == 'ENTRADA' %}aprobado{% else %}denegado{% endif %}">
+                            {% if acceso.tipo_acceso == 'ENTRADA' %}Aprobado{% else %}Denegado{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No hay actividad reciente</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Alertas del Sistema -->
+<div class="alerta-sistema">
+    <h3><i class="fa-solid fa-bell"></i> Alertas del Sistema</h3>
+    <div class="contenido-alerta">
+        <div class="mensaje alerta-exito">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Sistema operando con normalidad</span>
+        </div>
+        <div class="mensaje alerta-error">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>3 dispositivos requieren mantenimiento</span>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts para gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/dashboard-charts.js' %}"></script>
+{% endblock %}

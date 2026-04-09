@@ -1,0 +1,218 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_reporte.css' %}">
+
+<div class="contenido">
+    <header>
+        <h1><i class="fa-solid fa-chart-bar"></i> Reportes - Sistema Biometrika</h1>
+    </header>
+    
+    <!-- Resumen de reportes -->
+    <section class="resumen-reportes">
+        <div class="resumen-item total">
+            <div class="resumen-valor">1,247</div>
+            <div class="resumen-label">Registros Totales</div>
+        </div>
+        <div class="resumen-item exitosos">
+            <div class="resumen-valor">1,158</div>
+            <div class="resumen-label">Autenticaciones Exitosas</div>
+        </div>
+        <div class="resumen-item fallidos">
+            <div class="resumen-valor">89</div>
+            <div class="resumen-label">Autenticaciones Fallidas</div>
+        </div>
+    </section>
+    
+    <!-- Filtros -->
+    <section class="filtros-reportes">
+        <h3><i class="fa-solid fa-filter"></i> Filtros de Búsqueda</h3>
+        <div class="filtros-grid">
+            <div class="filtro-group">
+                <label for="filtro-fecha-inicio">Fecha Inicio</label>
+                <input type="date" id="filtro-fecha-inicio">
+            </div>
+            <div class="filtro-group">
+                <label for="filtro-fecha-fin">Fecha Fin</label>
+                <input type="date" id="filtro-fecha-fin">
+            </div>
+            <div class="filtro-group">
+                <label for="filtro-tipo">Tipo Biométrico</label>
+                <select id="filtro-tipo">
+                    <option value="">Todos los tipos</option>
+                    <option value="huella">Huella Dactilar</option>
+                    <option value="facial">Reconocimiento Facial</option>
+                    <option value="voz">Reconocimiento de Voz</option>
+                    <option value="iris">Escaneo de Iris</option>
+                </select>
+            </div>
+            <div class="filtro-group">
+                <label for="filtro-estado">Estado</label>
+                <select id="filtro-estado">
+                    <option value="">Todos los estados</option>
+                    <option value="exitoso">Exitoso</option>
+                    <option value="fallido">Fallido</option>
+                    <option value="pendiente">Pendiente</option>
+                </select>
+            </div>
+            <div class="filtro-group">
+                <label for="filtro-dispositivo">Dispositivo</label>
+                <select id="filtro-dispositivo">
+                    <option value="">Todos los dispositivos</option>
+                    <option value="terminal-1">Terminal 1 - Recepción</option>
+                    <option value="terminal-2">Terminal 2 - Oficinas</option>
+                    <option value="terminal-3">Terminal 3 - Laboratorio</option>
+                    <option value="movil">Dispositivo Móvil</option>
+                </select>
+            </div>
+            <div class="filtro-group">
+                <label for="filtro-usuario">Usuario</label>
+                <input type="text" id="filtro-usuario" placeholder="Buscar por usuario...">
+            </div>
+        </div>
+        <div class="botones-filtro">
+            <button class="btn-filtro btn-limpiar" id="btnLimpiar">
+                <i class="fa-solid fa-eraser"></i> Limpiar Filtros
+            </button>
+            <button class="btn-filtro btn-aplicar" id="btnAplicar">
+                <i class="fa-solid fa-filter"></i> Aplicar Filtros
+            </button>
+            <button class="btn-filtro btn-exportar" id="btnExportar">
+                <i class="fa-solid fa-file-export"></i> Exportar Reporte
+            </button>
+        </div>
+    </section>
+    
+    <!-- Tabla de reportes -->
+    <section class="tabla-reportes">
+        <h2><i class="fa-solid fa-list"></i> Registros Biométricos</h2>
+        <div class="desplazamiento">
+            <table id="tablaReportes">
+                <thead>
+                    <tr>
+                        <th>ID Registro</th>
+                        <th>Usuario</th>
+                        <th>Tipo Biométrico</th>
+                        <th>Fecha/Hora</th>
+                        <th>Dispositivo</th>
+                        <th>Estado</th>
+                        <th>Confianza</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>    
+                <tbody id="tbodyReportes">
+                    <!-- Los registros se cargan dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginación -->
+        <div class="paginacion">
+            <div class="paginacion-info" id="infoPaginacion">
+                Mostrando 1-8 de 1,247 registros
+            </div>
+            <div class="paginacion-controles" id="controlesPaginacion">
+                <!-- Los controles de paginación se generan dinámicamente -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Información de Soporte -->
+    <div class="soporte-info">
+        <i class="fa-solid fa-headset"></i>
+        <div class="soporte-content">
+            <strong>¿Necesita ayuda?</strong><br>
+            Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
+            <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <div>Copyright© Sistema Biométrico 2025</div>
+        <div>Versión 1.0</div>
+    </div>
+</div>
+
+<!-- Modal de Exportación -->
+<div id="modalExportar" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-file-export"></i> Exportar Reporte</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="export-options">
+                <h4>Formato de Exportación</h4>
+                <div class="export-option">
+                    <input type="radio" id="export-pdf" name="export-format" value="pdf" checked>
+                    <label for="export-pdf">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <div>
+                            <strong>PDF Document</strong>
+                            <span>Formato ideal para impresión</span>
+                        </div>
+                    </label>
+                </div>
+                <div class="export-option">
+                    <input type="radio" id="export-excel" name="export-format" value="excel">
+                    <label for="export-excel">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <div>
+                            <strong>Excel Spreadsheet</strong>
+                            <span>Formato para análisis de datos</span>
+                        </div>
+                    </label>
+                </div>
+                <div class="export-option">
+                    <input type="radio" id="export-csv" name="export-format" value="csv">
+                    <label for="export-csv">
+                        <i class="fa-solid fa-file-csv"></i>
+                        <div>
+                            <strong>CSV File</strong>
+                            <span>Formato para otras aplicaciones</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="export-sections">
+                <h4>Secciones a Incluir</h4>
+                <div class="sections-grid">
+                    <div class="section-checkbox">
+                        <input type="checkbox" id="section-datos" checked>
+                        <label for="section-datos">Datos de Registros</label>
+                    </div>
+                    <div class="section-checkbox">
+                        <input type="checkbox" id="section-resumen" checked>
+                        <label for="section-resumen">Resumen Estadístico</label>
+                    </div>
+                    <div class="section-checkbox">
+                        <input type="checkbox" id="section-graficos">
+                        <label for="section-graficos">Gráficos</label>
+                    </div>
+                    <div class="section-checkbox">
+                        <input type="checkbox" id="section-filtros">
+                        <label for="section-filtros">Configuración de Filtros</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="export-actions">
+                <button class="btn-programar" id="btnProgramar">
+                    <i class="fa-solid fa-clock"></i> Programar
+                </button>
+                <button class="btn-exportar-modal" id="btnExportarAhora">
+                    <i class="fa-solid fa-download"></i> Exportar Ahora
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notificación -->
+<div id="notificacion" class="notificacion" style="display: none;"></div>
+
+<script src="{% static 'js/reporte.js' %}"></script>
+{% endblock %}

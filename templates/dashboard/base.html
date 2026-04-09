@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIOMETRIKA - Sistema Biométrico para Edificios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+        }
+        
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%);
+            color: white;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+        }
+        
+        .navbar-custom {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        
+        .user-menu {
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 20px;
+            transition: background 0.3s;
+        }
+        
+        .user-menu:hover {
+            background: #f0f2f5;
+        }
+        
+        .dropdown-menu-custom {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            min-width: 200px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 1000;
+        }
+        
+        .dropdown-menu-custom.show {
+            display: block;
+        }
+        
+        .dropdown-item {
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .dropdown-item:hover {
+            background: #f0f2f5;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .card-stats {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .card-stats:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 p-0 sidebar">
+                <div class="logo">
+                    <i class="fas fa-fingerprint"></i>
+                    BIOMETRIKA
+                </div>
+                <nav class="nav flex-column mt-3">
+                    <a class="nav-link" href="{% url 'dashboard:dashboard' %}">
+                        <i class="fas fa-chart-line"></i> Dashboard
+                    </a>
+                    <a class="nav-link" href="{% url 'sedes:lista' %}">
+                        <i class="fas fa-building"></i> Sedes y Areas
+                    </a>
+                    <a class="nav-link" href="{% url 'personal:lista' %}">
+                        <i class="fas fa-users"></i> Gestion de Personal
+                    </a>
+                    <a class="nav-link" href="{% url 'dispositivos:lista' %}">
+                        <i class="fas fa-microchip"></i> Dispositivos
+                    </a>
+                    <a class="nav-link" href="{% url 'soporte:index' %}">
+                        <i class="fas fa-headset"></i> Soporte
+                    </a>
+                    <a class="nav-link" href="{% url 'reportes:index' %}">
+                        <i class="fas fa-chart-bar"></i> Reportes
+                    </a>
+                    <a class="nav-link" href="{% url 'alertas:lista' %}">
+                        <i class="fas fa-bell"></i> Alertas
+                    </a>
+                </nav>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 p-0">
+                <!-- Top Navbar -->
+                <nav class="navbar navbar-custom px-4 py-2">
+                    <div>
+                        <h5 class="mb-0">Bienvenido, {{ user.get_full_name|default:user.username }}</h5>
+                        <small class="text-muted">Sistema Biométrico para Edificios</small>
+                    </div>
+                    
+                    <!-- User Menu -->
+                    <div class="position-relative">
+                        <div class="user-menu d-flex align-items-center" onclick="toggleUserMenu()">
+                            <i class="fas fa-user-circle fa-2x me-2"></i>
+                            <span>{{ user.username }}</span>
+                            <i class="fas fa-chevron-down ms-2 small"></i>
+                        </div>
+                        <div id="userDropdown" class="dropdown-menu-custom">
+                            <a class="dropdown-item" href="{% url 'usuarios:notificaciones' %}">
+                                <i class="fas fa-bell"></i> Notificaciones
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url 'usuarios:perfil' %}">
+                                <i class="fas fa-user"></i> Perfil
+                            </a>
+                            <a class="dropdown-item" href="{% url 'usuarios:cambiar_password' %}">
+                                <i class="fas fa-key"></i> Contraseña
+                            </a>
+                            <a class="dropdown-item" href="{% url 'usuarios:configuracion' %}">
+                                <i class="fas fa-cog"></i> Configuración
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </nav>
+                
+                <!-- Page Content -->
+                <div class="main-content">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+        
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const userMenu = document.querySelector('.user-menu');
+            if (!userMenu.contains(event.target) && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

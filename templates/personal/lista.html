@@ -1,0 +1,256 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_personal.css' %}">
+
+<div class="contenido">
+    <header>
+        <h1><i class="fa-solid fa-users"></i> Gestión de Personal</h1>
+        <p>Administre la información del personal y sus credenciales biométricas</p>
+    </header>
+
+    <div class="main-container">
+        <!-- Panel para agregar/editar empleados -->
+        <div class="form-panel">
+            <h2><i class="fa-solid fa-user-plus"></i> <span id="form-title">Nuevo Empleado</span></h2>
+            
+            <div class="mensaje-exito" id="mensaje-exito">
+                <i class="fa-solid fa-check"></i>
+                <span id="mensaje-texto">El empleado ha sido registrado correctamente.</span>
+            </div>
+
+            <form id="formularioEmpleado">
+                {% csrf_token %}
+                <fieldset>
+                    <legend><i class="fa-solid fa-id-card"></i> Información Personal</legend>
+                    
+                    <div class="form-group foto-group">
+                        <label><i class="fa-solid fa-camera"></i> Foto del Empleado:</label>
+                        <div class="foto-container">
+                            <div class="foto-preview" id="foto-preview">
+                                <i class="fa-solid fa-user"></i>
+                                <span>Sin foto</span>
+                            </div>
+                            <input type="file" id="foto_empleado" accept="image/*" class="foto-input">
+                            <button type="button" class="btn-foto" onclick="document.getElementById('foto_empleado').click()">
+                                <i class="fa-solid fa-upload"></i> Seleccionar Foto
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-signature"></i> Nombre: <span class="required">*</span></label>
+                            <input type="text" id="nombre" placeholder="Ej: Juan Pérez" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-briefcase"></i> Cargo: <span class="required">*</span></label>
+                            <input type="text" id="cargo" placeholder="Ej: Analista de Sistemas" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-building"></i> Área: <span class="required">*</span></label>
+                            <select id="area" required>
+                                <option value="" disabled selected>Seleccione un área</option>
+                                <option value="ti">Tecnología de la Información</option>
+                                <option value="rh">Recursos Humanos</option>
+                                <option value="finanzas">Finanzas</option>
+                                <option value="operaciones">Operaciones</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="ventas">Ventas</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-envelope"></i> Correo: <span class="required">*</span></label>
+                            <input type="email" id="correo" placeholder="usuario@biometrika.com" required>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend><i class="fa-solid fa-building"></i> Ubicación Laboral</legend>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-layer-group"></i> Tipo de Sede: <span class="required">*</span></label>
+                            <select id="tipo_sede" required>
+                                <option value="" disabled selected>Seleccione tipo</option>
+                                <option value="sede">Sede Principal</option>
+                                <option value="oficina">Oficina</option>
+                                <option value="area">Área Específica</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-location-dot"></i> Nombre de Sede: <span class="required">*</span></label>
+                            <input type="text" id="nombre_sede" placeholder="Ej: Sede Central" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-id-badge"></i> ID de Empleado: <span class="required">*</span></label>
+                        <input type="text" id="id_empleado" placeholder="Ej: EMP-001" required>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend><i class="fa-solid fa-fingerprint"></i> Credenciales de Acceso</legend>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-microchip"></i> Tipo de Dispositivo: <span class="required">*</span></label>
+                            <select id="dispositivo_biometrico" required>
+                                <option value="" disabled selected>Seleccione dispositivo</option>
+                                <option value="huella">Lector de Huella Dactilar</option>
+                                <option value="tarjeta">Tarjeta de Acceso</option>
+                                <option value="pin">PIN</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-shield-halved"></i> Nivel de Seguridad: <span class="required">*</span></label>
+                            <select id="nivel_seguridad" required>
+                                <option value="" disabled selected>Seleccione nivel</option>
+                                <option value="bajo">Bajo</option>
+                                <option value="medio">Medio</option>
+                                <option value="alto">Alto</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="seccion-credenciales" style="display: none;">
+                        <div class="form-group" id="opcion-huella" style="display: none;">
+                            <label><i class="fa-solid fa-fingerprint"></i> Registro de Huella:</label>
+                            <div class="credencial-options">
+                                <button type="button" class="btn-credencial" onclick="registrarHuella()">
+                                    <i class="fa-solid fa-hand-point-up"></i> Registrar Huella
+                                </button>
+                                <div class="huella-status" id="huella-status">
+                                    <i class="fa-solid fa-times-circle"></i> Huella no registrada
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="opcion-tarjeta" style="display: none;">
+                            <label><i class="fa-solid fa-credit-card"></i> Registro de Tarjeta:</label>
+                            <div class="credencial-options">
+                                <input type="text" id="numero_tarjeta" placeholder="Número de tarjeta" class="input-credencial">
+                                <button type="button" class="btn-credencial" onclick="generarNumeroTarjeta()">
+                                    <i class="fa-solid fa-barcode"></i> Generar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="opcion-pin" style="display: none;">
+                            <label><i class="fa-solid fa-key"></i> Generación de PIN:</label>
+                            <div class="credencial-options">
+                                <input type="text" id="pin" placeholder="PIN de acceso" class="input-credencial" readonly>
+                                <button type="button" class="btn-credencial" onclick="generarPIN()">
+                                    <i class="fa-solid fa-key"></i> Generar PIN
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success" id="btn-guardar">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btn-cancelar" style="display: none;">
+                        <i class="fa-solid fa-times"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn btn-info" id="btn-nuevo">
+                        <i class="fa-solid fa-user-plus"></i> Nuevo
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Panel para listar empleados -->
+        <div class="list-panel">
+            <div class="header-actions">
+                <h2><i class="fa-solid fa-list-check"></i> Empleados Registrados</h2>
+                
+                <div class="dropdown">
+                    <button class="dropdown-toggle" id="dropdownMenuButton">
+                        <i class="fa-solid fa-ellipsis-vertical"></i> Opciones
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a class="dropdown-item" id="opcion-importar"><i class="fa-solid fa-file-import"></i> Importar</a>
+                        <a class="dropdown-item" id="opcion-exportar"><i class="fa-solid fa-file-export"></i> Exportar</a>
+                        <a class="dropdown-item" id="opcion-refresh"><i class="fa-solid fa-rotate"></i> Actualizar</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <input type="text" id="filtro-nombre" placeholder="Buscar por nombre o ID">
+                <select id="filtro-area">
+                    <option value="">Todas las áreas</option>
+                    <option value="ti">Tecnología de la Información</option>
+                    <option value="rh">Recursos Humanos</option>
+                    <option value="finanzas">Finanzas</option>
+                    <option value="operaciones">Operaciones</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="ventas">Ventas</option>
+                </select>
+                <select id="filtro-sede">
+                    <option value="">Todas las sedes</option>
+                    <option value="sede">Sede Principal</option>
+                    <option value="oficina">Oficina</option>
+                    <option value="area">Área Específica</option>
+                </select>
+                <button id="btn-limpiar-filtros" class="btn-accion">
+                    <i class="fa-solid fa-broom"></i> Limpiar
+                </button>
+            </div>
+            
+            <div class="tabla-container">
+                <table id="tablaEmpleados">
+                    <thead>
+                        <tr>
+                            <th>Foto</th>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Cargo</th>
+                            <th>Área</th>
+                            <th>Sede</th>
+                            <th>Dispositivo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTabla"></tbody>
+                </table>
+            </div>
+            
+            <div id="estado-vacio" class="empty-state">
+                <i class="fa-solid fa-users-slash"></i>
+                <p>No hay empleados registrados aún</p>
+                <button class="btn btn-success" id="btn-agregar-primero">
+                    <i class="fa-solid fa-user-plus"></i> Agregar Primer Empleado
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="soporte-info">
+        <i class="fa-solid fa-headset"></i>
+        <strong>¿Necesita ayuda?</strong><br>
+        Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
+        <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+    </div>
+
+    <div class="footer">
+        <div>Copyright© Sistema Biométrico 2025</div>
+        <div>Versión 1.0</div>
+    </div>
+</div>
+
+<script src="{% static 'js/personal.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_ubicacion.css' %}">
+
+<div class="contenido">
+    <header>
+        <h1><i class="fa-solid fa-map-location-dot"></i> Panel de Gestión de Ubicaciones</h1>
+        <p>Utiliza este formulario para registrar nuevas sedes, oficinas y áreas de acceso.</p>
+    </header>
+
+    <div class="main-container">
+        <!-- Panel para agregar ubicaciones -->
+        <div class="add-panel">
+            <h2><i class="fa-solid fa-plus-circle"></i> Agregar Ubicación</h2>
+            
+            <div class="mensaje-exito" id="mensaje-exito">
+                <i class="fa-solid fa-check"></i>
+                La ubicación ha sido registrada correctamente.
+            </div>
+
+            <form id="formularioUbicacion">
+                {% csrf_token %}
+                <fieldset>
+                    <legend><i class="fa-solid fa-building"></i> Información de la Sede</legend>
+                    
+                    <div class="form-group">
+                        <label for="tipo_ubicacion"><i class="fa-solid fa-layer-group"></i> Tipo de Ubicación: <span class="required">*</span></label>
+                        <select id="tipo_ubicacion" name="tipo_ubicacion" required>
+                            <option value="" disabled selected>Seleccione un tipo</option>
+                            <option value="sede">Sede (Edificio Principal)</option>
+                            <option value="oficina">Oficina (Piso/Ala)</option>
+                            <option value="area">Área Específica (Sala/Cuarto)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nombre_sede"><i class="fa-solid fa-signature"></i> Nombre de la Ubicación: <span class="required">*</span></label>
+                        <input type="text" id="nombre_sede" name="nombre_sede" placeholder="Ej: Sede Central" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="codigo_unico"><i class="fa-solid fa-barcode"></i> Código Único (ID): <span class="required">*</span></label>
+                        <input type="text" id="codigo_unico" name="codigo_unico" placeholder="Ej: WAN-001" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="direccion"><i class="fa-solid fa-location-dot"></i> Dirección Completa:</label>
+                        <textarea id="direccion" name="direccion" rows="2" placeholder="Calle, número, ciudad"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcion"><i class="fa-solid fa-align-left"></i> Descripción Adicional:</label>
+                        <textarea id="descripcion" name="descripcion" rows="2" placeholder="Detalles adicionales"></textarea>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend><i class="fa-solid fa-fingerprint"></i> Configuración de Seguridad Biométrica</legend>
+
+                    <div class="form-group">
+                        <label for="dispositivo_biometrico"><i class="fa-solid fa-microchip"></i> Tipo de Dispositivo Biométrico:</label>
+                        <select id="dispositivo_biometrico" name="dispositivo_biometrico">
+                            <option value="huella">Lector de Huella Dactilar</option>
+                            <option value="Tarjeta">Tarjeta de Acceso</option>
+                            <option value="PIN">PIN</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nivel_seguridad"><i class="fa-solid fa-shield-halved"></i> Nivel de Seguridad:</label>
+                        <select id="nivel_seguridad" name="nivel_seguridad">
+                            <option value="bajo">Bajo</option>
+                            <option value="medio">Medio</option>
+                            <option value="alto">Alto</option>
+                        </select>
+                    </div>
+                </fieldset>
+
+                <button type="submit" class="btn" id="btn-guardar">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+                </button>
+            </form>
+        </div>
+        
+        <!-- Panel para listar ubicaciones -->
+        <div class="list-panel">
+            <div class="header-actions">
+                <h2><i class="fa-solid fa-list-check"></i> Ubicaciones Registradas</h2>
+                
+                <div class="dropdown">
+                    <button class="dropdown-toggle" id="dropdownMenuButton">
+                        <i class="fa-solid fa-ellipsis-vertical"></i> Opciones
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a class="dropdown-item" id="opcion-filtros">Mostrar/Ocultar Filtros</a>
+                        <a class="dropdown-item" id="opcion-modificar-todo">Modificar Todo</a>
+                        <a class="dropdown-item" id="opcion-eliminar-todo">Eliminar Todo</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-section" id="filtros" style="display: none;">
+                <input type="text" id="filtro-nombre" placeholder="Filtrar por nombre">
+                <select id="filtro-tipo">
+                    <option value="">Todos los tipos</option>
+                    <option value="sede">Sede</option>
+                    <option value="oficina">Oficina</option>
+                    <option value="area">Área</option>
+                </select>
+                <select id="filtro-dispositivo">
+                    <option value="">Todos los dispositivos</option>
+                    <option value="huella">Lector de Huella</option>
+                    <option value="Tarjeta">Tarjeta de Acceso</option>
+                    <option value="PIN">PIN</option>
+                </select>
+                <button id="btn-limpiar-filtros" class="btn-accion">Limpiar Filtros</button>
+            </div>
+            
+            <div class="tabla-container">
+                <table id="tablaUbicaciones">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Dispositivo</th>
+                            <th>Seguridad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTabla"></tbody>
+                </table>
+            </div>
+            
+            <div id="estado-vacio" class="empty-state">
+                <i class="fa-solid fa-inbox"></i>
+                <p>No hay ubicaciones registradas aún</p>
+                <button class="btn" id="btn-agregar-primero">
+                    <i class="fa-solid fa-plus"></i> Agregar Primera Ubicación
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="soporte-info">
+        <i class="fa-solid fa-headset"></i>
+        <strong>¿Necesita ayuda?</strong><br>
+        Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
+        <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+    </div>
+
+    <div class="footer">
+        <div>Copyright© Sistema Biométrico 2025</div>
+        <div>Versión 1.0</div>
+    </div>
+</div>
+
+<script src="{% static 'js/ubicaciones.js' %}"></script>
+{% endblock %}

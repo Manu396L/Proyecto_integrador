@@ -1,0 +1,190 @@
+<!-- templates/usuarios/notificaciones.html -->
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_notificaciones.css' %}">
+
+<main class="contenido">
+    <header>
+        <h1><i class="fa-solid fa-bell"></i> <b>Notificaciones del Sistema</b></h1>
+    </header>
+    
+    <!-- Resumen de notificaciones -->
+    <section class="resumen-notificaciones">
+        <div class="resumen-item no-leidas">
+            <div class="resumen-valor">12</div>
+            <div class="resumen-label">No Leídas</div>
+        </div>
+        <div class="resumen-item criticas">
+            <div class="resumen-valor">5</div>
+            <div class="resumen-label">Críticas</div>
+        </div>
+        <div class="resumen-item hoy">
+            <div class="resumen-valor">8</div>
+            <div class="resumen-label">Hoy</div>
+        </div>
+        <div class="resumen-item total">
+            <div class="resumen-valor">47</div>
+            <div class="resumen-label">Total</div>
+        </div>
+    </section>
+    
+    <!-- Filtros y acciones -->
+    <section class="filtros-notificaciones">
+        <h3><i class="fa-solid fa-filter"></i> Filtros y Acciones</h3>
+        <div class="filtros-grid">
+            <div class="filtro-group">
+                <label for="filtro-tipo">Tipo de Notificación</label>
+                <select id="filtro-tipo">
+                    <option value="">Todos los tipos</option>
+                    <option value="Alerta de Dispositivo">Alertas del Sistema</option>
+                    <option value="Evento de Seguridad">Eventos de Seguridad</option>
+                    <option value="Mantenimiento del Sistema">Mantenimiento</option>
+                    <option value="Gestión de Usuarios">Actividad de Usuarios</option>
+                    <option value="Actualización del Sistema">Actualizaciones</option>
+                    <option value="Problema de Red">Problemas de Red</option>
+                </select>
+            </div>
+            <div class="filtro-group">
+                <label for="filtro-prioridad">Prioridad</label>
+                <select id="filtro-prioridad">
+                    <option value="">Todas las prioridades</option>
+                    <option value="critica">Crítica</option>
+                    <option value="alta">Alta</option>
+                    <option value="media">Media</option>
+                    <option value="baja">Baja</option>
+                    <option value="informativa">Informativa</option>
+                </select>
+            </div>
+            <div class="filtro-group">
+                <label for="filtro-estado">Estado</label>
+                <select id="filtro-estado">
+                    <option value="">Todos los estados</option>
+                    <option value="no-leida">No Leída</option>
+                    <option value="leida">Leída</option>
+                </select>
+            </div>
+            <div class="filtro-group">
+                <label for="filtro-fecha">Fecha</label>
+                <select id="filtro-fecha">
+                    <option value="">Cualquier fecha</option>
+                    <option value="hoy">Hoy</option>
+                    <option value="ayer">Ayer</option>
+                    <option value="semana">Esta semana</option>
+                </select>
+            </div>
+        </div>
+        <div class="botones-filtro">
+            <button class="btn-filtro btn-marcar-todas" id="btnMarcarTodas">
+                <i class="fa-solid fa-check-double"></i> Marcar Todas como Leídas
+            </button>
+            <button class="btn-filtro btn-limpiar" id="btnLimpiar">
+                <i class="fa-solid fa-eraser"></i> Limpiar Filtros
+            </button>
+            <button class="btn-filtro btn-aplicar" id="btnAplicar">
+                <i class="fa-solid fa-filter"></i> Aplicar Filtros
+            </button>
+        </div>
+    </section>
+    
+    <!-- Lista de notificaciones -->
+    <section class="lista-notificaciones">
+        <h2><i class="fa-solid fa-list"></i> Notificaciones Recientes</h2>
+        
+        <div class="notificaciones-container">
+            <!-- Las notificaciones se cargan dinámicamente con JS -->
+        </div>
+        
+        <!-- Paginación -->
+        <div class="paginacion">
+            <div class="paginacion-info">
+                Mostrando 6 de 6 notificaciones
+            </div>
+            <div class="paginacion-controles">
+                <button class="btn-pagina anterior" disabled>
+                    <i class="fa-solid fa-chevron-left"></i> Anterior
+                </button>
+                <button class="btn-pagina activa">1</button>
+                <button class="btn-pagina siguiente" disabled>
+                    Siguiente <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Información de Soporte -->
+    <div class="soporte-info">
+        <i class="fa-solid fa-headset"></i>
+        <div>
+            <strong>¿Necesita ayuda?</strong><br>
+            Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
+            <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <div>Copyright© Sistema Biométrico 2025</div>
+        <div>Versión 1.0</div>
+    </div>
+</main>
+
+<!-- Modal de Detalles de Notificación -->
+<div id="modalDetalle" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-circle-info"></i> Detalles de Notificación</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="detalle-notificacion">
+                <div class="detalle-header">
+                    <h4 id="detalle-titulo">Título de la Notificación</h4>
+                    <div class="detalle-meta">
+                        <span class="detalle-fecha" id="detalle-fecha">Fecha</span>
+                        <span class="detalle-prioridad" id="detalle-prioridad">Prioridad</span>
+                    </div>
+                </div>
+                <div class="detalle-contenido">
+                    <p id="detalle-mensaje">Mensaje de la notificación...</p>
+                    <div class="detalle-adicional">
+                        <h5>Información Adicional</h5>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Tipo:</label>
+                                <span id="detalle-tipo">Tipo</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Origen:</label>
+                                <span id="detalle-origen">Origen</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Usuario:</label>
+                                <span id="detalle-usuario">Usuario</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Dispositivo:</label>
+                                <span id="detalle-dispositivo">Dispositivo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secundario" id="btnCerrarDetalle">
+                <i class="fa-solid fa-xmark"></i> Cerrar
+            </button>
+            <button class="btn-primario" id="btnAccionDetalle">
+                <i class="fa-solid fa-gear"></i> Tomar Acción
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Notificación del sistema -->
+<div id="notificacionSistema" class="notificacion-sistema" style="display: none;"></div>
+
+<script src="{% static 'js/notificaciones.js' %}"></script>
+{% endblock %}

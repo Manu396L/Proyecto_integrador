@@ -1,0 +1,253 @@
+<!-- templates/dispositivos/lista.html -->
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_dispositivos.css' %}">
+
+<!-- Quitamos el <main> y <header> duplicados, usamos el contenido directamente -->
+<div class="dispositivos-container">
+    <header class="dispositivos-header">
+        <h1><i class="fa-solid fa-microchip"></i> Gestión de Dispositivos Biométricos</h1>
+        <p>Administre y configure los dispositivos de control de acceso biométrico</p>
+    </header>
+
+    <div class="main-container">
+        <!-- Panel para agregar/editar dispositivos -->
+        <div class="form-panel">
+            <h2><i class="fa-solid fa-plus-circle"></i> <span id="form-title">Nuevo Dispositivo</span></h2>
+            
+            <div class="mensaje-exito" id="mensaje-exito">
+                <i class="fa-solid fa-check"></i>
+                <span id="mensaje-texto">El dispositivo ha sido registrado correctamente.</span>
+            </div>
+
+            <form id="formularioDispositivo">
+                {% csrf_token %}
+                <input type="hidden" id="dispositivo_id" value="">
+                
+                <fieldset>
+                    <legend><i class="fa-solid fa-info-circle"></i> Información Básica</legend>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombre_dispositivo"><i class="fa-solid fa-signature"></i> Nombre del Dispositivo: <span class="required">*</span></label>
+                            <input type="text" id="nombre_dispositivo" name="nombre_dispositivo" placeholder="Ej: Lector Principal Recepción" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="numero_serie"><i class="fa-solid fa-barcode"></i> Número de Serie: <span class="required">*</span></label>
+                            <input type="text" id="numero_serie" name="numero_serie" placeholder="Ej: SN-2024-BIO-001" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tipo_sede"><i class="fa-solid fa-layer-group"></i> Tipo de Sede: <span class="required">*</span></label>
+                            <select id="tipo_sede" name="tipo_sede" required>
+                                <option value="" disabled selected>Seleccione tipo</option>
+                                <option value="sede">Sede Principal</option>
+                                <option value="oficina">Oficina</option>
+                                <option value="area">Área Específica</option>
+                                <option value="almacen">Almacén</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="area"><i class="fa-solid fa-map-marker-alt"></i> Área/Ubicación: <span class="required">*</span></label>
+                            <input type="text" id="area" name="area" placeholder="Ej: Recepción Principal" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="direccion"><i class="fa-solid fa-location-dot"></i> Dirección Física:</label>
+                        <input type="text" id="direccion" name="direccion" placeholder="Ej: Planta Baja, Edificio A">
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend><i class="fa-solid fa-network-wired"></i> Configuración de Red</legend>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="direccion_ip"><i class="fa-solid fa-globe"></i> Dirección IP: <span class="required">*</span></label>
+                            <input type="text" id="direccion_ip" name="direccion_ip" placeholder="Ej: 192.168.1.100" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="zona_horaria"><i class="fa-solid fa-clock"></i> Zona Horaria: <span class="required">*</span></label>
+                            <select id="zona_horaria" name="zona_horaria" required>
+                                <option value="" disabled selected>Seleccione zona horaria</option>
+                                <option value="America/Mexico_City">CDMX (UTC-6)</option>
+                                <option value="America/Bogota">Bogotá (UTC-5)</option>
+                                <option value="America/Buenos_Aires">Buenos Aires (UTC-3)</option>
+                                <option value="America/Lima">Lima (UTC-5)</option>
+                                <option value="America/Santiago">Santiago (UTC-4)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="intervalo_solicitud"><i class="fa-solid fa-hourglass-half"></i> Intervalo de Solicitud (minutos):</label>
+                        <input type="number" id="intervalo_solicitud" name="intervalo_solicitud" placeholder="Ej: 5" min="1" max="60" value="5">
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend><i class="fa-solid fa-sliders"></i> Estado y Configuración</legend>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="estado"><i class="fa-solid fa-power-off"></i> Estado del Dispositivo: <span class="required">*</span></label>
+                            <select id="estado" name="estado" required>
+                                <option value="" disabled selected>Seleccione estado</option>
+                                <option value="activo">Activo</option>
+                                <option value="pausado">Pausado</option>
+                                <option value="error">Error</option>
+                                <option value="sin_conexion">Sin Conexión</option>
+                                <option value="apagado">Apagado</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tipo_dispositivo"><i class="fa-solid fa-fingerprint"></i> Tipo de Dispositivo:</label>
+                            <select id="tipo_dispositivo" name="tipo_dispositivo">
+                                <option value="huella">Lector de Huella</option>
+                                <option value="tarjeta">Lector de Tarjeta</option>
+                                <option value="facial">Reconocimiento Facial</option>
+                                <option value="iris">Escáner de Iris</option>
+                                <option value="multi">Multibiométrico</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="observaciones"><i class="fa-solid fa-comment"></i> Observaciones:</label>
+                        <textarea id="observaciones" name="observaciones" rows="3" placeholder="Notas adicionales sobre el dispositivo"></textarea>
+                    </div>
+                </fieldset>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success" id="btn-guardar">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Dispositivo
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btn-cancelar" style="display: none;">
+                        <i class="fa-solid fa-times"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn btn-info" id="btn-nuevo">
+                        <i class="fa-solid fa-plus"></i> Nuevo Dispositivo
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Panel para listar dispositivos -->
+        <div class="list-panel">
+            <div class="header-actions">
+                <h2><i class="fa-solid fa-list-check"></i> Dispositivos Registrados</h2>
+                
+                <!-- Menú desplegable de Acceso Rápido -->
+                <div class="dropdown-container">
+                    <div class="dropdown-group">
+                        <button class="dropdown-toggle" onclick="toggleDropdown('menu-principal')">
+                            <i class="fa-solid fa-bolt"></i> Acceso Rápido
+                        </button>
+                        <div class="dropdown-menu" id="menu-principal">
+                            <a class="dropdown-item" onclick="nuevoDispositivo()"><i class="fa-solid fa-plus"></i> Nuevo</a>
+                            <a class="dropdown-item" onclick="modificarSeleccionado()"><i class="fa-solid fa-pen"></i> Modificar</a>
+                            <a class="dropdown-item" onclick="borrarSeleccionado()"><i class="fa-solid fa-trash"></i> Borrar</a>
+                            <a class="dropdown-item" onclick="actualizarListado()"><i class="fa-solid fa-rotate"></i> Refresh</a>
+                        </div>
+                    </div>
+
+                    <div class="dropdown-group">
+                        <button class="dropdown-toggle" onclick="toggleDropdown('menu-dispositivo')">
+                            <i class="fa-solid fa-microchip"></i> Dispositivo
+                        </button>
+                        <div class="dropdown-menu" id="menu-dispositivo">
+                            <a class="dropdown-item" onclick="leerInformacion()"><i class="fa-solid fa-download"></i> Leer Información</a>
+                            <a class="dropdown-item" onclick="enrolamientoRemoto()"><i class="fa-solid fa-user-plus"></i> Enrolamiento Remoto</a>
+                            <a class="dropdown-item" onclick="configurarEnrolamiento()"><i class="fa-solid fa-cog"></i> Configuración de Enrolamiento</a>
+                        </div>
+                    </div>
+
+                    <div class="dropdown-group">
+                        <button class="dropdown-toggle" onclick="toggleDropdown('menu-mantenimiento')">
+                            <i class="fa-solid fa-screwdriver-wrench"></i> Mantenimiento
+                        </button>
+                        <div class="dropdown-menu" id="menu-mantenimiento">
+                            <a class="dropdown-item" onclick="reiniciarDispositivo()"><i class="fa-solid fa-rotate"></i> Reiniciar</a>
+                            <a class="dropdown-item" onclick="actualizarFirmware()"><i class="fa-solid fa-arrow-up"></i> Actualizar Firmware</a>
+                            <a class="dropdown-item" onclick="descargarInformacion()"><i class="fa-solid fa-download"></i> Descargar Información</a>
+                            <a class="dropdown-item" onclick="exportarInformacion()"><i class="fa-solid fa-file-export"></i> Exportar (CSV)</a>
+                            <a class="dropdown-item" onclick="importarInformacion()"><i class="fa-solid fa-file-import"></i> Importar (CSV)</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección de filtros -->
+            <div class="filter-section">
+                <input type="text" id="filtro-nombre" placeholder="Buscar por nombre o número de serie">
+                <select id="filtro-estado">
+                    <option value="">Todos los estados</option>
+                    <option value="activo">Activo</option>
+                    <option value="pausado">Pausado</option>
+                    <option value="error">Error</option>
+                    <option value="sin_conexion">Sin Conexión</option>
+                    <option value="apagado">Apagado</option>
+                </select>
+                <select id="filtro-tipo">
+                    <option value="">Todos los tipos</option>
+                    <option value="sede">Sede Principal</option>
+                    <option value="oficina">Oficina</option>
+                    <option value="area">Área Específica</option>
+                    <option value="almacen">Almacén</option>
+                </select>
+                <button id="btn-limpiar-filtros" class="btn-accion">
+                    <i class="fa-solid fa-broom"></i> Limpiar Filtros
+                </button>
+            </div>
+            
+            <!-- Tabla de dispositivos -->
+            <div class="tabla-container">
+                <table id="tablaDispositivos">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>N° Serie</th>
+                            <th>IP</th>
+                            <th>Área</th>
+                            <th>Tipo Sede</th>
+                            <th>Estado</th>
+                            <th>Última Conexión</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTabla">
+                        <!-- Los dispositivos se agregarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Estado vacío -->
+            <div id="estado-vacio" class="empty-state">
+                <i class="fa-solid fa-microchip"></i>
+                <p>No hay dispositivos registrados aún</p>
+                <button class="btn btn-success" id="btn-agregar-primero" onclick="nuevoDispositivo()">
+                    <i class="fa-solid fa-plus"></i> Agregar Primer Dispositivo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="soporte-info">
+        <i class="fa-solid fa-headset"></i>
+        <strong>¿Necesita ayuda?</strong><br>
+        Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
+        <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+    </div>
+</div>
+
+<script src="{% static 'js/dispositivos.js' %}"></script>
+{% endblock %}

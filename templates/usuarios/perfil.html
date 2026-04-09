@@ -1,0 +1,192 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_perfil.css' %}">
+
+<div class="contenido">
+    <header>
+        <h1><i class="fa-solid fa-id-card"></i> Perfil del Empleado</h1>
+        <p>Información completa y credenciales de acceso del empleado</p>
+    </header>
+
+    <div class="main-container">
+        <!-- Panel principal -->
+        <div class="profile-panel">
+            <div class="profile-header">
+                <div class="profile-photo-section">
+                    <div class="profile-photo">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div class="profile-actions">
+                        <button class="btn btn-primary" onclick="editarPerfil()">
+                            <i class="fa-solid fa-pen"></i> Editar
+                        </button>
+                        <button class="btn btn-secondary" onclick="imprimirPerfil()">
+                            <i class="fa-solid fa-print"></i> Imprimir
+                        </button>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <h2>Juan Pérez García</h2>
+                    <p class="profile-cargo">Analista de Sistemas Senior</p>
+                    <p class="profile-id">ID: EMP-001</p>
+                    <div class="status-badges">
+                        <span class="badge status-activo">
+                            <i class="fa-solid fa-circle"></i> Activo
+                        </span>
+                        <span class="badge">
+                            <i class="fa-solid fa-shield-halved"></i> Nivel: Alto
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3><i class="fa-solid fa-user"></i> Información Personal</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label><i class="fa-solid fa-id-badge"></i> ID de Empleado:</label>
+                        <span>EMP-001</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fa-solid fa-signature"></i> Nombre Completo:</label>
+                        <span>Juan Pérez García</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fa-solid fa-briefcase"></i> Cargo:</label>
+                        <span>Analista de Sistemas Senior</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fa-solid fa-building"></i> Área/Departamento:</label>
+                        <span>Tecnología de la Información</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fa-solid fa-envelope"></i> Correo:</label>
+                        <span>juan.perez@biometrika.com</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fa-solid fa-calendar"></i> Fecha Ingreso:</label>
+                        <span>15/03/2022</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3><i class="fa-solid fa-fingerprint"></i> Credenciales de Seguridad</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label><i class="fa-solid fa-microchip"></i> Tipo Dispositivo:</label>
+                        <span>Lector de Huella Dactilar</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fa-solid fa-key"></i> Credencial Asignada:</label>
+                        <span>Huella registrada</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fa-solid fa-calendar-check"></i> Último Acceso:</label>
+                        <span>Hoy, 08:15 AM</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Accesos Recientes</h3>
+                <div class="accesos-container">
+                    <div class="acceso-item">
+                        <div class="acceso-icon"><i class="fa-solid fa-door-open"></i></div>
+                        <div class="acceso-info">
+                            <div class="acceso-tipo">Entrada - Sede Central</div>
+                            <div class="acceso-fecha">Hoy, 08:15 AM</div>
+                        </div>
+                        <div class="acceso-estado success">Exitoso</div>
+                    </div>
+                    <div class="acceso-item">
+                        <div class="acceso-icon"><i class="fa-solid fa-door-closed"></i></div>
+                        <div class="acceso-info">
+                            <div class="acceso-tipo">Salida - Sede Central</div>
+                            <div class="acceso-fecha">Ayer, 06:30 PM</div>
+                        </div>
+                        <div class="acceso-estado success">Exitoso</div>
+                    </div>
+                    <div class="acceso-item">
+                        <div class="acceso-icon"><i class="fa-solid fa-door-open"></i></div>
+                        <div class="acceso-info">
+                            <div class="acceso-tipo">Entrada - Oficina Adm.</div>
+                            <div class="acceso-fecha">Ayer, 02:15 PM</div>
+                        </div>
+                        <div class="acceso-estado success">Exitoso</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar derecho -->
+        <div class="sidebar">
+            <div class="credential-card">
+                <div class="credential-header">
+                    <i class="fa-solid fa-id-card"></i>
+                    <h4>Credencial de Acceso</h4>
+                </div>
+                <div class="credential-body">
+                    <div class="credential-photo">
+                        <div><i class="fa-solid fa-user"></i></div>
+                    </div>
+                    <div class="credential-info">
+                        <div class="credential-name">Juan Pérez García</div>
+                        <div class="credential-id">ID: EMP-001</div>
+                        <div class="credential-cargo">Analista de Sistemas</div>
+                    </div>
+                    <div class="credential-footer">
+                        <div class="credential-type">Huella Digital</div>
+                        <div class="credential-qr"><i class="fa-solid fa-qrcode"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <h4><i class="fa-solid fa-address-book"></i> Contacto</h4>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>juan.perez@biometrika.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fa-solid fa-phone"></i>
+                        <span>+1 234 567 8900</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fa-solid fa-building"></i>
+                        <span>Oficina 304 - Planta 3</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <h4><i class="fa-solid fa-chart-pie"></i> Estadísticas</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">42</div>
+                        <div class="stat-label">Accesos/mes</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">2.8</div>
+                        <div class="stat-label">Promedio/día</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div>Copyright© Sistema Biométrico 2025</div>
+        <div>Perfil generado el <span id="fecha-generacion"></span></div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('fecha-generacion').textContent = new Date().toLocaleDateString('es-ES');
+    function editarPerfil() { window.location.href = '/personal/'; }
+    function imprimirPerfil() { window.print(); }
+</script>
+{% endblock %}

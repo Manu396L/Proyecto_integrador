@@ -1,0 +1,151 @@
+<!-- templates/alertas/lista.html -->
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_alertas.css' %}">
+
+<!-- Contenido principal de la pagina -->
+<main class="contenido">
+    <header>
+        <h1><i class="fa-solid fa-triangle-exclamation"></i> <b>Alertas - Dispositivos</b></h1>
+    </header>
+    
+    <!-- Resumen de alertas -->
+    <section class="resumen-alertas">
+        <div class="resumen-item criticas">
+            <div class="resumen-valor">{{ criticos }}</div>
+            <div class="resumen-label">Dispositivos Críticos</div>
+        </div>
+        <div class="resumen-item advertencias">
+            <div class="resumen-valor">{{ problemas }}</div>
+            <div class="resumen-label">Con Problemas</div>
+        </div>
+        <div class="resumen-item estables">
+            <div class="resumen-valor">{{ estables }}</div>
+            <div class="resumen-label">Dispositivos Estables</div>
+        </div>
+    </section>
+    
+    <!-- Filtros -->
+    <section class="filtros-alertas">
+        <h3><i class="fa-solid fa-filter"></i> Filtros de Búsqueda</h3>
+        <div class="filtros-grid">
+            <div class="filtro-group">
+                <label for="filtro-sede">Sede</label>
+                <select id="filtro-sede">
+                    <option value="">Todas las sedes</option>
+                    {% for sede in sedes %}
+                    <option value="{{ sede }}">{{ sede }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtro-group">
+                <label for="filtro-estado">Estado</label>
+                <select id="filtro-estado">
+                    <option value="">Todos los estados</option>
+                    <option value="caido">Caído</option>
+                    <option value="inestable">Inestable</option>
+                    <option value="online">Online</option>
+                </select>
+            </div>
+            <div class="filtro-group">
+                <label for="filtro-autenticacion">Tipo de Autenticación</label>
+                <select id="filtro-autenticacion">
+                    <option value="">Todos los tipos</option>
+                    <option value="huella">Huella</option>
+                    <option value="tarjeta">Tarjeta</option>
+                    <option value="pin">PIN</option>
+                    <option value="facial">Reconocimiento Facial</option>
+                </select>
+            </div>
+            <div class="filtro-group">
+                <label for="filtro-dispositivo">Dispositivo</label>
+                <input type="text" id="filtro-dispositivo" placeholder="Buscar por dispositivo...">
+            </div>
+        </div>
+        <div class="botones-filtro">
+            <button class="btn-filtro btn-limpiar">
+                <i class="fa-solid fa-eraser"></i> Limpiar Filtros
+            </button>
+            <button class="btn-filtro btn-aplicar">
+                <i class="fa-solid fa-filter"></i> Aplicar Filtros
+            </button>
+        </div>
+    </section>
+    
+    <!-- Tabla de alertas -->
+    <section class="tabla-alertas">
+        <h2><i class="fa-solid fa-list"></i> Dispositivos</h2>
+        <div class="desplazamiento">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Dispositivo</th>
+                        <th>Sede</th>
+                        <th>Oficina</th>
+                        <th>Ubicación</th>
+                        <th>Último Registro</th>
+                        <th>Tipo Auth</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>    
+                <tbody>
+                    {% for dispositivo in dispositivos %}
+                    <tr>
+                        <td><strong>{{ dispositivo.id }}</strong></td>
+                        <td>{{ dispositivo.sede }}</td>
+                        <td>{{ dispositivo.oficina }}</td>
+                        <td>{{ dispositivo.ubicacion }}</td>
+                        <td>{{ dispositivo.ultimo_registro }}</td>
+                        <td>
+                            <span class="tipo-autenticacion">
+                                {% if dispositivo.tipo_auth == 'huella' %}
+                                <i class="fa-solid fa-fingerprint"></i>Huella
+                                {% elif dispositivo.tipo_auth == 'tarjeta' %}
+                                <i class="fa-solid fa-credit-card"></i>Tarjeta
+                                {% elif dispositivo.tipo_auth == 'pin' %}
+                                <i class="fa-solid fa-keyboard"></i>PIN
+                                {% elif dispositivo.tipo_auth == 'facial' %}
+                                <i class="fa-solid fa-face-smile"></i>Facial
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="estado-dispositivo 
+                                {% if dispositivo.estado == 'caido' %}estado-caido
+                                {% elif dispositivo.estado == 'inestable' %}estado-inestable
+                                {% else %}estado-online{% endif %}">
+                                {{ dispositivo.estado|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-reportar" data-id="{{ dispositivo.id }}">
+                                <i class="fa-solid fa-flag"></i> Reportar
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px;">
+                            No hay dispositivos registrados
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Información de Soporte -->
+    <div class="soporte-info">
+        <i class="fa-solid fa-headset"></i>
+        <strong>¿Necesita ayuda?</strong><br>
+        Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
+        <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+    </div>
+</main>
+
+<script src="{% static 'js/alertas.js' %}"></script>
+{% endblock %}

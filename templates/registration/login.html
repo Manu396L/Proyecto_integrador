@@ -1,0 +1,79 @@
+<!-- templates/registration/login.html -->
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - BIOMETRIKA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style_acceso.css' %}">
+</head>
+<body>
+
+    <!-- Logo de la pagina de inicio de sesion -->
+    <div class="login-container">
+        <div class="logo">
+            <div class="fingerprint-scanner">
+                <i class="fas fa-fingerprint"></i>
+                <h1>BIOMETRIKA S.A</h1>
+            </div> 
+        </div>
+        
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            
+            <!-- usuario -->
+            <div class="input-group">
+                <label for="id_username">Usuario</label>
+                <input type="text" name="username" id="id_username" placeholder="Ingrese su usuario" required autofocus>
+            </div>
+
+            <!-- contraseña -->
+            <div class="input-group">
+                <label for="id_password">Contraseña</label>
+                <input type="password" name="password" id="id_password" placeholder="Ingrese su contraseña" required>
+            </div>
+
+            <!-- opciones para recordar credenciales -->
+            <div class="options">
+                <div class="remember">
+                    <input type="checkbox" name="remember" id="remember">
+                    <label for="remember">Recordarme</label>
+                </div>
+                <a href="{% url 'usuarios:recuperar_contraseña' %}" class="forgot-password">¿Olvidó su contraseña?</a>
+            </div>
+            
+            <button type="submit" class="login-button">
+                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+            </button>
+            
+            <!-- Mensaje de error de Django -->
+            {% if form.errors %}
+            <div class="error-message" style="display: block;">
+                <i class="fas fa-exclamation-circle"></i> Usuario o contraseña incorrectos. Inténtelo de nuevo.
+            </div>
+            {% endif %}
+        </form>
+
+        <!-- Ayuda -->
+        <div class="register">
+            ¿No tiene una cuenta? <a href="{% url 'usuarios:registro_usuario' %}">Haga clic aquí</a>
+        </div>
+        
+        <!-- Mensaje de asistencia -->
+        <div class="soporte-info">
+            <i class="fa-solid fa-headset"></i>
+            <strong>¿Necesita ayuda?</strong><br>
+            Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
+            <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <div><i class="far fa-copyright"></i> Sistema Biométrico 2025</div>
+        <div>Versión 1.0</div>
+    </div>
+</body>
+</html>
