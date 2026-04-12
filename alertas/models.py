@@ -1,3 +1,4 @@
+# alertas/models.py
 from django.db import models
 from personal.models import Persona
 from dispositivos.models import Dispositivo
@@ -18,9 +19,9 @@ class Alerta(models.Model):
         ('CRITICA', 'Crítica'),
     ]
     
-    tipo = models.CharField(max_length=30, choices=TIPO_ALERTA)
-    nivel = models.CharField(max_length=10, choices=NIVEL_ALERTA)
-    mensaje = models.TextField()
+    tipo = models.CharField(max_length=30, choices=TIPO_ALERTA, default='MANTENIMIENTO')
+    nivel = models.CharField(max_length=10, choices=NIVEL_ALERTA, default='MEDIA')
+    mensaje = models.TextField(default='')
     dispositivo = models.ForeignKey(Dispositivo, on_delete=models.CASCADE, null=True, blank=True)
     persona = models.ForeignKey(Persona, on_delete=models.CASCADE, null=True, blank=True)
     fecha_hora = models.DateTimeField(auto_now_add=True)
@@ -28,4 +29,8 @@ class Alerta(models.Model):
     resuelta = models.BooleanField(default=False)
     
     def __str__(self):
-        return f"{self.get_tipo_display()} - {self.fecha_hora}"
+        return f"{self.tipo} - {self.fecha_hora}"
+    
+    class Meta:
+        verbose_name = 'Alerta'
+        verbose_name_plural = 'Alertas'

@@ -4,5 +4,5 @@ from .models import Persona
 
 @login_required
 def lista_personal(request):
-    personal = Persona.objects.all()
+    personal = Persona.objects.filter(activo=True)
     return render(request, 'personal/lista.html', {'personal': personal})
