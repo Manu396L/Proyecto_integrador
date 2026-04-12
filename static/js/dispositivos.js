@@ -112,10 +112,10 @@ function actualizarTabla() {
                 <td><span class="badge-estado ${estadoBadgeClass}">${estadoTexto}</span></td>
                 <td>${dispositivo.ultimaConexion}</td>
                 <td class="acciones">
-                    <button class="btn-accion btn-editar" data-index="${index}" onclick="seleccionarDispositivo(${index})">
+                    <button class="btn-accion btn-editar" data-id="${dispositivo.id}" onclick="seleccionarDispositivo(${dispositivo.id})">
                         <i class="fa-solid fa-pen"></i> Editar
                     </button>
-                    <button class="btn-accion btn-eliminar" data-index="${index}" onclick="eliminarDispositivo(${index})">
+                    <button class="btn-accion btn-eliminar" data-id="${dispositivo.id}" onclick="eliminarDispositivo(${dispositivo.id})">
                         <i class="fa-solid fa-trash"></i> Eliminar
                     </button>
                 </td>
@@ -126,9 +126,12 @@ function actualizarTabla() {
     }
 }
 
-function seleccionarDispositivo(index) {
-    dispositivoSeleccionado = index;
-    editarDispositivo(index);
+function seleccionarDispositivo(dispositivoId) {
+    const dispositivo = dispositivos.find(d => d.id === dispositivoId);
+    if (dispositivo) {
+        dispositivoSeleccionado = dispositivoId;
+        editarDispositivo(dispositivoId);
+    }
 }
 
 function guardarDispositivo(e) {
@@ -159,43 +162,74 @@ function guardarDispositivo(e) {
         return;
     }
     
-    const nuevoDispositivo = {
+    const datosDispositivo = {
         nombre,
-        numeroSerie,
-        tipoSede,
+        numero_serie: numeroSerie,
+        tipo_sede: tipoSede,
         area,
         direccion,
-        direccionIP,
-        zonaHoraria,
+        direccion_ip: direccionIP,
+        zona_horaria: zonaHoraria,
         intervalo: intervalo || 5,
         estado,
-        tipoDispositivo,
-        observaciones,
-        ultimaConexion: new Date().toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        })
+        tipo_dispositivo: tipoDispositivo,
+        observaciones
     };
     
+    // Obtener token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                      getCookie('csrftoken');
+    
     if (editandoIndex !== null) {
-        // Actualizar dispositivo existente
-        dispositivos[editandoIndex] = nuevoDispositivo;
-        editandoIndex = null;
-        mostrarMensaje('Dispositivo actualizado correctamente');
+        // ACTUALIZAR dispositivo existente
+        const dispositivoId = editandoIndex;
+        fetch(`/dispositivos/api/dispositivos/${dispositivoId}/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(datosDispositivo)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarMensaje('Dispositivo actualizado correctamente');
+                limpiarFormulario();
+                cargarDispositivos();
+            } else {
+                mostrarMensaje(`Error: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarMensaje('Error al actualizar el dispositivo', 'error');
+        });
     } else {
-        // Agregar nuevo dispositivo
-        dispositivos.push(nuevoDispositivo);
-        mostrarMensaje('Dispositivo registrado correctamente');
+        // CREAR nuevo dispositivo
+        fetch('/dispositivos/api/dispositivos/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(datosDispositivo)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarMensaje('Dispositivo registrado correctamente');
+                limpiarFormulario();
+                cargarDispositivos();
+            } else {
+                mostrarMensaje(`Error: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarMensaje('Error al registrar el dispositivo', 'error');
+        });
     }
-    
-    // Limpiar formulario
-    limpiarFormulario();
-    
-    // Actualizar tabla
-    actualizarTabla();
 }
 
 function mostrarMensaje(mensaje, tipo = 'success') {
@@ -231,8 +265,15 @@ function limpiarFormulario() {
     dispositivoSeleccionado = null;
 }
 
-function editarDispositivo(index) {
-    const dispositivo = dispositivos[index];
+function editarDispositivo(dispositivoId) {
+    const dispositivo = dispositivos.find(d => d.id === dispositivoId);
+    
+    if (!dispositivo) {
+        mostrarMensaje('Dispositivo no encontrado', 'error');
+        return;
+    }
+    
+    console.log('Dispositivo a editar:', dispositivo);
     
     // Llenar formulario con datos existentes
     inputNombre.value = dispositivo.nombre;
@@ -244,11 +285,16 @@ function editarDispositivo(index) {
     selectZonaHoraria.value = dispositivo.zonaHoraria;
     inputIntervalo.value = dispositivo.intervalo;
     selectEstado.value = dispositivo.estado;
+    
+    // Asignar tipo dispositivo con mejor manejo
+    console.log('Tipo dispositivo a asignar:', dispositivo.tipoDispositivo);
     selectTipoDispositivo.value = dispositivo.tipoDispositivo || 'huella';
+    console.log('Valor del select después de asignar:', selectTipoDispositivo.value);
+    
     textareaObservaciones.value = dispositivo.observaciones || '';
     
     // Cambiar a modo edición
-    editandoIndex = index;
+    editandoIndex = dispositivoId;
     btnCancelar.style.display = 'inline-flex';
     formTitle.textContent = 'Editar Dispositivo';
     
@@ -258,16 +304,34 @@ function editarDispositivo(index) {
     mostrarMensaje(`Editando dispositivo: ${dispositivo.nombre}`);
 }
 
-function eliminarDispositivo(index) {
+function eliminarDispositivo(dispositivoId) {
     if (confirm('¿Está seguro de que desea eliminar este dispositivo?')) {
-        dispositivos.splice(index, 1);
-        actualizarTabla();
-        mostrarMensaje('Dispositivo eliminado correctamente');
+        // Obtener token CSRF
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                          getCookie('csrftoken');
         
-        // Si estábamos editando y eliminamos el mismo dispositivo, limpiar formulario
-        if (editandoIndex === index) {
-            limpiarFormulario();
-        }
+        fetch(`/dispositivos/api/dispositivos/${dispositivoId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarMensaje('Dispositivo eliminado correctamente');
+                cargarDispositivos();
+                if (editandoIndex === dispositivoId) {
+                    limpiarFormulario();
+                }
+            } else {
+                mostrarMensaje(`Error: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarMensaje('Error al eliminar el dispositivo', 'error');
+        });
     }
 }
 
@@ -624,6 +688,66 @@ function importarInformacion() {
     menuAbierto = null;
 }
 
+// ========== FUNCIÓN PARA CARGAR DESDE BASE DE DATOS ==========
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function cargarDispositivos() {
+    fetch('/dispositivos/api/dispositivos/', {
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Datos crudos del API:', data);
+        
+        // Convertir snake_case a camelCase
+        dispositivos = data.map(d => {
+            const dispositivoConvertido = {
+                id: d.id,
+                nombre: d.nombre,
+                numeroSerie: d.numero_serie,
+                tipoSede: d.tipo_sede,
+                area: d.area,
+                direccion: d.direccion || '',
+                direccionIP: d.direccion_ip,
+                zonaHoraria: d.zona_horaria,
+                intervalo: d.intervalo_solicitud || 5,
+                estado: d.estado,
+                tipoDispositivo: d.tipo_dispositivo && d.tipo_dispositivo.trim() ? d.tipo_dispositivo.trim() : 'huella',
+                observaciones: d.observaciones || '',
+                ultimaConexion: d.ultima_conexion || new Date().toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+            };
+            console.log('Dispositivo convertido:', dispositivoConvertido);
+            return dispositivoConvertido;
+        });
+        console.log('Dispositivos cargados:', dispositivos);
+        actualizarTabla();
+    })
+    .catch(error => {
+        console.error('Error al cargar dispositivos:', error);
+        mostrarMensaje('Error al cargar dispositivos desde el servidor', 'error');
+    });
+}
+
 // ========== INICIALIZACIÓN ==========
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -651,51 +775,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Inicializar tabla con datos de ejemplo
-    dispositivos = [
-        {
-            nombre: 'Lector Principal Recepción',
-            numeroSerie: 'SN-LECTOR-RECEP-001',
-            tipoSede: 'sede',
-            area: 'Recepción Principal',
-            direccion: 'Planta Baja, Edificio A',
-            direccionIP: '192.168.1.100',
-            zonaHoraria: 'America/Mexico_City',
-            intervalo: 5,
-            estado: 'activo',
-            tipoDispositivo: 'huella',
-            observaciones: 'Dispositivo principal de acceso',
-            ultimaConexion: '15/03/2024, 08:15'
-        },
-        {
-            nombre: 'Control Acceso Almacén',
-            numeroSerie: 'SN-ALMACEN-002',
-            tipoSede: 'almacen',
-            area: 'Almacén Central',
-            direccion: 'Planta -1, Sector B',
-            direccionIP: '192.168.1.101',
-            zonaHoraria: 'America/Mexico_City',
-            intervalo: 10,
-            estado: 'activo',
-            tipoDispositivo: 'tarjeta',
-            observaciones: 'Control de acceso a zona restringida',
-            ultimaConexion: '15/03/2024, 07:45'
-        },
-        {
-            nombre: 'Lector Oficina RH',
-            numeroSerie: 'SN-OFICINA-RH-003',
-            tipoSede: 'oficina',
-            area: 'Recursos Humanos',
-            direccion: 'Planta 2, Ala Este',
-            direccionIP: '192.168.1.102',
-            zonaHoraria: 'America/Mexico_City',
-            intervalo: 5,
-            estado: 'pausado',
-            tipoDispositivo: 'huella',
-            observaciones: 'En mantenimiento preventivo',
-            ultimaConexion: '14/03/2024, 17:30'
-        }
-    ];
-    
-    actualizarTabla();
+    // Cargar dispositivos desde la base de datos
+    cargarDispositivos();
 });

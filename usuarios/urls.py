@@ -23,5 +23,12 @@ registro_urls = [
     path('api/registro/', views.api_registro_usuario, name='api_registro_usuario'),
 ]
 
+# URLs para ver solicitudes
+solicitudes_urls = [
+    path('mis-solicitudes/', views.mis_solicitudes, name='mis_solicitudes'),
+    path('todas-solicitudes/', views.todas_solicitudes, name='todas_solicitudes'),
+]
+
 urlpatterns += password_urls
 urlpatterns += registro_urls
+urlpatterns += solicitudes_urls

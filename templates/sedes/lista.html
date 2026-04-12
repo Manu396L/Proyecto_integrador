@@ -71,7 +71,7 @@
                     <div class="form-group">
                         <label for="nivel_seguridad"><i class="fa-solid fa-shield-halved"></i> Nivel de Seguridad:</label>
                         <select id="nivel_seguridad" name="nivel_seguridad">
-                            <option value="bajo">Bajo</option>
+                            <option value="bajo" selected>Bajo</option>
                             <option value="medio">Medio</option>
                             <option value="alto">Alto</option>
                         </select>
@@ -130,11 +130,13 @@
                             <th>Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="cuerpoTabla"></tbody>
+                    <tbody id="cuerpoTabla">
+                        <!-- Se carga dinámicamente desde JavaScript -->
+                    </tbody>
                 </table>
             </div>
             
-            <div id="estado-vacio" class="empty-state">
+            <div id="estado-vacio" class="empty-state" style="display: none;">
                 <i class="fa-solid fa-inbox"></i>
                 <p>No hay ubicaciones registradas aún</p>
                 <button class="btn" id="btn-agregar-primero">

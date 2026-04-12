@@ -122,18 +122,111 @@
     </div>
 </div>
 
+<!-- Personal Recientemente Agregado -->
+<div class="actividad">
+    <h2><i class="fa-solid fa-user-plus"></i> Personal Recientemente Agregado</h2>
+    <div class="desplazamiento">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Documento</th>
+                    <th>Área</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for persona in personal_reciente %}
+                <tr>
+                    <td>{{ persona.nombre_completo }}</td>
+                    <td>{{ persona.email|default:"N/A" }}</td>
+                    <td>{{ persona.numero_documento }}</td>
+                    <td>{{ persona.area|default:"Sin área" }}</td>
+                    <td>
+                        <span class="estado {% if persona.activo %}aprobado{% else %}denegado{% endif %}">
+                            {% if persona.activo %}Activo{% else %}Inactivo{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No hay personal recientemente agregado</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Alertas Pendientes -->
+<div class="actividad">
+    <h2><i class="fa-solid fa-exclamation-circle"></i> Alertas Pendientes</h2>
+    <div class="desplazamiento">
+        <table>
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Tipo</th>
+                    <th>Prioridad</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alerta in alertas_pendientes %}
+                <tr>
+                    <td>{{ alerta.descripcion }}</td>
+                    <td>{{ alerta.tipo }}</td>
+                    <td>
+                        <span class="badge" style="background: 
+                            {% if alerta.prioridad == 'ALTA' %}#e74c3c
+                            {% elif alerta.prioridad == 'MEDIA' %}#f39c12
+                            {% else %}#3498db{% endif %};">
+                            {{ alerta.prioridad }}
+                        </span>
+                    </td>
+                    <td>{{ alerta.fecha_hora|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <span class="estado {% if alerta.resuelta %}aprobado{% else %}denegado{% endif %}">
+                            {% if alerta.resuelta %}Resuelta{% else %}Pendiente{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No hay alertas pendientes</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <!-- Alertas del Sistema -->
 <div class="alerta-sistema">
     <h3><i class="fa-solid fa-bell"></i> Alertas del Sistema</h3>
     <div class="contenido-alerta">
         <div class="mensaje alerta-exito">
             <i class="fa-solid fa-circle-check"></i>
-            <span>Sistema operando con normalidad</span>
+            <span>Personal Total: {{ total_personal }}</span>
         </div>
+        <div class="mensaje alerta-info">
+            <i class="fa-solid fa-info-circle"></i>
+            <span>Accesos hoy: {{ accesos_hoy }} | Dispositivos activos: {{ dispositivos_activos }}</span>
+        </div>
+        {% if alertas_activas > 0 %}
         <div class="mensaje alerta-error">
             <i class="fa-solid fa-triangle-exclamation"></i>
-            <span>3 dispositivos requieren mantenimiento</span>
+            <span>{{ alertas_activas }} alertas activas requieren atención</span>
         </div>
+        {% endif %}
+        {% if dispositivos_inactivos > 0 %}
+        <div class="mensaje alerta-advertencia">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <span>{{ dispositivos_inactivos }} dispositivos inactivos</span>
+        </div>
+        {% endif %}
     </div>
 </div>
 

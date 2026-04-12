@@ -1,4 +1,165 @@
-// static/js/alertas.js
+// static/js/alertas.js - Manejo de alertas y reportes
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formReportar');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            enviarReporte();
+        });
+    }
+});
+
+function reportarDispositivo(id, nombre) {
+    document.getElementById('dispositivo_id_reportar').value = id;
+    document.getElementById('dispositivo_nombre_reportar').value = nombre;
+    document.getElementById('modalReportar').style.display = 'block';
+}
+
+function cerrarModal() {
+    document.getElementById('modalReportar').style.display = 'none';
+    document.getElementById('formReportar').reset();
+}
+
+function enviarReporte() {
+    const dispositivo_id = document.getElementById('dispositivo_id_reportar').value;
+    const descripcion = document.getElementById('descripcion_reporte').value;
+    
+    if (!dispositivo_id || !descripcion.trim()) {
+        alert('Por favor completa todos los campos');
+        return;
+    }
+    
+    const datos = new FormData();
+    datos.append('dispositivo_id', dispositivo_id);
+    datos.append('descripcion', descripcion);
+    
+    fetch('/alertas/reportar/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: datos
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Reporte enviado correctamente');
+            cerrarModal();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al enviar el reporte');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Estilos para el modal
+const estilosModal = `
+    .modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-contenido {
+        background-color: white;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 400px;
+    }
+    
+    .cerrar {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .cerrar:hover {
+        color: black;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+    }
+    
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .btn {
+        background: #0066cc;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    .btn:hover {
+        background: #004fa3;
+    }
+    
+    .total-registros {
+        padding: 15px;
+        background: #f8f9fa;
+        text-align: right;
+        font-size: 14px;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .text-success { color: #28a745; font-weight: 600; }
+    .text-warning { color: #ffc107; font-weight: 600; }
+    .text-danger { color: #dc3545; font-weight: 600; }
+`;
+
+// Inyectar estilos
+const styleSheet = document.createElement('style');
+styleSheet.textContent = estilosModal;
+document.head.appendChild(styleSheet);
 
 document.addEventListener('DOMContentLoaded', function() {
     // Referencias a elementos del DOM

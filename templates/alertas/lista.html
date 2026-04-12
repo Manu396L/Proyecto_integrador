@@ -76,67 +76,87 @@
     
     <!-- Tabla de alertas -->
     <section class="tabla-alertas">
-        <h2><i class="fa-solid fa-list"></i> Dispositivos</h2>
+        <h2><i class="fa-solid fa-list"></i> Alertas Activas</h2>
         <div class="desplazamiento">
             <table>
                 <thead>
                     <tr>
+                        <th>Tipo de Alerta</th>
+                        <th>Nivel</th>
                         <th>Dispositivo</th>
-                        <th>Sede</th>
-                        <th>Oficina</th>
-                        <th>Ubicación</th>
-                        <th>Último Registro</th>
-                        <th>Tipo Auth</th>
+                        <th>Persona</th>
+                        <th>Mensaje</th>
+                        <th>Fecha y Hora</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>    
                 <tbody>
-                    {% for dispositivo in dispositivos %}
+                    {% for alerta in alertas %}
                     <tr>
-                        <td><strong>{{ dispositivo.id }}</strong></td>
-                        <td>{{ dispositivo.sede }}</td>
-                        <td>{{ dispositivo.oficina }}</td>
-                        <td>{{ dispositivo.ubicacion }}</td>
-                        <td>{{ dispositivo.ultimo_registro }}</td>
+                        <td><strong>{{ alerta.get_tipo_display }}</strong></td>
                         <td>
-                            <span class="tipo-autenticacion">
-                                {% if dispositivo.tipo_auth == 'huella' %}
-                                <i class="fa-solid fa-fingerprint"></i>Huella
-                                {% elif dispositivo.tipo_auth == 'tarjeta' %}
-                                <i class="fa-solid fa-credit-card"></i>Tarjeta
-                                {% elif dispositivo.tipo_auth == 'pin' %}
-                                <i class="fa-solid fa-keyboard"></i>PIN
-                                {% elif dispositivo.tipo_auth == 'facial' %}
-                                <i class="fa-solid fa-face-smile"></i>Facial
-                                {% endif %}
+                            <span class="nivel-alerta nivel-{{ alerta.nivel|lower }}">
+                                <i class="fa-solid fa-exclamation-circle"></i> {{ alerta.get_nivel_display }}
+                            </span>
+                        </td>
+                        <td>{{ alerta.dispositivo.nombre|default:"N/A" }}</td>
+                        <td>{{ alerta.persona.nombre_completo|default:"N/A" }}</td>
+                        <td>{{ alerta.mensaje }}</td>
+                        <td>{{ alerta.fecha_hora|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <span class="estado-alerta 
+                                {% if alerta.resuelta %}estado-resuelta
+                                {% elif alerta.leida %}estado-leida
+                                {% else %}estado-pendiente{% endif %}">
+                                <i class="fa-solid fa-circle"></i>
+                                {% if alerta.resuelta %}Resuelta{% elif alerta.leida %}Leída{% else %}Pendiente{% endif %}
                             </span>
                         </td>
                         <td>
-                            <span class="estado-dispositivo 
-                                {% if dispositivo.estado == 'caido' %}estado-caido
-                                {% elif dispositivo.estado == 'inestable' %}estado-inestable
-                                {% else %}estado-online{% endif %}">
-                                {{ dispositivo.estado|title }}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn-reportar" data-id="{{ dispositivo.id }}">
-                                <i class="fa-solid fa-flag"></i> Reportar
+                            <button class="btn-reportar" onclick="marcarAlertaResuelta({{ alerta.id }})">
+                                <i class="fa-solid fa-check"></i> Resolver
                             </button>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
                         <td colspan="8" style="text-align: center; padding: 40px;">
-                            No hay dispositivos registrados
+                            <i class="fa-solid fa-inbox"></i>
+                            <p>No hay alertas registradas</p>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        <div class="total-registros">
+            Total: <strong>{{ alertas|length }}</strong> alertas | 
+            <span class="text-success">{{ estables }} dispositivos activos</span> | 
+            <span class="text-warning">{{ problemas }} pausados</span> | 
+            <span class="text-danger">{{ criticos }} con error</span>
+        </div>
     </section>
+
+    <!-- Modal para reportar -->
+    <div id="modalReportar" class="modal" style="display: none;">
+        <div class="modal-contenido">
+            <span class="cerrar" onclick="cerrarModal()">&times;</span>
+            <h2>Reportar Dispositivo</h2>
+            <form id="formReportar">
+                <input type="hidden" id="dispositivo_id_reportar">
+                <div class="form-group">
+                    <label>Dispositivo:</label>
+                    <input type="text" id="dispositivo_nombre_reportar" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Descripción del Problema:</label>
+                    <textarea id="descripcion_reporte" required placeholder="Describe el problema aquí..."></textarea>
+                </div>
+                <button type="submit" class="btn">Enviar Reporte</button>
+            </form>
+        </div>
+    </div>
 
     <!-- Información de Soporte -->
     <div class="soporte-info">

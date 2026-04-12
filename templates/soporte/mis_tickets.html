@@ -1,0 +1,211 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_soporte.css' %}">
+
+<div class="contenido">
+    <h1><i class="fa-solid fa-ticket"></i> Mis Tickets de Soporte</h1>
+    <p class="subtitulo">Seguimiento de tus reportes de problemas</p>
+
+    <div class="tabla-container">
+        {% if tickets %}
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Asunto</th>
+                        <th>Categoría</th>
+                        <th>Fecha Creación</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                        <tr>
+                            <td>#{{ ticket.id }}</td>
+                            <td><strong>{{ ticket.asunto }}</strong></td>
+                            <td>
+                                <span class="badge categoria-{{ ticket.categoria }}">
+                                    {% if ticket.categoria == 'tecnico' %}
+                                        <i class="fa-solid fa-wrench"></i> Técnico
+                                    {% elif ticket.categoria == 'cuenta' %}
+                                        <i class="fa-solid fa-user"></i> Cuenta
+                                    {% elif ticket.categoria == 'biometrico' %}
+                                        <i class="fa-solid fa-fingerprint"></i> Biométrico
+                                    {% elif ticket.categoria == 'funcionalidad' %}
+                                        <i class="fa-solid fa-gears"></i> Funcionalidad
+                                    {% else %}
+                                        <i class="fa-solid fa-circle-question"></i> Otro
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <span class="badge estado-{{ ticket.estado }}">
+                                    {% if ticket.estado == 'pendiente' %}
+                                        <i class="fa-solid fa-hourglass-end"></i> Pendiente
+                                    {% elif ticket.estado == 'en_proceso' %}
+                                        <i class="fa-solid fa-spinner"></i> En Proceso
+                                    {% else %}
+                                        <i class="fa-solid fa-check-circle"></i> Resuelto
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn-small btn-view" onclick="verTicket({{ ticket.id }}, '{{ ticket.asunto }}', '{{ ticket.descripcion }}')">
+                                    <i class="fa-solid fa-eye"></i> Ver
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alerta-info">
+                <i class="fa-solid fa-info-circle"></i>
+                <p>No tienes tickets de soporte registrados.</p>
+                <a href="{% url 'soporte:index' %}" class="btn">
+                    <i class="fa-solid fa-plus"></i> Crear Nuevo Ticket
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Modal para ver detalles del ticket -->
+    <div id="modalTicket" class="modal" style="display: none;">
+        <div class="modal-contenido">
+            <span class="cerrar" onclick="cerrarModal()">&times;</span>
+            <h2 id="modalTitulo"></h2>
+            <div id="modalDescripcion"></div>
+        </div>
+    </div>
+
+    <style>
+        .tabla-container {
+            background: white;
+            border-radius: 8px;
+            overflow-x: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tabla-datos {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .tabla-datos thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tabla-datos th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .tabla-datos td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tabla-datos tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .categoria-tecnico { background: #e3f2fd; color: #1565c0; }
+        .categoria-cuenta { background: #f3e5f5; color: #7b1fa2; }
+        .categoria-biometrico { background: #e0f2f1; color: #00695c; }
+        .categoria-funcionalidad { background: #fff3e0; color: #e65100; }
+        .categoria-otro { background: #f5f5f5; color: #424242; }
+
+        .estado-pendiente { background: #fff3cd; color: #856404; }
+        .estado-en_proceso { background: #cfe2ff; color: #084298; }
+        .estado-resuelto { background: #d4edda; color: #155724; }
+
+        .btn-small {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .btn-view {
+            background: #0066cc;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #004fa3;
+        }
+
+        .alerta-info {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            color: #004085;
+        }
+
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-contenido {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .cerrar {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .cerrar:hover {
+            color: black;
+        }
+    </style>
+
+    <script>
+        function verTicket(id, asunto, descripcion) {
+            document.getElementById('modalTitulo').textContent = asunto;
+            document.getElementById('modalDescripcion').innerHTML = '<p>' + descripcion.replace(/\n/g, '<br>') + '</p>';
+            document.getElementById('modalTicket').style.display = 'block';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalTicket').style.display = 'none';
+        }
+    </script>
+</div>
+{% endblock %}

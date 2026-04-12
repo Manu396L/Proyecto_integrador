@@ -1,0 +1,253 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_soporte.css' %}">
+
+<div class="contenido">
+    <h1><i class="fa-solid fa-headset"></i> Todos los Tickets de Soporte</h1>
+    <p class="subtitulo">Gestión de tickets y reportes de problemas</p>
+
+    <!-- Filtros -->
+    <div class="filtros-container">
+        <form method="GET" class="filtros-form">
+            <div class="filtro-grupo">
+                <label>Filtrar por Estado:</label>
+                <select name="estado">
+                    <option value="">Todos los estados</option>
+                    {% for value, label in estados %}
+                        <option value="{{ value }}" {% if value == estado_filtro %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label>Filtrar por Categoría:</label>
+                <select name="categoria">
+                    <option value="">Todas las categorías</option>
+                    {% for value, label in categorias %}
+                        <option value="{{ value }}" {% if value == categoria_filtro %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn"><i class="fa-solid fa-filter"></i> Filtrar</button>
+            <a href="{% url 'soporte:todos_tickets' %}" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i> Limpiar</a>
+        </form>
+    </div>
+
+    <!-- Tabla de tickets -->
+    <div class="tabla-container">
+        {% if tickets %}
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Asunto</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Fecha Creación</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                        <tr>
+                            <td><strong>#{{ ticket.id }}</strong></td>
+                            <td>{{ ticket.asunto }}</td>
+                            <td>{{ ticket.nombre }}</td>
+                            <td>
+                                <span class="badge categoria-{{ ticket.categoria }}">
+                                    {% if ticket.categoria == 'tecnico' %}
+                                        Técnico
+                                    {% elif ticket.categoria == 'cuenta' %}
+                                        Cuenta
+                                    {% elif ticket.categoria == 'biometrico' %}
+                                        Biométrico
+                                    {% elif ticket.categoria == 'funcionalidad' %}
+                                        Funcionalidad
+                                    {% else %}
+                                        Otro
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <span class="badge estado-{{ ticket.estado }}">
+                                    {% if ticket.estado == 'pendiente' %}
+                                        Pendiente
+                                    {% elif ticket.estado == 'en_proceso' %}
+                                        En Proceso
+                                    {% else %}
+                                        Resuelto
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="/admin/soporte/ticketsoporte/{{ ticket.id }}/change/" class="btn-small btn-edit">
+                                    <i class="fa-solid fa-edit"></i> Editar
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="total-registros">Total: <strong>{{ tickets.count }}</strong> tickets</p>
+        {% else %}
+            <div class="alerta-info">
+                <i class="fa-solid fa-info-circle"></i>
+                <p>No hay tickets de soporte registrados con estos filtros.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <style>
+        .filtros-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filtros-form {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .filtro-grupo {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filtro-grupo label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .filtro-grupo select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .tabla-container {
+            background: white;
+            border-radius: 8px;
+            overflow-x: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tabla-datos {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .tabla-datos thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tabla-datos th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .tabla-datos td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tabla-datos tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .categoria-tecnico { background: #e3f2fd; color: #1565c0; }
+        .categoria-cuenta { background: #f3e5f5; color: #7b1fa2; }
+        .categoria-biometrico { background: #e0f2f1; color: #00695c; }
+        .categoria-funcionalidad { background: #fff3e0; color: #e65100; }
+        .categoria-otro { background: #f5f5f5; color: #424242; }
+
+        .estado-pendiente { background: #fff3cd; color: #856404; }
+        .estado-en_proceso { background: #cfe2ff; color: #084298; }
+        .estado-resuelto { background: #d4edda; color: #155724; }
+
+        .btn-small {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-edit {
+            background: #0066cc;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #004fa3;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #004fa3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .alerta-info {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            color: #004085;
+        }
+
+        .total-registros {
+            padding: 15px;
+            background: #f8f9fa;
+            text-align: right;
+            margin: 0;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+</div>
+{% endblock %}

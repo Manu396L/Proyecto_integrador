@@ -12,6 +12,8 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 import json
 import re
+from .models import SolicitudRegistro
+from .forms import SolicitudRegistroForm
 
 # ===== VISTAS CON LOGIN =====
 
@@ -88,10 +90,15 @@ def registro_usuario(request):
 
 @csrf_exempt
 def api_registro_usuario(request):
-    """API para registrar solicitud de nuevo usuario"""
+    """API para registrar solicitud de nuevo usuario y GUARDAR EN BASE DE DATOS"""
     if request.method == 'POST':
         try:
+            print("\n" + "="*60)
+            print("🔍 INTENTANDO GUARDAR USUARIO")
+            print("="*60)
+            
             data = json.loads(request.body)
+            print(f"✅ Datos recibidos: {data}")
             
             nombre = data.get('nombre', '').strip()
             email = data.get('email', '').strip()
@@ -100,10 +107,14 @@ def api_registro_usuario(request):
             puesto = data.get('puesto', '').strip()
             superior = data.get('superior', '').strip()
             fecha_ingreso = data.get('fecha_ingreso', '').strip()
-            fecha_solicitud = data.get('fecha_solicitud', '')
+            
+            print(f"Nombre: {nombre}")
+            print(f"Email: {email}")
+            print(f"Departamento: {departamento}")
             
             # Validar campos obligatorios
             if not nombre or not email or not telefono or not departamento or not puesto:
+                print("❌ Faltan campos obligatorios")
                 return JsonResponse({
                     'success': False, 
                     'message': 'Por favor, complete todos los campos obligatorios'
@@ -111,6 +122,7 @@ def api_registro_usuario(request):
             
             # Validar formato de email
             if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+                print("❌ Email inválido")
                 return JsonResponse({
                     'success': False, 
                     'message': 'Por favor, ingrese un correo electrónico válido'
@@ -118,53 +130,68 @@ def api_registro_usuario(request):
             
             # Validar teléfono (básico)
             if not re.match(r'^[\+]?[0-9\s\-\(\)]{8,}$', telefono):
+                print("❌ Teléfono inválido")
                 return JsonResponse({
                     'success': False, 
                     'message': 'Por favor, ingrese un número de teléfono válido'
                 }, status=400)
             
-            # Aquí puedes guardar la solicitud en una tabla de SolicitudesRegistro
-            # Por ahora solo registramos en consola
-            print(f"Nueva solicitud de registro:")
-            print(f"  Nombre: {nombre}")
-            print(f"  Email: {email}")
-            print(f"  Teléfono: {telefono}")
-            print(f"  Departamento: {departamento}")
-            print(f"  Puesto: {puesto}")
-            print(f"  Superior: {superior}")
-            print(f"  Fecha Ingreso: {fecha_ingreso}")
+            # ✅ AHORA GUARDA EN LA BASE DE DATOS
+            print("\n📝 GUARDANDO EN BD...")
+            solicitud = SolicitudRegistro.objects.create(
+                nombre=nombre,
+                email=email,
+                telefono=telefono,
+                departamento=departamento,
+                puesto=puesto,
+                superior=superior if superior else None,
+                fecha_ingreso=fecha_ingreso if fecha_ingreso else None,
+                estado='pendiente'
+            )
+            
+            print(f"✅✅✅ SOLICITUD GUARDADA - ID: {solicitud.id}")
+            print(f"  Nombre: {solicitud.nombre}")
+            print(f"  Email: {solicitud.email}")
+            print(f"  Departamento: {solicitud.departamento}")
+            print("="*60 + "\n")
             
             # Opcional: Enviar email de notificación al administrador
-            # try:
-            #     send_mail(
-            #         'Nueva solicitud de registro - Biometrika',
-            #         f'Se ha recibido una nueva solicitud de registro:\n\n'
-            #         f'Nombre: {nombre}\n'
-            #         f'Email: {email}\n'
-            #         f'Teléfono: {telefono}\n'
-            #         f'Departamento: {departamento}\n'
-            #         f'Puesto: {puesto}\n'
-            #         f'Superior: {superior}\n'
-            #         f'Fecha Ingreso: {fecha_ingreso}\n\n'
-            #         f'Por favor, revise la solicitud en el panel de administración.',
-            #         settings.DEFAULT_FROM_EMAIL,
-            #         ['admin@biometrika.com'],
-            #         fail_silently=False,
-            #     )
-            # except Exception as e:
-            #     print(f"Error al enviar email: {e}")
+            try:
+                send_mail(
+                    'Nueva solicitud de registro - Biometrika',
+                    f'Se ha recibido una nueva solicitud de registro:\n\n'
+                    f'Nombre: {nombre}\n'
+                    f'Email: {email}\n'
+                    f'Teléfono: {telefono}\n'
+                    f'Departamento: {departamento}\n'
+                    f'Puesto: {puesto}\n'
+                    f'Superior: {superior or "No especificado"}\n'
+                    f'Fecha Ingreso: {fecha_ingreso or "No especificada"}\n\n'
+                    f'Por favor, revise la solicitud en el panel de administración.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    ['admin@biometrika.com'],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                print(f"⚠️ Advertencia: Error al enviar email: {e}")
             
             return JsonResponse({
                 'success': True, 
-                'message': 'Solicitud enviada correctamente. Nos pondremos en contacto con usted.'
+                'message': 'Solicitud enviada correctamente. Nos pondremos en contacto con usted.',
+                'solicitud_id': solicitud.id
             })
             
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
+            print(f"❌ Error JSON: {e}")
             return JsonResponse({
                 'success': False, 
                 'message': 'Datos inválidos'
             }, status=400)
         except Exception as e:
+            print(f"❌ ERROR AL GUARDAR: {str(e)}")
+            print(f"Tipo de error: {type(e)}")
+            import traceback
+            traceback.print_exc()
             return JsonResponse({
                 'success': False, 
                 'message': f'Error al procesar la solicitud: {str(e)}'
@@ -174,3 +201,33 @@ def api_registro_usuario(request):
         'success': False, 
         'message': 'Método no permitido'
     }, status=405)
+
+
+# ===== VISTAS PARA VER LAS SOLICITUDES =====
+
+@login_required
+def mis_solicitudes(request):
+    """Vista para que el usuario vea sus solicitudes de registro"""
+    solicitudes = SolicitudRegistro.objects.filter(email=request.user.email).order_by('-fecha_solicitud')
+    return render(request, 'usuarios/mis_solicitudes.html', {'solicitudes': solicitudes})
+
+
+@login_required
+def todas_solicitudes(request):
+    """Vista para admin: ver TODAS las solicitudes de registro"""
+    if not request.user.is_staff:
+        return redirect('dashboard:index')
+    
+    estado = request.GET.get('estado', '')
+    solicitudes = SolicitudRegistro.objects.all().order_by('-fecha_solicitud')
+    
+    if estado:
+        solicitudes = solicitudes.filter(estado=estado)
+    
+    estados = SolicitudRegistro._meta.get_field('estado').choices
+    
+    return render(request, 'usuarios/todas_solicitudes.html', {
+        'solicitudes': solicitudes,
+        'estados': estados,
+        'estado_filtro': estado
+    })

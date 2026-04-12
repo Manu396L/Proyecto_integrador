@@ -219,15 +219,77 @@
                             <th>IP</th>
                             <th>Área</th>
                             <th>Tipo Sede</th>
+                            <th>Tipo</th>
                             <th>Estado</th>
                             <th>Última Conexión</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="cuerpoTabla">
-                        <!-- Los dispositivos se agregarán aquí dinámicamente -->
+                        {% for dispositivo in dispositivos %}
+                        <tr data-id="{{ dispositivo.id }}">
+                            <td><strong>{{ dispositivo.nombre }}</strong></td>
+                            <td>{{ dispositivo.numero_serie }}</td>
+                            <td>{{ dispositivo.direccion_ip }}</td>
+                            <td>{{ dispositivo.area }}</td>
+                            <td>{{ dispositivo.tipo_sede }}</td>
+                            <td>
+                                <span class="badge tipo-dispositivo-{{ dispositivo.tipo_dispositivo }}">
+                                    {% if dispositivo.tipo_dispositivo == 'huella' %}
+                                        <i class="fa-solid fa-fingerprint"></i> Huella
+                                    {% elif dispositivo.tipo_dispositivo == 'tarjeta' %}
+                                        <i class="fa-solid fa-credit-card"></i> Tarjeta
+                                    {% elif dispositivo.tipo_dispositivo == 'facial' %}
+                                        <i class="fa-solid fa-face-smile"></i> Facial
+                                    {% elif dispositivo.tipo_dispositivo == 'iris' %}
+                                        <i class="fa-solid fa-eye"></i> Iris
+                                    {% else %}
+                                        <i class="fa-solid fa-microchip"></i> Multi
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge estado-{{ dispositivo.estado }}">
+                                    {% if dispositivo.estado == 'activo' %}
+                                        <i class="fa-solid fa-check-circle"></i> Activo
+                                    {% elif dispositivo.estado == 'pausado' %}
+                                        <i class="fa-solid fa-pause-circle"></i> Pausado
+                                    {% elif dispositivo.estado == 'error' %}
+                                        <i class="fa-solid fa-xmark-circle"></i> Error
+                                    {% elif dispositivo.estado == 'sin_conexion' %}
+                                        <i class="fa-solid fa-wifi-slash"></i> Sin conexión
+                                    {% else %}
+                                        <i class="fa-solid fa-power-off"></i> Apagado
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>{{ dispositivo.ultima_conexion|date:"d/m/Y H:i"|default:"Nunca" }}</td>
+                            <td>
+                                <button class="btn-accion btn-editar" onclick="editarDispositivo({{ dispositivo.id }})">
+                                    <i class="fa-solid fa-pen"></i> Editar
+                                </button>
+                                <button class="btn-accion btn-eliminar" onclick="eliminarDispositivo({{ dispositivo.id }})">
+                                    <i class="fa-solid fa-trash"></i> Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 40px;">
+                                <i class="fa-solid fa-inbox"></i>
+                                <p>No hay dispositivos registrados</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
+            </div>
+            
+            <div style="padding: 15px; background: #f8f9fa; text-align: right; border-top: 1px solid #dee2e6;">
+                Total: <strong>{{ dispositivos.count }}</strong> dispositivos | 
+                <span style="color: #28a745; font-weight: 600;"><i class="fa-solid fa-check-circle"></i> {{ total_activos }} activos</span> | 
+                <span style="color: #ffc107; font-weight: 600;"><i class="fa-solid fa-pause-circle"></i> {{ total_pausados }} pausados</span> | 
+                <span style="color: #dc3545; font-weight: 600;"><i class="fa-solid fa-xmark-circle"></i> {{ total_error }} con error</span>
             </div>
             
             <!-- Estado vacío -->

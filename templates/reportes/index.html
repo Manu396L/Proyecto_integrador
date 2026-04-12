@@ -12,15 +12,15 @@
     <!-- Resumen de reportes -->
     <section class="resumen-reportes">
         <div class="resumen-item total">
-            <div class="resumen-valor">1,247</div>
+            <div class="resumen-valor">{{ total_registros|default:"0" }}</div>
             <div class="resumen-label">Registros Totales</div>
         </div>
         <div class="resumen-item exitosos">
-            <div class="resumen-valor">1,158</div>
+            <div class="resumen-valor">{{ accesos_exitosos|default:"0" }}</div>
             <div class="resumen-label">Autenticaciones Exitosas</div>
         </div>
         <div class="resumen-item fallidos">
-            <div class="resumen-valor">89</div>
+            <div class="resumen-valor">{{ accesos_fallidos|default:"0" }}</div>
             <div class="resumen-label">Autenticaciones Fallidas</div>
         </div>
     </section>
@@ -28,60 +28,45 @@
     <!-- Filtros -->
     <section class="filtros-reportes">
         <h3><i class="fa-solid fa-filter"></i> Filtros de Búsqueda</h3>
-        <div class="filtros-grid">
-            <div class="filtro-group">
-                <label for="filtro-fecha-inicio">Fecha Inicio</label>
-                <input type="date" id="filtro-fecha-inicio">
+        <form method="GET" class="filtros-form">
+            <div class="filtros-grid">
+                <div class="filtro-group">
+                    <label for="fecha_inicio">Fecha Inicio</label>
+                    <input type="date" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+                </div>
+                <div class="filtro-group">
+                    <label for="fecha_fin">Fecha Fin</label>
+                    <input type="date" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
+                </div>
+                <div class="filtro-group">
+                    <label for="dispositivo_id">Dispositivo</label>
+                    <select id="dispositivo_id" name="dispositivo_id">
+                        <option value="">Todos los dispositivos</option>
+                        {% for dispositivo in dispositivos %}
+                            <option value="{{ dispositivo.id }}" {% if dispositivo.id|stringformat:"s" == dispositivo_id %}selected{% endif %}>
+                                {{ dispositivo.nombre }} - {{ dispositivo.tipo_dispositivo }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filtro-group">
+                    <label for="tipo_acceso">Tipo Acceso</label>
+                    <select id="tipo_acceso" name="tipo_acceso">
+                        <option value="">Todos los tipos</option>
+                        <option value="exitoso" {% if tipo_acceso == 'exitoso' %}selected{% endif %}>Exitoso</option>
+                        <option value="fallido" {% if tipo_acceso == 'fallido' %}selected{% endif %}>Fallido</option>
+                    </select>
+                </div>
             </div>
-            <div class="filtro-group">
-                <label for="filtro-fecha-fin">Fecha Fin</label>
-                <input type="date" id="filtro-fecha-fin">
+            <div class="botones-filtro">
+                <button type="submit" class="btn-filtro btn-aplicar" id="btnAplicar">
+                    <i class="fa-solid fa-filter"></i> Aplicar Filtros
+                </button>
+                <a href="{% url 'reportes:index' %}" class="btn-filtro btn-limpiar">
+                    <i class="fa-solid fa-eraser"></i> Limpiar Filtros
+                </a>
             </div>
-            <div class="filtro-group">
-                <label for="filtro-tipo">Tipo Biométrico</label>
-                <select id="filtro-tipo">
-                    <option value="">Todos los tipos</option>
-                    <option value="huella">Huella Dactilar</option>
-                    <option value="facial">Reconocimiento Facial</option>
-                    <option value="voz">Reconocimiento de Voz</option>
-                    <option value="iris">Escaneo de Iris</option>
-                </select>
-            </div>
-            <div class="filtro-group">
-                <label for="filtro-estado">Estado</label>
-                <select id="filtro-estado">
-                    <option value="">Todos los estados</option>
-                    <option value="exitoso">Exitoso</option>
-                    <option value="fallido">Fallido</option>
-                    <option value="pendiente">Pendiente</option>
-                </select>
-            </div>
-            <div class="filtro-group">
-                <label for="filtro-dispositivo">Dispositivo</label>
-                <select id="filtro-dispositivo">
-                    <option value="">Todos los dispositivos</option>
-                    <option value="terminal-1">Terminal 1 - Recepción</option>
-                    <option value="terminal-2">Terminal 2 - Oficinas</option>
-                    <option value="terminal-3">Terminal 3 - Laboratorio</option>
-                    <option value="movil">Dispositivo Móvil</option>
-                </select>
-            </div>
-            <div class="filtro-group">
-                <label for="filtro-usuario">Usuario</label>
-                <input type="text" id="filtro-usuario" placeholder="Buscar por usuario...">
-            </div>
-        </div>
-        <div class="botones-filtro">
-            <button class="btn-filtro btn-limpiar" id="btnLimpiar">
-                <i class="fa-solid fa-eraser"></i> Limpiar Filtros
-            </button>
-            <button class="btn-filtro btn-aplicar" id="btnAplicar">
-                <i class="fa-solid fa-filter"></i> Aplicar Filtros
-            </button>
-            <button class="btn-filtro btn-exportar" id="btnExportar">
-                <i class="fa-solid fa-file-export"></i> Exportar Reporte
-            </button>
-        </div>
+        </form>
     </section>
     
     <!-- Tabla de reportes -->
@@ -91,30 +76,76 @@
             <table id="tablaReportes">
                 <thead>
                     <tr>
-                        <th>ID Registro</th>
+                        <th>ID</th>
                         <th>Usuario</th>
-                        <th>Tipo Biométrico</th>
-                        <th>Fecha/Hora</th>
                         <th>Dispositivo</th>
+                        <th>Fecha/Hora</th>
+                        <th>Tipo Acceso</th>
                         <th>Estado</th>
-                        <th>Confianza</th>
-                        <th>Acciones</th>
+                        <th>Temperatura</th>
+                        <th>Detalles</th>
                     </tr>
                 </thead>    
                 <tbody id="tbodyReportes">
-                    <!-- Los registros se cargan dinámicamente -->
+                    {% for registro in registros %}
+                    <tr>
+                        <td><strong>#{{ registro.id }}</strong></td>
+                        <td>{{ registro.persona.nombre_completo }}</td>
+                        <td>{{ registro.dispositivo.nombre }}</td>
+                        <td>{{ registro.fecha_hora|date:"d/m/Y H:i:s" }}</td>
+                        <td>
+                            <span class="badge tipo-acceso-{{ registro.tipo_acceso }}">
+                                {% if registro.tipo_acceso == 'exitoso' %}
+                                    <i class="fa-solid fa-check-circle"></i> Exitoso
+                                {% elif registro.tipo_acceso == 'fallido' %}
+                                    <i class="fa-solid fa-xmark-circle"></i> Fallido
+                                {% else %}
+                                    <i class="fa-solid fa-question-circle"></i> {{ registro.tipo_acceso }}
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge estado-{{ registro.tipo_acceso }}">
+                                {% if registro.tipo_acceso == 'exitoso' %}
+                                    <span class="dot-green"></span> Autorizado
+                                {% else %}
+                                    <span class="dot-red"></span> Denegado
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            {% if registro.temperatura %}
+                                {{ registro.temperatura }}°C
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if registro.motivo_denegado %}
+                                <button class="btn-small" onclick="verDetalle('{{ registro.motivo_denegado }}')">
+                                    <i class="fa-solid fa-info-circle"></i> Ver
+                                </button>
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px;">
+                            <i class="fa-solid fa-inbox"></i>
+                            <p>No hay registros biométricos disponibles</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
-        
-        <!-- Paginación -->
-        <div class="paginacion">
-            <div class="paginacion-info" id="infoPaginacion">
-                Mostrando 1-8 de 1,247 registros
-            </div>
-            <div class="paginacion-controles" id="controlesPaginacion">
-                <!-- Los controles de paginación se generan dinámicamente -->
-            </div>
+        <div style="padding: 15px; background: #f8f9fa; text-align: right; border-top: 1px solid #dee2e6;">
+            Total: <strong>{{ total_registros }}</strong> registros | 
+            <span style="color: #28a745; font-weight: 600;"><i class="fa-solid fa-check-circle"></i> {{ accesos_exitosos }} exitosos</span> | 
+            <span style="color: #dc3545; font-weight: 600;"><i class="fa-solid fa-xmark-circle"></i> {{ accesos_fallidos }} fallidos</span> |
+            <span style="color: #0066cc; font-weight: 600;"><i class="fa-solid fa-calendar-days"></i> {{ registros_semana }} últimos 7 días</span>
         </div>
     </section>
 

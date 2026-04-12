@@ -1,4 +1,4 @@
-// static/js/soporte.js - VERSIÓN COMPLETA
+// static/js/soporte.js - VERSIÓN COMPLETA CON GUARDADO EN BD
 
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('formularioProblema');
@@ -14,8 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 email: document.getElementById('email').value,
                 categoria: document.getElementById('categoria').value,
                 asunto: document.getElementById('asunto').value,
-                descripcion: document.getElementById('descripcion').value,
-                fecha: new Date().toISOString()
+                descripcion: document.getElementById('descripcion').value
             };
             
             // Validar campos
@@ -31,35 +30,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Mostrar en consola los datos (para pruebas)
-            console.log('Datos del formulario:', datos);
+            console.log('Enviando ticket:', datos);
             
-            // Aquí iría la llamada a la API para guardar el ticket
-            // fetch('/api/soporte/', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //         'X-CSRFToken': getCookie('csrftoken')
-            //     },
-            //     body: JSON.stringify(datos)
-            // })
-            // .then(response => response.json())
-            // .then(data => {
-            //     if (data.success) {
-            //         mostrarMensajeExito();
-            //     } else {
-            //         mostrarNotificacion(data.error, 'error');
-            //     }
-            // })
-            // .catch(error => {
-            //     mostrarNotificacion('Error al enviar el reporte', 'error');
-            // });
-            
-            // Por ahora, mostrar mensaje de éxito
-            mostrarMensajeExito();
-            
-            // Limpiar formulario
-            form.reset();
+            // ✅ NUEVA: Enviar al servidor a guardar en BD
+            enviarTicket(datos);
+        });
+    }
+    
+    function enviarTicket(datos) {
+        const boton = form.querySelector('.btn');
+        const textoOriginal = boton.innerHTML;
+        boton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+        boton.disabled = true;
+        
+        fetch('/soporte/api/crear-ticket/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(datos)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('✅ Ticket guardado - ID:', data.ticket_id);
+                mostrarMensajeExito();
+                form.reset();
+            } else {
+                mostrarNotificacion(data.message || 'Error al crear el ticket', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error de conexión. Por favor, intente nuevamente.', 'error');
+        })
+        .finally(() => {
+            boton.innerHTML = textoOriginal;
+            boton.disabled = false;
         });
     }
     
@@ -106,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
     
-    // Función para obtener CSRF token (si se necesita)
+    // Función para obtener CSRF token
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {

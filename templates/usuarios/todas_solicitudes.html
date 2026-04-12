@@ -1,0 +1,233 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_usuario_nuevo.css' %}">
+
+<div class="contenido">
+    <h1><i class="fa-solid fa-users"></i> Todas las Solicitudes de Registro</h1>
+    <p class="subtitulo">Gestión de solicitudes de acceso al sistema</p>
+
+    <!-- Filtros -->
+    <div class="filtros-container">
+        <form method="GET" class="filtros-form">
+            <div class="filtro-grupo">
+                <label>Filtrar por Estado:</label>
+                <select name="estado">
+                    <option value="">Todos los estados</option>
+                    {% for value, label in estados %}
+                        <option value="{{ value }}" {% if value == estado_filtro %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn"><i class="fa-solid fa-filter"></i> Filtrar</button>
+            <a href="{% url 'usuarios:todas_solicitudes' %}" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i> Limpiar</a>
+        </form>
+    </div>
+
+    <!-- Tabla de solicitudes -->
+    <div class="tabla-container">
+        {% if solicitudes %}
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Departamento</th>
+                        <th>Puesto</th>
+                        <th>Fecha Solicitud</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for solicitud in solicitudes %}
+                        <tr>
+                            <td><strong>{{ solicitud.nombre }}</strong></td>
+                            <td>{{ solicitud.email }}</td>
+                            <td>{{ solicitud.departamento }}</td>
+                            <td>{{ solicitud.puesto }}</td>
+                            <td>{{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <span class="badge estado-{{ solicitud.estado }}">
+                                    {% if solicitud.estado == 'pendiente' %}
+                                        <i class="fa-solid fa-hourglass-end"></i> Pendiente
+                                    {% elif solicitud.estado == 'aprobado' %}
+                                        <i class="fa-solid fa-check-circle"></i> Aprobado
+                                    {% else %}
+                                        <i class="fa-solid fa-xmark-circle"></i> Rechazado
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="/admin/usuarios/solicitudregistro/{{ solicitud.id }}/change/" class="btn-small btn-edit">
+                                    <i class="fa-solid fa-edit"></i> Editar
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="total-registros">Total: <strong>{{ solicitudes.count }}</strong> solicitudes</p>
+        {% else %}
+            <div class="alerta-info">
+                <i class="fa-solid fa-info-circle"></i>
+                <p>No hay solicitudes de registro registradas.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <style>
+        .filtros-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filtros-form {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .filtro-grupo {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filtro-grupo label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .filtro-grupo select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .tabla-container {
+            background: white;
+            border-radius: 8px;
+            overflow-x: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tabla-datos {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .tabla-datos thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tabla-datos th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .tabla-datos td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tabla-datos tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .badge.estado-pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge.estado-aprobado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.estado-rechazado {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-edit {
+            background: #0066cc;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #004fa3;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #004fa3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .alerta-info {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            color: #004085;
+        }
+
+        .total-registros {
+            padding: 15px;
+            background: #f8f9fa;
+            text-align: right;
+            margin: 0;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+</div>
+{% endblock %}

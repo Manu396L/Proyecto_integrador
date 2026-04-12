@@ -159,10 +159,10 @@ function actualizarTabla() {
                 <td><span class="badge-sede ${sedeBadgeClass}">${sedeTexto}</span></td>
                 <td><span class="badge-dispositivo ${dispositivoBadgeClass}">${dispositivoTexto}</span></td>
                 <td class="acciones">
-                    <button class="btn-accion btn-editar" data-index="${index}">
+                    <button class="btn-accion btn-editar" data-id="${empleado.id}">
                         <i class="fa-solid fa-pen"></i> Editar
                     </button>
-                    <button class="btn-accion btn-eliminar" data-index="${index}">
+                    <button class="btn-accion btn-eliminar" data-id="${empleado.id}">
                         <i class="fa-solid fa-trash"></i> Eliminar
                     </button>
                 </td>
@@ -175,22 +175,22 @@ function actualizarTabla() {
         document.querySelectorAll('.btn-editar').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const index = parseInt(btn.getAttribute('data-index'));
-                editarEmpleado(index);
+                const empleadoId = parseInt(btn.getAttribute('data-id'));
+                editarEmpleado(empleadoId);
             });
         });
         
         document.querySelectorAll('.btn-eliminar').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const index = parseInt(btn.getAttribute('data-index'));
-                eliminarEmpleado(index);
+                const empleadoId = parseInt(btn.getAttribute('data-id'));
+                eliminarEmpleado(empleadoId);
             });
         });
     }
 }
 
-// Función para agregar/editar empleado
+// Función para guardar/editar empleado
 function guardarEmpleado(e) {
     e.preventDefault();
     
@@ -226,36 +226,74 @@ function guardarEmpleado(e) {
         credencial = huellaStatus.classList.contains('registrada') ? 'huella_registrada' : '';
     }
     
-    const nuevoEmpleado = {
+    const datosEmpleado = {
         id,
         nombre,
+        email: correo,
         cargo,
         area,
-        correo,
-        tipoSede,
-        nombreSede,
+        tipo_sede: tipoSede,
+        nombre_sede: nombreSede,
         dispositivo,
-        nivelSeguridad,
+        nivel_seguridad: nivelSeguridad,
         credencial,
         foto: fotoActual
     };
     
+    // Obtener token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                      getCookie('csrftoken');
+    
     if (editandoIndex !== null) {
-        // Actualizar empleado existente
-        empleados[editandoIndex] = nuevoEmpleado;
-        editandoIndex = null;
-        mostrarMensaje('Empleado actualizado correctamente');
+        // ACTUALIZAR empleado existente
+        const empleadoId = editandoIndex;
+        fetch(`/personal/api/personal/${empleadoId}/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(datosEmpleado)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarMensaje('Empleado actualizado correctamente');
+                limpiarFormulario();
+                cargarPersonal();
+            } else {
+                mostrarMensaje(`Error: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarMensaje('Error al actualizar el empleado', 'error');
+        });
     } else {
-        // Agregar nuevo empleado
-        empleados.push(nuevoEmpleado);
-        mostrarMensaje('Empleado registrado correctamente');
+        // CREAR nuevo empleado
+        fetch('/personal/api/personal/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(datosEmpleado)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarMensaje('Empleado registrado correctamente');
+                limpiarFormulario();
+                cargarPersonal();
+            } else {
+                mostrarMensaje(`Error: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarMensaje('Error al registrar el empleado', 'error');
+        });
     }
-    
-    // Limpiar formulario
-    limpiarFormulario();
-    
-    // Actualizar tabla
-    actualizarTabla();
 }
 
 // Función para mostrar mensaje
@@ -302,8 +340,13 @@ function limpiarFormulario() {
 }
 
 // Función para editar empleado
-function editarEmpleado(index) {
-    const empleado = empleados[index];
+function editarEmpleado(empleadoId) {
+    const empleado = empleados.find(e => e.id === empleadoId);
+    
+    if (!empleado) {
+        mostrarMensaje('Empleado no encontrado', 'error');
+        return;
+    }
     
     // Llenar formulario con datos existentes
     inputNombre.value = empleado.nombre;
@@ -335,7 +378,7 @@ function editarEmpleado(index) {
     }
     
     // Cambiar a modo edición
-    editandoIndex = index;
+    editandoIndex = empleadoId;
     btnCancelar.style.display = 'inline-flex';
     formTitle.textContent = 'Editar Empleado';
     
@@ -346,16 +389,41 @@ function editarEmpleado(index) {
 }
 
 // Función para eliminar empleado
-function eliminarEmpleado(index) {
+function eliminarEmpleado(empleadoId) {
     if (confirm('¿Está seguro de que desea eliminar este empleado?')) {
-        empleados.splice(index, 1);
-        actualizarTabla();
-        mostrarMensaje('Empleado eliminado correctamente');
+        const empleado = empleados.find(e => e.id === empleadoId);
         
-        // Si estábamos editando y eliminamos el mismo empleado, limpiar formulario
-        if (editandoIndex === index) {
-            limpiarFormulario();
+        if (!empleado) {
+            mostrarMensaje('Empleado no encontrado', 'error');
+            return;
         }
+        
+        // Obtener token CSRF
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                          getCookie('csrftoken');
+        
+        fetch(`/personal/api/personal/${empleadoId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarMensaje('Empleado eliminado correctamente');
+                cargarPersonal();
+                if (editandoIndex === empleadoId) {
+                    limpiarFormulario();
+                }
+            } else {
+                mostrarMensaje(`Error: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarMensaje('Error al eliminar el empleado', 'error');
+        });
     }
 }
 
@@ -751,6 +819,52 @@ function actualizarListado() {
     mostrarMensaje('Listado actualizado');
 }
 
+// Función para obtener token CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Función para cargar empleados desde la base de datos
+function cargarPersonal() {
+    fetch('/personal/api/personal/', {
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Convertir snake_case a camelCase y asegurar estructura correcta
+        empleados = data.map(p => ({
+            id: p.id || p.numero_documento,
+            nombre: p.nombre,
+            cargo: p.cargo || 'N/A',
+            area: p.area || 'ti',
+            correo: p.email,
+            tipoSede: p.tipo_sede || 'sede',
+            nombreSede: p.nombre_sede || 'Sede Central',
+            dispositivo: p.dispositivo || 'huella',
+            nivelSeguridad: p.nivel_seguridad || 'medio',
+            credencial: p.credencial || '',
+            foto: p.foto
+        }));
+        console.log('Personal cargado:', empleados);
+        actualizarTabla();
+    })
+    .catch(error => {
+        console.error('Error al cargar personal:', error);
+        mostrarMensaje('Error al cargar personal desde el servidor', 'error');
+    });
+}
+
 // Función para manejar el dropdown del menú de opciones
 function toggleDropdown(e) {
     e.stopPropagation();
@@ -849,35 +963,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Inicializar tabla con datos de ejemplo
-    empleados = [
-        {
-            id: 'EMP-Juan-123',
-            nombre: 'Juan Pérez',
-            cargo: 'Analista de Sistemas',
-            area: 'ti',
-            correo: 'juan.perez@biometrika.com',
-            tipoSede: 'sede',
-            nombreSede: 'Sede Central',
-            dispositivo: 'huella',
-            nivelSeguridad: 'alto',
-            credencial: 'huella_registrada',
-            foto: null
-        },
-        {
-            id: 'EMP-Maria-456',
-            nombre: 'María García',
-            cargo: 'Gerente de RH',
-            area: 'rh',
-            correo: 'maria.garcia@biometrika.com',
-            tipoSede: 'oficina',
-            nombreSede: 'Oficina Administrativa',
-            dispositivo: 'tarjeta',
-            nivelSeguridad: 'medio',
-            credencial: 'TARJ-789123',
-            foto: null
-        }
-    ];
-    
-    actualizarTabla();
+    // Cargar personal desde la base de datos
+    cargarPersonal();
 });
