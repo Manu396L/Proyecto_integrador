@@ -11,6 +11,10 @@ def lista_personal(request):
     personal = Persona.objects.all()
     return render(request, 'personal/lista.html', {'personal': personal})
 
+def test_upload(request):
+    """Página de prueba para upload de fotos"""
+    return render(request, 'personal/test_upload.html')
+
 @csrf_exempt
 @require_http_methods(["GET", "POST", "PUT", "DELETE"])
 def api_personal(request, persona_id=None):
@@ -56,12 +60,10 @@ def api_personal(request, persona_id=None):
     
     elif request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            
-            # Validar campos requeridos
-            email = data.get('email', '').strip() if data.get('email') else None
-            numero_documento = data.get('id', '').strip() if data.get('id') else None
-            nombre = data.get('nombre', '').strip() if data.get('nombre') else None
+            # Obtener datos del formulario (multipart/form-data)
+            email = request.POST.get('email', '').strip() if request.POST.get('email') else None
+            numero_documento = request.POST.get('id', '').strip() if request.POST.get('id') else None
+            nombre = request.POST.get('nombre', '').strip() if request.POST.get('nombre') else None
             
             if not numero_documento:
                 return JsonResponse({'success': False, 'error': 'Número de documento requerido'}, status=400)
@@ -76,23 +78,29 @@ def api_personal(request, persona_id=None):
             apellidos = ' '.join(nombres_list[1:]) if len(nombres_list) > 1 else nombres
             
             persona = Persona.objects.create(
-                tipo_documento=data.get('tipo_documento', 'CC'),
+                tipo_documento=request.POST.get('tipo_documento', 'CC'),
                 numero_documento=numero_documento,
                 nombres=nombres,
                 apellidos=apellidos,
-                tipo_persona=data.get('tipo_persona', 'EMP'),
+                tipo_persona=request.POST.get('tipo_persona', 'EMP'),
                 email=email,
-                telefono=data.get('telefono', '').strip(),
-                direccion=data.get('direccion', '').strip(),
-                cargo=data.get('cargo', '').strip(),
-                area=data.get('area'),
-                tipo_sede=data.get('tipo_sede', 'sede'),
-                nombre_sede=data.get('nombre_sede', 'Sede Central'),
-                dispositivo_biometrico=data.get('dispositivo', 'huella'),
-                credencial_biometrica=data.get('credencial', '').strip(),
-                nivel_seguridad=data.get('nivel_seguridad', 'medio'),
+                telefono=request.POST.get('telefono', '').strip(),
+                direccion=request.POST.get('direccion', '').strip(),
+                cargo=request.POST.get('cargo', '').strip(),
+                area=request.POST.get('area'),
+                tipo_sede=request.POST.get('tipo_sede', 'sede'),
+                nombre_sede=request.POST.get('nombre_sede', 'Sede Central'),
+                dispositivo_biometrico=request.POST.get('dispositivo', 'huella'),
+                credencial_biometrica=request.POST.get('credencial', '').strip(),
+                nivel_seguridad=request.POST.get('nivel_seguridad', 'medio'),
                 activo=True,
             )
+            
+            # Manejar foto si existe en FILES
+            if 'foto' in request.FILES:
+                persona.foto = request.FILES['foto']
+                persona.save()
+            
             return JsonResponse({'success': True, 'id': persona.id, 'message': 'Personal registrado correctamente'})
         except Exception as e:
             import traceback
@@ -102,10 +110,8 @@ def api_personal(request, persona_id=None):
     elif request.method == 'PUT':
         persona = get_object_or_404(Persona, id=persona_id)
         try:
-            data = json.loads(request.body)
-            
-            # Validar si el email ya existe en otra persona
-            email = data.get('email', persona.email).strip()
+            # Obtener datos del formulario (multipart/form-data)
+            email = request.POST.get('email', persona.email).strip()
             email_actual = persona.email.strip()
             
             # Solo validar si cambió el email
@@ -114,26 +120,36 @@ def api_personal(request, persona_id=None):
                     return JsonResponse({'success': False, 'error': 'Este email ya existe'}, status=400)
             
             # Actualizar campos
-            if 'nombre' in data:
-                nombres_apellidos = data.get('nombre', '').split()
+            if 'nombre' in request.POST:
+                nombres_apellidos = request.POST.get('nombre', '').split()
                 persona.nombres = nombres_apellidos[0] if nombres_apellidos else ''
                 persona.apellidos = ' '.join(nombres_apellidos[1:]) if len(nombres_apellidos) > 1 else ''
-            persona.numero_documento = data.get('numero_documento', persona.numero_documento)
+            persona.numero_documento = request.POST.get('numero_documento', persona.numero_documento)
             persona.email = email
-            persona.telefono = data.get('telefono', persona.telefono)
-            persona.tipo_persona = data.get('tipo_persona', persona.tipo_persona)
-            persona.direccion = data.get('direccion', persona.direccion)
-            persona.cargo = data.get('cargo', persona.cargo)
-            persona.area = data.get('area', persona.area)
-            persona.tipo_sede = data.get('tipo_sede', persona.tipo_sede)
-            persona.nombre_sede = data.get('nombre_sede', persona.nombre_sede)
-            persona.dispositivo_biometrico = data.get('dispositivo', persona.dispositivo_biometrico)
-            persona.credencial_biometrica = data.get('credencial', persona.credencial_biometrica)
-            persona.nivel_seguridad = data.get('nivel_seguridad', persona.nivel_seguridad)
-            persona.activo = data.get('activo', persona.activo)
+            persona.telefono = request.POST.get('telefono', persona.telefono)
+            persona.tipo_persona = request.POST.get('tipo_persona', persona.tipo_persona)
+            persona.direccion = request.POST.get('direccion', persona.direccion)
+            persona.cargo = request.POST.get('cargo', persona.cargo)
+            persona.area = request.POST.get('area', persona.area)
+            persona.tipo_sede = request.POST.get('tipo_sede', persona.tipo_sede)
+            persona.nombre_sede = request.POST.get('nombre_sede', persona.nombre_sede)
+            persona.dispositivo_biometrico = request.POST.get('dispositivo', persona.dispositivo_biometrico)
+            persona.credencial_biometrica = request.POST.get('credencial', persona.credencial_biometrica)
+            persona.nivel_seguridad = request.POST.get('nivel_seguridad', persona.nivel_seguridad)
+            persona.activo = request.POST.get('activo', persona.activo) in ['true', 'True', '1', 'on']
+            
+            # Manejar foto si existe en FILES
+            if 'foto' in request.FILES:
+                # Eliminar foto anterior si existe
+                if persona.foto:
+                    persona.foto.delete()
+                persona.foto = request.FILES['foto']
+            
             persona.save()
             return JsonResponse({'success': True, 'message': 'Personal actualizado correctamente'})
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
     
     elif request.method == 'DELETE':

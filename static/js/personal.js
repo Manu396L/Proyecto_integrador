@@ -226,19 +226,26 @@ function guardarEmpleado(e) {
         credencial = huellaStatus.classList.contains('registrada') ? 'huella_registrada' : '';
     }
     
-    const datosEmpleado = {
-        id,
-        nombre,
-        email: correo,
-        cargo,
-        area,
-        tipo_sede: tipoSede,
-        nombre_sede: nombreSede,
-        dispositivo,
-        nivel_seguridad: nivelSeguridad,
-        credencial,
-        foto: fotoActual
-    };
+    // Crear FormData para enviar archivos
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('nombre', nombre);
+    formData.append('email', correo);
+    formData.append('cargo', cargo);
+    formData.append('area', area);
+    formData.append('tipo_sede', tipoSede);
+    formData.append('nombre_sede', nombreSede);
+    formData.append('dispositivo', dispositivo);
+    formData.append('nivel_seguridad', nivelSeguridad);
+    formData.append('credencial', credencial);
+    
+    // Agregar foto si existe (objeto File del input)
+    if (inputFoto.files && inputFoto.files.length > 0) {
+        console.log('📸 Agregando foto al FormData:', inputFoto.files[0].name, inputFoto.files[0].size);
+        formData.append('foto', inputFoto.files[0]);
+    } else {
+        console.log('📸 No hay archivo seleccionado en el input');
+    }
     
     // Obtener token CSRF
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
@@ -247,13 +254,14 @@ function guardarEmpleado(e) {
     if (editandoIndex !== null) {
         // ACTUALIZAR empleado existente
         const empleadoId = editandoIndex;
+        console.log('✏️ Actualizando empleado ID:', empleadoId);
+        
         fetch(`/personal/api/personal/${empleadoId}/`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken
             },
-            body: JSON.stringify(datosEmpleado)
+            body: formData
         })
         .then(response => response.json())
         .then(data => {
@@ -271,13 +279,14 @@ function guardarEmpleado(e) {
         });
     } else {
         // CREAR nuevo empleado
+        console.log('✨ Creando nuevo empleado');
+        
         fetch('/personal/api/personal/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken
             },
-            body: JSON.stringify(datosEmpleado)
+            body: formData
         })
         .then(response => response.json())
         .then(data => {
@@ -325,6 +334,7 @@ function mostrarMensaje(mensaje, tipo = 'success') {
 // Función para limpiar formulario
 function limpiarFormulario() {
     formulario.reset();
+    inputFoto.value = ''; // Limpiar explícitamente el input de archivo
     fotoActual = null;
     fotoPreview.innerHTML = '<i class="fa-solid fa-user"></i><span>Sin foto</span>';
     fotoPreview.classList.remove('has-image');
@@ -887,13 +897,11 @@ document.addEventListener('DOMContentLoaded', function() {
     inputFoto.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                fotoActual = e.target.result;
-                fotoPreview.innerHTML = `<img src="${fotoActual}" alt="Foto del empleado">`;
-                fotoPreview.classList.add('has-image');
-            };
-            reader.readAsDataURL(file);
+            // Crear URL temporal para preview (más eficiente que DataURL)
+            const photoURL = URL.createObjectURL(file);
+            fotoActual = photoURL;
+            fotoPreview.innerHTML = `<img src="${photoURL}" alt="Foto del empleado">`;
+            fotoPreview.classList.add('has-image');
         }
     });
     

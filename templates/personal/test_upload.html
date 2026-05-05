@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Upload de Fotos - Personal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, button {
+            padding: 10px;
+            font-size: 14px;
+        }
+        input[type="file"] {
+            padding: 5px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .preview {
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+        }
+        .preview.show {
+            display: block;
+        }
+        .preview img {
+            max-width: 100%;
+            max-height: 300px;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        .message.show {
+            display: block;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Upload de Fotos - Personal</h1>
+    
+    <form id="testForm">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="fotoInput">Seleccionar Foto:</label>
+            <input type="file" id="fotoInput" accept="image/*" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="idInput">ID Empleado:</label>
+            <input type="text" id="idInput" placeholder="EMP-001" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="nombreInput">Nombre:</label>
+            <input type="text" id="nombreInput" placeholder="Juan Pérez" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="cargoInput">Cargo:</label>
+            <input type="text" id="cargoInput" placeholder="Analista" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="areaSelect">Área:</label>
+            <select id="areaSelect" required>
+                <option value="">Seleccionar...</option>
+                <option value="ti">TI</option>
+                <option value="rh">RH</option>
+                <option value="finanzas">Finanzas</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="emailInput">Email:</label>
+            <input type="email" id="emailInput" placeholder="usuario@biometrika.com" required>
+        </div>
+        
+        <button type="submit">Guardar Empleado</button>
+    </form>
+    
+    <div class="preview" id="preview"></div>
+    <div class="message" id="message"></div>
+
+    <script>
+        const fotoInput = document.getElementById('fotoInput');
+        const preview = document.getElementById('preview');
+        const message = document.getElementById('message');
+        const form = document.getElementById('testForm');
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Preview de la foto
+        fotoInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `
+                        <h3>Preview:</h3>
+                        <img src="${e.target.result}" alt="preview">
+                        <p>Archivo: ${file.name}</p>
+                        <p>Tamaño: ${(file.size / 1024).toFixed(2)} KB</p>
+                    `;
+                    preview.classList.add('show');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Envío del formulario
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('id', document.getElementById('idInput').value);
+            formData.append('nombre', document.getElementById('nombreInput').value);
+            formData.append('cargo', document.getElementById('cargoInput').value);
+            formData.append('area', document.getElementById('areaSelect').value);
+            formData.append('email', document.getElementById('emailInput').value);
+            formData.append('tipo_sede', 'sede');
+            formData.append('nombre_sede', 'Sede Central');
+            formData.append('dispositivo', 'huella');
+            formData.append('nivel_seguridad', 'medio');
+            formData.append('credencial', '');
+            
+            // Agregar foto
+            if (fotoInput.files && fotoInput.files[0]) {
+                console.log('Agregando archivo:', fotoInput.files[0].name);
+                formData.append('foto', fotoInput.files[0]);
+            }
+            
+            try {
+                console.log('Enviando FormData...');
+                const response = await fetch('/personal/api/personal/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                console.log('Response:', data);
+                
+                if (data.success) {
+                    showMessage(`✓ Empleado registrado: ${data.message}. ID: ${data.id}`, 'success');
+                    form.reset();
+                    preview.classList.remove('show');
+                } else {
+                    showMessage(`✗ Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage(`✗ Error al enviar: ${error.message}`, 'error');
+            }
+        });
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message show ${type}`;
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
