@@ -1,4 +1,4 @@
-/* static/css/style_personal.css - VERSIÓN CORREGIDA IGUAL A DISPOSITIVOS */
+/* static/css/style_personal.css - VERSIÓN COMPLETA Y LIMPIA */
 
 * {
     margin: 0;
@@ -14,9 +14,9 @@ body {
 
 /* ===== CONTENIDO PRINCIPAL - AJUSTADO PARA SIDEBAR ===== */
 .contenido {
-    margin-left: 250px;
-    padding: 20px 30px;
-    width: calc(100% - 250px);
+    margin-left: 50px;
+    padding: 0px 10px;
+    width: calc(100% - 200px);
 }
 
 /* Header */
@@ -336,6 +336,40 @@ legend {
     gap: 15px;
 }
 
+/* ===== BOTONES DE SELECCIÓN MÚLTIPLE ===== */
+.selection-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-selection {
+    background: #2c3e50;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-selection:hover {
+    background: #1abc9c;
+    transform: translateY(-1px);
+}
+
+.btn-selection.btn-danger {
+    background: #e74c3c;
+}
+
+.btn-selection.btn-danger:hover {
+    background: #c0392b;
+}
+
 /* ===== DROPDOWN ===== */
 .dropdown {
     position: relative;
@@ -460,6 +494,74 @@ td {
 
 tbody tr:hover {
     background: #f8f9fa;
+}
+
+/* ===== CHECKBOX EN TABLA ===== */
+.checkbox-cell {
+    width: 40px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.checkbox-cell input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #1abc9c;
+}
+
+#checkbox-seleccionar-todos {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #1abc9c;
+}
+
+/* ===== FOOTER DE SELECCIÓN ===== */
+.selection-footer {
+    background: #e8f4fc;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.selection-footer span {
+    font-weight: bold;
+    color: #1abc9c;
+    font-size: 16px;
+}
+
+.btn-selection-small {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+.btn-selection-small:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+/* Fila seleccionada */
+tr.seleccionado {
+    background-color: #e8f4fc !important;
+}
+
+tr.seleccionado:hover {
+    background-color: #d4eaf5 !important;
 }
 
 /* ===== BADGES ===== */
@@ -596,6 +698,159 @@ tbody tr:hover {
     border-radius: 8px;
 }
 
+/* ===== MÉTODO ADICIONAL ===== */
+.metodo-adicional {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    border: 1px solid #e2e8f0;
+}
+
+.adicional-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.adicional-header i {
+    color: #1abc9c;
+    font-size: 18px;
+}
+
+.adicional-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #2c3e50;
+    flex-wrap: wrap;
+}
+
+.adicional-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #1abc9c;
+}
+
+.adicional-label span {
+    font-size: 14px;
+}
+
+.adicional-label .helper-text {
+    font-size: 11px;
+    color: #7f8c8d;
+    font-weight: normal;
+}
+
+#contenedor_metodo_adicional {
+    margin-top: 15px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.adicional-status {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.adicional-status.registrado {
+    background: #d4edda;
+    color: #155724;
+}
+
+.adicional-status.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.adicional-status i {
+    font-size: 16px;
+}
+
+/* ===== BADGES PARA TABLA - MÉTODO ADICIONAL ===== */
+.metodos-adicionales {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.badge-metodo-adicional {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    background: #e8eaf6;
+    color: #3949ab;
+}
+
+.badge-metodo-adicional.vacio {
+    background: #f1f3f5;
+    color: #adb5bd;
+}
+
+.badge-metodo-adicional i {
+    font-size: 11px;
+}
+
+.nivel-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    margin-left: 4px;
+    font-weight: 600;
+}
+
+.nivel-bajo {
+    background: #d4edda;
+    color: #155724;
+}
+
+.nivel-medio {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.nivel-alto {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* ===== ESTILOS PARA CELDAS DE TABLA ===== */
+.foto-cell {
+    width: 50px;
+    text-align: center;
+}
+
+.id-cell {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.nombre-cell strong {
+    color: #2c3e50;
+}
+
+.metodo-adicional-cell {
+    min-width: 150px;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
     .contenido {
@@ -628,6 +883,15 @@ tbody tr:hover {
     .header-actions {
         flex-direction: column;
         align-items: flex-start;
+    }
+    
+    .selection-actions {
+        width: 100%;
+    }
+    
+    .btn-selection {
+        flex: 1;
+        justify-content: center;
     }
     
     .filter-section {

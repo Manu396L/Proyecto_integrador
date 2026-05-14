@@ -62,6 +62,9 @@ class Persona(models.Model):
     credencial_biometrica = models.CharField(max_length=200, blank=True)
     nivel_seguridad = models.CharField(max_length=20, choices=NIVEL_SEGURIDAD, default='medio')
     
+    # NUEVO CAMPO: Método de autenticación adicional
+    metodo_adicional = models.JSONField(null=True, blank=True, verbose_name='Método de Autenticación Adicional')
+    
     fecha_registro = models.DateTimeField(auto_now_add=True)
     activo = models.BooleanField(default=True)
     

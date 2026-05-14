@@ -29,6 +29,14 @@ def api_personal(request, persona_id=None):
                 'direccion': persona.direccion,
                 'foto': persona.foto.url if persona.foto else None,
                 'activo': persona.activo,
+                'cargo': persona.cargo,
+                'area': persona.area,
+                'tipo_sede': persona.tipo_sede,
+                'nombre_sede': persona.nombre_sede,
+                'dispositivo': persona.dispositivo_biometrico,
+                'nivel_seguridad': persona.nivel_seguridad,
+                'credencial': persona.credencial_biometrica,
+                'metodo_adicional': persona.metodo_adicional,  # <-- AGREGAR ESTA LÍNEA
             }
             return JsonResponse(data)
         else:
@@ -51,6 +59,7 @@ def api_personal(request, persona_id=None):
                     'dispositivo': persona.dispositivo_biometrico,
                     'nivel_seguridad': persona.nivel_seguridad,
                     'credencial': persona.credencial_biometrica,
+                    'metodo_adicional': persona.metodo_adicional,  # <-- AGREGAR ESTA LÍNEA
                 })
             return JsonResponse(data, safe=False)
     
@@ -58,7 +67,6 @@ def api_personal(request, persona_id=None):
         try:
             data = json.loads(request.body)
             
-            # Validar campos requeridos
             email = data.get('email', '').strip() if data.get('email') else None
             numero_documento = data.get('id', '').strip() if data.get('id') else None
             nombre = data.get('nombre', '').strip() if data.get('nombre') else None
@@ -70,7 +78,6 @@ def api_personal(request, persona_id=None):
             if not email:
                 return JsonResponse({'success': False, 'error': 'Email requerido'}, status=400)
             
-            # Dividir nombre en nombres y apellidos
             nombres_list = nombre.split()
             nombres = nombres_list[0] if nombres_list else ''
             apellidos = ' '.join(nombres_list[1:]) if len(nombres_list) > 1 else nombres
@@ -91,6 +98,7 @@ def api_personal(request, persona_id=None):
                 dispositivo_biometrico=data.get('dispositivo', 'huella'),
                 credencial_biometrica=data.get('credencial', '').strip(),
                 nivel_seguridad=data.get('nivel_seguridad', 'medio'),
+                metodo_adicional=data.get('metodo_adicional'),  # <-- AGREGAR ESTA LÍNEA
                 activo=True,
             )
             return JsonResponse({'success': True, 'id': persona.id, 'message': 'Personal registrado correctamente'})
@@ -104,16 +112,13 @@ def api_personal(request, persona_id=None):
         try:
             data = json.loads(request.body)
             
-            # Validar si el email ya existe en otra persona
             email = data.get('email', persona.email).strip()
             email_actual = persona.email.strip()
             
-            # Solo validar si cambió el email
             if email.lower() != email_actual.lower():
                 if Persona.objects.filter(email__iexact=email).exclude(id=persona_id).exists():
                     return JsonResponse({'success': False, 'error': 'Este email ya existe'}, status=400)
             
-            # Actualizar campos
             if 'nombre' in data:
                 nombres_apellidos = data.get('nombre', '').split()
                 persona.nombres = nombres_apellidos[0] if nombres_apellidos else ''
@@ -130,6 +135,7 @@ def api_personal(request, persona_id=None):
             persona.dispositivo_biometrico = data.get('dispositivo', persona.dispositivo_biometrico)
             persona.credencial_biometrica = data.get('credencial', persona.credencial_biometrica)
             persona.nivel_seguridad = data.get('nivel_seguridad', persona.nivel_seguridad)
+            persona.metodo_adicional = data.get('metodo_adicional')  # <-- AGREGAR ESTA LÍNEA
             persona.activo = data.get('activo', persona.activo)
             persona.save()
             return JsonResponse({'success': True, 'message': 'Personal actualizado correctamente'})

@@ -108,19 +108,20 @@
                 <fieldset>
                     <legend><i class="fa-solid fa-fingerprint"></i> Credenciales de Acceso</legend>
 
+                    <!-- Método Principal -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label><i class="fa-solid fa-microchip"></i> Tipo de Dispositivo: <span class="required">*</span></label>
+                            <label><i class="fa-solid fa-microchip"></i> Método Principal: <span class="required">*</span></label>
                             <select id="dispositivo_biometrico" required>
-                                <option value="" disabled selected>Seleccione dispositivo</option>
-                                <option value="huella">Lector de Huella Dactilar</option>
+                                <option value="" disabled selected>Seleccione método</option>
+                                <option value="huella">Huella Dactilar</option>
                                 <option value="tarjeta">Tarjeta de Acceso</option>
                                 <option value="pin">PIN</option>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label><i class="fa-solid fa-shield-halved"></i> Nivel de Seguridad: <span class="required">*</span></label>
+                            <label><i class="fa-solid fa-shield-halved"></i> Nivel de Seguridad Principal: <span class="required">*</span></label>
                             <select id="nivel_seguridad" required>
                                 <option value="" disabled selected>Seleccione nivel</option>
                                 <option value="bajo">Bajo</option>
@@ -130,6 +131,57 @@
                         </div>
                     </div>
 
+                    <!-- Método Adicional (Opcional) -->
+                    <div class="metodo-adicional">
+                        <div class="adicional-header">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <label class="adicional-label">
+                                <input type="checkbox" id="toggle_metodo_adicional">
+                                <span>Agregar método de autenticación adicional (opcional)</span>
+                                <small class="helper-text">Útil para dispositivos compatibles con múltiples métodos de ingreso</small>
+                            </label>
+                        </div>
+
+                        <div id="contenedor_metodo_adicional" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label><i class="fa-solid fa-microchip"></i> Método Adicional:</label>
+                                    <select id="tipo_metodo_adicional">
+                                        <option value="" disabled selected>Seleccione método adicional</option>
+                                        <option value="huella">Huella Dactilar</option>
+                                        <option value="tarjeta">Tarjeta de Acceso</option>
+                                        <option value="pin">PIN</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label><i class="fa-solid fa-shield-halved"></i> Nivel de Seguridad Adicional:</label>
+                                    <select id="nivel_seguridad_adicional">
+                                        <option value="" disabled selected>Seleccione nivel</option>
+                                        <option value="bajo">Bajo</option>
+                                        <option value="medio">Medio</option>
+                                        <option value="alto">Alto</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="opcion-credencial-adicional" style="display: none;">
+                                <label><i class="fa-solid fa-credit-card"></i> Credencial Adicional:</label>
+                                <div class="credencial-options">
+                                    <input type="text" id="credencial_adicional" placeholder="Número de tarjeta o PIN" class="input-credencial" readonly>
+                                    <button type="button" class="btn-credencial" id="btn-generar-adicional">
+                                        <i class="fa-solid fa-barcode"></i> Generar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="adicional-status" id="adicional-status">
+                                <i class="fa-solid fa-info-circle"></i> Método adicional no configurado
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección de credenciales del método principal -->
                     <div id="seccion-credenciales" style="display: none;">
                         <div class="form-group" id="opcion-huella" style="display: none;">
                             <label><i class="fa-solid fa-fingerprint"></i> Registro de Huella:</label>
@@ -184,6 +236,19 @@
             <div class="header-actions">
                 <h2><i class="fa-solid fa-list-check"></i> Empleados Registrados</h2>
                 
+                <!-- Botones de selección múltiple -->
+                <div class="selection-actions">
+                    <button class="btn-selection" onclick="seleccionarTodos()">
+                        <i class="fa-solid fa-check-double"></i> Seleccionar Todos
+                    </button>
+                    <button class="btn-selection" onclick="deseleccionarTodos()">
+                        <i class="fa-solid fa-square"></i> Deseleccionar Todos
+                    </button>
+                    <button class="btn-selection btn-danger" onclick="eliminarSeleccionados()">
+                        <i class="fa-solid fa-trash-can"></i> Eliminar Seleccionados
+                    </button>
+                </div>
+
                 <div class="dropdown">
                     <button class="dropdown-toggle" id="dropdownMenuButton">
                         <i class="fa-solid fa-ellipsis-vertical"></i> Opciones
@@ -222,13 +287,17 @@
                 <table id="tablaEmpleados">
                     <thead>
                         <tr>
+                            <th style="width: 40px;">
+                                <input type="checkbox" id="checkbox-seleccionar-todos" onchange="toggleSeleccionarTodos(this)">
+                            </th>
                             <th>Foto</th>
                             <th>ID</th>
                             <th>Nombre</th>
                             <th>Cargo</th>
                             <th>Área</th>
                             <th>Sede</th>
-                            <th>Dispositivo</th>
+                            <th>Método acceso</th>
+                            <th>Método Adicional</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -238,6 +307,13 @@
                 </table>
             </div>
             
+            <div class="selection-footer" id="selection-footer" style="display: none;">
+                <span id="contador-seleccionados">0</span> empleado(s) seleccionado(s)
+                <button class="btn-selection-small btn-danger" onclick="eliminarSeleccionados()">
+                    <i class="fa-solid fa-trash-can"></i> Eliminar
+                </button>
+            </div>
+
             <div id="estado-vacio" class="empty-state" style="display: none;">
                 <i class="fa-solid fa-users-slash"></i>
                 <p>No hay empleados registrados aún</p>

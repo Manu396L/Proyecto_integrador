@@ -6,61 +6,63 @@
 
 <div class="contenido">
     <header>
-        <h1><i class="fa-solid fa-map-location-dot"></i> Panel de Gestión de Ubicaciones</h1>
-        <p>Utiliza este formulario para registrar nuevas sedes, oficinas y áreas de acceso.</p>
+        <h1><i class="fa-solid fa-map-location-dot"></i> Gestión de Sedes y Áreas</h1>
+        <p>Administre las sedes, oficinas y áreas de acceso del sistema</p>
     </header>
 
     <div class="main-container">
-        <!-- Panel para agregar ubicaciones -->
+        <!-- Panel para agregar/editar ubicaciones -->
         <div class="add-panel">
-            <h2><i class="fa-solid fa-plus-circle"></i> Agregar Ubicación</h2>
+            <h2><i class="fa-solid fa-plus-circle"></i> <span id="form-title">Nueva Ubicación</span></h2>
             
             <div class="mensaje-exito" id="mensaje-exito">
                 <i class="fa-solid fa-check"></i>
-                La ubicación ha sido registrada correctamente.
+                <span id="mensaje-texto">La ubicación ha sido registrada correctamente.</span>
             </div>
 
             <form id="formularioUbicacion">
                 {% csrf_token %}
                 <fieldset>
-                    <legend><i class="fa-solid fa-building"></i> Información de la Sede</legend>
+                    <legend><i class="fa-solid fa-building"></i> Información de la Ubicación</legend>
                     
                     <div class="form-group">
                         <label for="tipo_ubicacion"><i class="fa-solid fa-layer-group"></i> Tipo de Ubicación: <span class="required">*</span></label>
                         <select id="tipo_ubicacion" name="tipo_ubicacion" required>
                             <option value="" disabled selected>Seleccione un tipo</option>
                             <option value="sede">Sede (Edificio Principal)</option>
-                            <option value="oficina">Oficina (Piso/Ala)</option>
-                            <option value="area">Área Específica (Sala/Cuarto)</option>
+                            <option value="area">Área Específica (Sala/Cuarto/Oficina)</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="nombre_sede"><i class="fa-solid fa-signature"></i> Nombre de la Ubicación: <span class="required">*</span></label>
-                        <input type="text" id="nombre_sede" name="nombre_sede" placeholder="Ej: Sede Central" required>
+                        <label for="nombre_sede"><i class="fa-solid fa-signature"></i> Nombre: <span class="required">*</span></label>
+                        <input type="text" id="nombre_sede" name="nombre_sede" placeholder="Ej: Sede Central / Sala de Servidores" required>
+                    </div>
+
+                    <div class="form-group" id="grupo-sede" style="display: none;">
+                        <label for="sede_padre"><i class="fa-solid fa-building"></i> Sede Principal:</label>
+                        <select id="sede_padre" name="sede_padre">
+                            <option value="" disabled selected>Seleccione una sede</option>
+                        </select>
+                        <small class="helper-text">Seleccione la sede a la que pertenece esta área</small>
                     </div>
 
                     <div class="form-group">
-                        <label for="codigo_unico"><i class="fa-solid fa-barcode"></i> Código Único (ID): <span class="required">*</span></label>
-                        <input type="text" id="codigo_unico" name="codigo_unico" placeholder="Ej: WAN-001" required>
+                        <label for="codigo_unico"><i class="fa-solid fa-barcode"></i> Código Único: <span class="required">*</span></label>
+                        <input type="text" id="codigo_unico" name="codigo_unico" placeholder="Ej: SED-001 / ARE-001" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="direccion"><i class="fa-solid fa-location-dot"></i> Dirección Completa:</label>
+                        <label for="direccion"><i class="fa-solid fa-location-dot"></i> Dirección:</label>
                         <textarea id="direccion" name="direccion" rows="2" placeholder="Calle, número, ciudad"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="descripcion"><i class="fa-solid fa-align-left"></i> Descripción Adicional:</label>
-                        <textarea id="descripcion" name="descripcion" rows="2" placeholder="Detalles adicionales"></textarea>
                     </div>
                 </fieldset>
 
                 <fieldset>
-                    <legend><i class="fa-solid fa-fingerprint"></i> Configuración de Seguridad Biométrica</legend>
+                    <legend><i class="fa-solid fa-fingerprint"></i> Configuración de Seguridad</legend>
 
                     <div class="form-group">
-                        <label for="dispositivo_biometrico"><i class="fa-solid fa-microchip"></i> Tipo de Dispositivo Biométrico:</label>
+                        <label for="dispositivo_biometrico"><i class="fa-solid fa-microchip"></i> Dispositivo Biométrico:</label>
                         <select id="dispositivo_biometrico" name="dispositivo_biometrico">
                             <option value="huella">Lector de Huella Dactilar</option>
                             <option value="Tarjeta">Tarjeta de Acceso</option>
@@ -71,16 +73,29 @@
                     <div class="form-group">
                         <label for="nivel_seguridad"><i class="fa-solid fa-shield-halved"></i> Nivel de Seguridad:</label>
                         <select id="nivel_seguridad" name="nivel_seguridad">
-                            <option value="bajo" selected>Bajo</option>
+                            <option value="bajo">Bajo</option>
                             <option value="medio">Medio</option>
                             <option value="alto">Alto</option>
                         </select>
                     </div>
+
+                    <div class="form-group" id="grupo-piso" style="display: none;">
+                        <label for="piso"><i class="fa-solid fa-layer-group"></i> Piso/Número:</label>
+                        <input type="number" id="piso" name="piso" placeholder="Ej: 1, 2, 3" value="1">
+                    </div>
                 </fieldset>
 
-                <button type="submit" class="btn" id="btn-guardar">
-                    <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
-                </button>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success" id="btn-guardar">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btn-cancelar" style="display: none;">
+                        <i class="fa-solid fa-times"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn btn-info" id="btn-nuevo">
+                        <i class="fa-solid fa-plus"></i> Nuevo
+                    </button>
+                </div>
             </form>
         </div>
         
@@ -88,40 +103,62 @@
         <div class="list-panel">
             <div class="header-actions">
                 <h2><i class="fa-solid fa-list-check"></i> Ubicaciones Registradas</h2>
-                
+
+                <!-- Botones de selección múltiple -->
+                <div class="selection-actions">
+                    <button class="btn-selection" onclick="seleccionarTodos()">
+                        <i class="fa-solid fa-check-double"></i> Seleccionar Todos
+                    </button>
+                    <button class="btn-selection" onclick="deseleccionarTodos()">
+                        <i class="fa-solid fa-square"></i> Deseleccionar Todos
+                    </button>
+                    <button class="btn-selection btn-danger" onclick="eliminarSeleccionados()">
+                        <i class="fa-solid fa-trash-can"></i> Eliminar Seleccionados
+                    </button>
+                </div>
+
                 <div class="dropdown">
                     <button class="dropdown-toggle" id="dropdownMenuButton">
                         <i class="fa-solid fa-ellipsis-vertical"></i> Opciones
                     </button>
                     <div class="dropdown-menu" id="dropdownMenu">
-                        <a class="dropdown-item" id="opcion-filtros">Mostrar/Ocultar Filtros</a>
-                        <a class="dropdown-item" id="opcion-modificar-todo">Modificar Todo</a>
-                        <a class="dropdown-item" id="opcion-eliminar-todo">Eliminar Todo</a>
+                        <a class="dropdown-item" id="opcion-filtros"><i class="fa-solid fa-filter"></i> Mostrar/Ocultar Filtros</a>
+                        <a class="dropdown-item" id="opcion-refresh"><i class="fa-solid fa-rotate"></i> Actualizar</a>
                     </div>
                 </div>
             </div>
             
             <div class="filter-section" id="filtros" style="display: none;">
-                <input type="text" id="filtro-nombre" placeholder="Filtrar por nombre">
+                <input type="text" id="filtro-nombre" placeholder="Buscar por nombre o código">
                 <select id="filtro-tipo">
                     <option value="">Todos los tipos</option>
                     <option value="sede">Sede</option>
-                    <option value="oficina">Oficina</option>
                     <option value="area">Área</option>
                 </select>
                 <select id="filtro-dispositivo">
                     <option value="">Todos los dispositivos</option>
-                    <option value="huella">Lector de Huella</option>
-                    <option value="Tarjeta">Tarjeta de Acceso</option>
+                    <option value="huella">Huella</option>
+                    <option value="Tarjeta">Tarjeta</option>
                     <option value="PIN">PIN</option>
                 </select>
-                <button id="btn-limpiar-filtros" class="btn-accion">Limpiar Filtros</button>
+                <select id="filtro-seguridad">
+                    <option value="">Todos los niveles</option>
+                    <option value="bajo">Bajo</option>
+                    <option value="medio">Medio</option>
+                    <option value="alto">Alto</option>
+                </select>
+                <button id="btn-limpiar-filtros" class="btn-accion">
+                    <i class="fa-solid fa-broom"></i> Limpiar
+                </button>
             </div>
             
             <div class="tabla-container">
                 <table id="tablaUbicaciones">
                     <thead>
                         <tr>
+                            <th style="width: 40px;">
+                                <input type="checkbox" id="checkbox-seleccionar-todos" onchange="toggleSeleccionarTodos(this)">
+                            </th>
                             <th>Código</th>
                             <th>Nombre</th>
                             <th>Tipo</th>
@@ -131,15 +168,22 @@
                         </tr>
                     </thead>
                     <tbody id="cuerpoTabla">
-                        <!-- Se carga dinámicamente desde JavaScript -->
+                        <!-- Los datos se cargan dinámicamente con JavaScript -->
                     </tbody>
                 </table>
             </div>
             
+            <div class="selection-footer" id="selection-footer" style="display: none;">
+                <span id="contador-seleccionados">0</span> ubicación(es) seleccionada(s)
+                <button class="btn-selection-small btn-danger" onclick="eliminarSeleccionados()">
+                    <i class="fa-solid fa-trash-can"></i> Eliminar
+                </button>
+            </div>
+
             <div id="estado-vacio" class="empty-state" style="display: none;">
                 <i class="fa-solid fa-inbox"></i>
                 <p>No hay ubicaciones registradas aún</p>
-                <button class="btn" id="btn-agregar-primero">
+                <button class="btn btn-success" id="btn-agregar-primero">
                     <i class="fa-solid fa-plus"></i> Agregar Primera Ubicación
                 </button>
             </div>

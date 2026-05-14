@@ -17,7 +17,6 @@ def api_crear_sede(request):
         try:
             data = json.loads(request.body)
             
-            # Validar campos requeridos
             nombre = data.get('nombre', '').strip()
             direccion = data.get('direccion', '').strip() or 'No especificada'
             ciudad = data.get('ciudad', '').strip() or 'N/A'
@@ -30,7 +29,6 @@ def api_crear_sede(request):
             if not email:
                 return JsonResponse({'success': False, 'message': 'Email requerido'}, status=400)
             
-            # Crear sede
             sede = Sede.objects.create(
                 nombre=nombre,
                 direccion=direccion,
@@ -64,7 +62,6 @@ def api_crear_area(request):
             data = json.loads(request.body)
             print(f"📥 Datos recibidos: {data}")
             
-            # Obtener y validar campos
             sede_id = data.get('sede_id')
             nombre = data.get('nombre', '').strip()
             piso = data.get('piso', 1)
@@ -72,23 +69,19 @@ def api_crear_area(request):
             dispositivo = data.get('dispositivo', 'huella')
             nivel_seguridad = data.get('nivel_seguridad', 'bajo')
             
-            # Validaciones
             if not sede_id or not nombre:
                 return JsonResponse({'success': False, 'message': 'Faltan campos requeridos'}, status=400)
             
-            # Limpiar nivel_seguridad
             if isinstance(nivel_seguridad, str):
                 nivel_seguridad = nivel_seguridad.strip().lower()
             if nivel_seguridad not in ['bajo', 'medio', 'alto']:
                 nivel_seguridad = 'bajo'
             
-            # Obtener sede
             try:
                 sede = Sede.objects.get(id=sede_id)
             except Sede.DoesNotExist:
                 return JsonResponse({'success': False, 'message': 'Sede no encontrada'}, status=404)
             
-            # Crear área
             area = Area.objects.create(
                 sede=sede,
                 nombre=nombre,
@@ -137,7 +130,6 @@ def api_sedes(request):
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     
     elif request.method == 'POST':
-        # Redirigir a api_crear_sede
         return api_crear_sede(request)
     
     return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
@@ -166,7 +158,6 @@ def api_areas(request):
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     
     elif request.method == 'POST':
-        # Redirigir a api_crear_area
         return api_crear_area(request)
     
     return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
@@ -195,7 +186,6 @@ def api_actualizar_sede(request, sede_id):
             sede = Sede.objects.get(id=sede_id)
             data = json.loads(request.body)
             
-            # Actualizar campos
             sede.nombre = data.get('nombre', sede.nombre).strip()
             sede.direccion = data.get('direccion', sede.direccion).strip()
             sede.ciudad = data.get('ciudad', sede.ciudad).strip()
@@ -250,20 +240,17 @@ def api_actualizar_area(request, area_id):
             area = Area.objects.get(id=area_id)
             data = json.loads(request.body)
             
-            # Actualizar campos
             area.nombre = data.get('nombre', area.nombre).strip()
             area.descripcion = data.get('descripcion', area.descripcion).strip()
             area.piso = int(data.get('piso', area.piso))
             area.codigo_acceso = data.get('codigo_acceso', area.codigo_acceso).strip()
             
-            # Actualizar dispositivo si se proporciona
             dispositivo = data.get('dispositivo')
             if dispositivo:
                 valid_devices = ['huella', 'Tarjeta', 'PIN']
                 if dispositivo in valid_devices:
                     area.dispositivo_biometrico = dispositivo
             
-            # Validar y actualizar nivel de seguridad
             nivel_seguridad = data.get('nivel_seguridad') or area.nivel_seguridad
             if nivel_seguridad and isinstance(nivel_seguridad, str):
                 nivel_seguridad = nivel_seguridad.strip().lower()
@@ -271,13 +258,8 @@ def api_actualizar_area(request, area_id):
             valid_levels = ['bajo', 'medio', 'alto']
             if nivel_seguridad in valid_levels:
                 area.nivel_seguridad = nivel_seguridad
-                print(f"✅ Actualizando nivel_seguridad a: {nivel_seguridad}")
-            else:
-                print(f"⚠️ Nivel inválido: {nivel_seguridad}, manteniendo: {area.nivel_seguridad}")
             
             area.save()
-            
-            print(f"✅ Área actualizada: {area.id} - Nivel: {area.nivel_seguridad}")
             
             return JsonResponse({
                 'success': True,
