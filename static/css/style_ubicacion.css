@@ -13,9 +13,9 @@ body {
 
 /* ===== CONTENIDO PRINCIPAL - AJUSTADO PARA SIDEBAR ===== */
 .contenido {
-    margin-left: 250px;
-    padding: 20px;
-    width: calc(100% - 250px);
+    margin-left: -3px;
+    padding: -5px;
+    width: calc(100% - -1px);
 }
 
 /* Ocultar elementos duplicados */

@@ -5,7 +5,6 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/style_dispositivos.css' %}">
 
-<!-- Quitamos el <main> y <header> duplicados, usamos el contenido directamente -->
 <div class="dispositivos-container">
     <header class="dispositivos-header">
         <h1><i class="fa-solid fa-microchip"></i> Gestión de Dispositivos Biométricos</h1>
@@ -110,14 +109,25 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="tipo_dispositivo"><i class="fa-solid fa-fingerprint"></i> Tipo de Dispositivo:</label>
+                            <label for="tipo_dispositivo"><i class="fa-solid fa-fingerprint"></i> Tipo de Autenticación:</label>
                             <select id="tipo_dispositivo" name="tipo_dispositivo">
-                                <option value="huella">Lector de Huella</option>
-                                <option value="tarjeta">Lector de Tarjeta</option>
-                                <option value="facial">Reconocimiento Facial</option>
-                                <option value="iris">Escáner de Iris</option>
-                                <option value="multi">Multibiométrico</option>
+                                <option value="pin">Solo PIN</option>
+                                <option value="huella">Solo Huella Digital</option>
+                                <option value="tarjeta">Solo Tarjeta RFID</option>
+                                <option value="pin_huella">PIN + Huella</option>
+                                <option value="pin_tarjeta">PIN + Tarjeta</option>
+                                <option value="huella_tarjeta">Huella + Tarjeta</option>
                             </select>
+                            <small class="form-text text-muted">Seleccione el métodode autenticación</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="modelo_dispositivo"><i class="fa-solid fa-microchip"></i> Modelo del Dispositivo:</label>
+                            <select id="modelo_dispositivo" name="modelo_dispositivo">
+                                <option value="reloj_ip65">Biometrico con acceso por Huella – Reloj – IP – IP65</option>
+                                <option value="molinete_zk">Molinete Biométrico ZK TS2022</option>
+                            </select>
+                            <small class="form-text text-muted">Seleccione el modelo del dispositivo</small>
                         </div>
                     </div>
 
@@ -145,8 +155,21 @@
         <div class="list-panel">
             <div class="header-actions">
                 <h2><i class="fa-solid fa-list-check"></i> Dispositivos Registrados</h2>
-                
-                <!-- Menú desplegable de Acceso Rápido -->
+
+                <!-- Botones de selección múltiple -->
+                <div class="selection-actions">
+                    <button class="btn-selection" onclick="seleccionarTodos()">
+                        <i class="fa-solid fa-check-double"></i> Seleccionar Todos
+                    </button>
+                    <button class="btn-selection" onclick="deseleccionarTodos()">
+                        <i class="fa-solid fa-square"></i> Deseleccionar Todos
+                    </button>
+                    <button class="btn-selection btn-danger" onclick="eliminarSeleccionados()">
+                        <i class="fa-solid fa-trash-can"></i> Eliminar Seleccionados
+                    </button>
+                </div>
+
+                <!-- Menús desplegables -->
                 <div class="dropdown-container">
                     <div class="dropdown-group">
                         <button class="dropdown-toggle" onclick="toggleDropdown('menu-principal')">
@@ -165,9 +188,9 @@
                             <i class="fa-solid fa-microchip"></i> Dispositivo
                         </button>
                         <div class="dropdown-menu" id="menu-dispositivo">
-                            <a class="dropdown-item" onclick="leerInformacion()"><i class="fa-solid fa-download"></i> Leer Información</a>
+                            <a class="dropdown-item" onclick="leerInformacionSeleccionado()"><i class="fa-solid fa-download"></i> Leer Información</a>
                             <a class="dropdown-item" onclick="enrolamientoRemoto()"><i class="fa-solid fa-user-plus"></i> Enrolamiento Remoto</a>
-                            <a class="dropdown-item" onclick="configurarEnrolamiento()"><i class="fa-solid fa-cog"></i> Configuración de Enrolamiento</a>
+                            <a class="dropdown-item" onclick="configurarEnrolamiento()"><i class="fa-solid fa-cog"></i> Configurar Enrolamiento</a>
                         </div>
                     </div>
 
@@ -178,9 +201,10 @@
                         <div class="dropdown-menu" id="menu-mantenimiento">
                             <a class="dropdown-item" onclick="reiniciarDispositivo()"><i class="fa-solid fa-rotate"></i> Reiniciar</a>
                             <a class="dropdown-item" onclick="actualizarFirmware()"><i class="fa-solid fa-arrow-up"></i> Actualizar Firmware</a>
-                            <a class="dropdown-item" onclick="descargarInformacion()"><i class="fa-solid fa-download"></i> Descargar Información</a>
-                            <a class="dropdown-item" onclick="exportarInformacion()"><i class="fa-solid fa-file-export"></i> Exportar (CSV)</a>
-                            <a class="dropdown-item" onclick="importarInformacion()"><i class="fa-solid fa-file-import"></i> Importar (CSV)</a>
+                            <a class="dropdown-item" onclick="cargarModelosManual()"><i class="fa-solid fa-upload"></i> Cargar Modelos</a>
+                            <a class="dropdown-item" onclick="descargarInformacionSeleccionado()"><i class="fa-solid fa-download"></i> Descargar Info</a>
+                            <a class="dropdown-item" onclick="exportarInformacion()"><i class="fa-solid fa-file-export"></i> Exportar CSV</a>
+                            <a class="dropdown-item" onclick="importarInformacion()"><i class="fa-solid fa-file-import"></i> Importar CSV</a>
                         </div>
                     </div>
                 </div>
@@ -214,12 +238,16 @@
                 <table id="tablaDispositivos">
                     <thead>
                         <tr>
+                            <th style="width: 40px;">
+                                <input type="checkbox" id="checkbox-seleccionar-todos" onchange="toggleSeleccionarTodos(this)">
+                            </th>
                             <th>Nombre</th>
                             <th>N° Serie</th>
                             <th>IP</th>
                             <th>Área</th>
                             <th>Tipo Sede</th>
-                            <th>Tipo</th>
+                            <th>Modelo</th>
+                            <th>Autenticación</th>
                             <th>Estado</th>
                             <th>Última Conexión</th>
                             <th>Acciones</th>
@@ -228,43 +256,54 @@
                     <tbody id="cuerpoTabla">
                         {% for dispositivo in dispositivos %}
                         <tr data-id="{{ dispositivo.id }}">
+                            <td class="checkbox-cell">
+                                <input type="checkbox" class="checkbox-dispositivo" data-id="{{ dispositivo.id }}" data-nombre="{{ dispositivo.nombre }}" onchange="actualizarContadorSeleccionados()">
+                            </td>
                             <td><strong>{{ dispositivo.nombre }}</strong></td>
                             <td>{{ dispositivo.numero_serie }}</td>
                             <td>{{ dispositivo.direccion_ip }}</td>
                             <td>{{ dispositivo.area }}</td>
-                            <td>{{ dispositivo.tipo_sede }}</td>
+                            <td>{{ dispositivo.get_tipo_sede_display }}</td>
                             <td>
-                                <span class="badge tipo-dispositivo-{{ dispositivo.tipo_dispositivo }}">
-                                    {% if dispositivo.tipo_dispositivo == 'huella' %}
+                                <span class="badge-modelo">
+                                    <i class="fa-solid fa-microchip"></i>
+                                    {% if dispositivo.modelo_dispositivo == 'reloj_ip65' %}
+                                        Reloj IP65
+                                    {% else %}
+                                        Molinete ZK TS2022
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge-tipo">
+                                    {% if dispositivo.tipo_dispositivo == 'pin' %}
+                                        <i class="fa-solid fa-keyboard"></i> PIN
+                                    {% elif dispositivo.tipo_dispositivo == 'huella' %}
                                         <i class="fa-solid fa-fingerprint"></i> Huella
                                     {% elif dispositivo.tipo_dispositivo == 'tarjeta' %}
                                         <i class="fa-solid fa-credit-card"></i> Tarjeta
-                                    {% elif dispositivo.tipo_dispositivo == 'facial' %}
-                                        <i class="fa-solid fa-face-smile"></i> Facial
-                                    {% elif dispositivo.tipo_dispositivo == 'iris' %}
-                                        <i class="fa-solid fa-eye"></i> Iris
-                                    {% else %}
-                                        <i class="fa-solid fa-microchip"></i> Multi
+                                    {% elif dispositivo.tipo_dispositivo == 'pin_huella' %}
+                                        <i class="fa-solid fa-keyboard"></i> + <i class="fa-solid fa-fingerprint"></i> PIN+Huella
+                                    {% elif dispositivo.tipo_dispositivo == 'pin_tarjeta' %}
+                                        <i class="fa-solid fa-keyboard"></i> + <i class="fa-solid fa-credit-card"></i> PIN+Tarjeta
+                                    {% elif dispositivo.tipo_dispositivo == 'huella_tarjeta' %}
+                                        <i class="fa-solid fa-fingerprint"></i> + <i class="fa-solid fa-credit-card"></i> Huella+Tarjeta
                                     {% endif %}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge estado-{{ dispositivo.estado }}">
-                                    {% if dispositivo.estado == 'activo' %}
-                                        <i class="fa-solid fa-check-circle"></i> Activo
-                                    {% elif dispositivo.estado == 'pausado' %}
-                                        <i class="fa-solid fa-pause-circle"></i> Pausado
-                                    {% elif dispositivo.estado == 'error' %}
-                                        <i class="fa-solid fa-xmark-circle"></i> Error
-                                    {% elif dispositivo.estado == 'sin_conexion' %}
-                                        <i class="fa-solid fa-wifi-slash"></i> Sin conexión
-                                    {% else %}
-                                        <i class="fa-solid fa-power-off"></i> Apagado
-                                    {% endif %}
+                                <span class="badge-estado {% if dispositivo.estado == 'activo' %}badge-activo{% elif dispositivo.estado == 'pausado' %}badge-pausado{% elif dispositivo.estado == 'error' %}badge-error{% else %}badge-sin_conexion{% endif %}">
+                                    <i class="fa-solid 
+                                        {% if dispositivo.estado == 'activo' %}fa-check-circle
+                                        {% elif dispositivo.estado == 'pausado' %}fa-pause-circle
+                                        {% elif dispositivo.estado == 'error' %}fa-exclamation-circle
+                                        {% elif dispositivo.estado == 'sin_conexion' %}fa-wifi
+                                        {% else %}fa-power-off{% endif %}"></i>
+                                    {{ dispositivo.get_estado_display }}
                                 </span>
                             </td>
                             <td>{{ dispositivo.ultima_conexion|date:"d/m/Y H:i"|default:"Nunca" }}</td>
-                            <td>
+                            <td class="acciones">
                                 <button class="btn-accion btn-editar" onclick="editarDispositivo({{ dispositivo.id }})">
                                     <i class="fa-solid fa-pen"></i> Editar
                                 </button>
@@ -275,7 +314,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="9" style="text-align: center; padding: 40px;">
+                            <td colspan="11" style="text-align: center; padding: 40px;">
                                 <i class="fa-solid fa-inbox"></i>
                                 <p>No hay dispositivos registrados</p>
                             </td>
@@ -285,14 +324,20 @@
                 </table>
             </div>
             
+            <div class="selection-footer" id="selection-footer" style="display: none;">
+                <span id="contador-seleccionados">0</span> dispositivo(s) seleccionado(s)
+                <button class="btn-selection-small btn-danger" onclick="eliminarSeleccionados()">
+                    <i class="fa-solid fa-trash-can"></i> Eliminar
+                </button>
+            </div>
+
             <div style="padding: 15px; background: #f8f9fa; text-align: right; border-top: 1px solid #dee2e6;">
                 Total: <strong>{{ dispositivos.count }}</strong> dispositivos | 
-                <span style="color: #28a745; font-weight: 600;"><i class="fa-solid fa-check-circle"></i> {{ total_activos }} activos</span> | 
-                <span style="color: #ffc107; font-weight: 600;"><i class="fa-solid fa-pause-circle"></i> {{ total_pausados }} pausados</span> | 
-                <span style="color: #dc3545; font-weight: 600;"><i class="fa-solid fa-xmark-circle"></i> {{ total_error }} con error</span>
+                <span style="color: #28a745;"><i class="fa-solid fa-check-circle"></i> Activos: {{ total_activos }}</span> | 
+                <span style="color: #ffc107;"><i class="fa-solid fa-pause-circle"></i> Pausados: {{ total_pausados }}</span> | 
+                <span style="color: #dc3545;"><i class="fa-solid fa-exclamation-circle"></i> Error: {{ total_error }}</span>
             </div>
             
-            <!-- Estado vacío -->
             <div id="estado-vacio" class="empty-state">
                 <i class="fa-solid fa-microchip"></i>
                 <p>No hay dispositivos registrados aún</p>
@@ -308,6 +353,37 @@
         <strong>¿Necesita ayuda?</strong><br>
         Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
         <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+    </div>
+</div>
+
+<!-- Modal para Cargar Modelos Manualmente -->
+<div id="modal-cargar-modelos" class="modal-cargar" style="display: none;">
+    <div class="modal-contenido">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-upload"></i> Cargar Modelos Biométricos</h3>
+            <button class="modal-close" onclick="cerrarModalCargarModelos()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Seleccione archivos de modelos (huellas) para <strong id="modal-dispositivo-nombre"></strong></p>
+            
+            <div class="upload-area-modal" id="uploadAreaModal">
+                <i class="fa-solid fa-cloud-upload-alt"></i>
+                <p>Arrastre archivos o haga clic</p>
+                <p class="small">Formatos: .fpt, .dat, .template, .fing, .bio</p>
+                <input type="file" id="modelos_file_input" accept=".fpt,.dat,.template,.fing,.bio" multiple style="display: none;">
+                <button type="button" class="btn btn-secondary" id="btn-select-files-modal">
+                    <i class="fa-solid fa-folder-open"></i> Seleccionar
+                </button>
+            </div>
+            
+            <div id="lista-modelos-modal" class="modelos-list-modal"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModalCargarModelos()">Cancelar</button>
+            <button type="button" class="btn btn-success" id="btn-subir-modelos">
+                <i class="fa-solid fa-upload"></i> Subir Modelos
+            </button>
+        </div>
     </div>
 </div>
 

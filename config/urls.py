@@ -16,6 +16,7 @@ urlpatterns = [
     path('alertas/', include('alertas.urls')),
     path('soporte/', include('soporte.urls')),
     path('usuarios/', include('usuarios.urls')),
+    path('tickets/', include('tickets.urls')),
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='registration/logout.html'), name='logout'),
 ]

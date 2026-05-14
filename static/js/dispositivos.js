@@ -1,7 +1,7 @@
-// Datos de ejemplo
+// dispositivos.js - FINAL CON CHECKBOXES
+
 let dispositivos = [];
 let editandoIndex = null;
-let dispositivoSeleccionado = null;
 
 // Elementos DOM
 const cuerpoTabla = document.getElementById('cuerpoTabla');
@@ -32,12 +32,12 @@ const selectZonaHoraria = document.getElementById('zona_horaria');
 const inputIntervalo = document.getElementById('intervalo_solicitud');
 const selectEstado = document.getElementById('estado');
 const selectTipoDispositivo = document.getElementById('tipo_dispositivo');
+const selectModeloDispositivo = document.getElementById('modelo_dispositivo');
 const textareaObservaciones = document.getElementById('observaciones');
 
 // ========== FUNCIONES PRINCIPALES ==========
 
 function actualizarTabla() {
-    // Aplicar filtros
     let dispositivosFiltrados = dispositivos;
     
     if (filtroNombre.value) {
@@ -56,10 +56,8 @@ function actualizarTabla() {
         dispositivosFiltrados = dispositivosFiltrados.filter(d => d.tipoSede === filtroTipo.value);
     }
     
-    // Limpiar tabla
     cuerpoTabla.innerHTML = '';
     
-    // Mostrar estado vacío o tabla
     if (dispositivosFiltrados.length === 0) {
         estadoVacio.style.display = 'block';
         tablaDispositivos.style.display = 'none';
@@ -67,194 +65,118 @@ function actualizarTabla() {
         estadoVacio.style.display = 'none';
         tablaDispositivos.style.display = 'table';
         
-        // Llenar tabla con dispositivos
-        dispositivosFiltrados.forEach((dispositivo, index) => {
+        dispositivosFiltrados.forEach(dispositivo => {
             const fila = document.createElement('tr');
+            fila.setAttribute('data-id', dispositivo.id);
             
-            // Determinar clases para badges
-            const estadoBadgeClass = {
-                'activo': 'badge-activo',
-                'pausado': 'badge-pausado',
-                'error': 'badge-error',
-                'sin_conexion': 'badge-sin-conexion',
-                'apagado': 'badge-apagado'
-            }[dispositivo.estado] || '';
+            // Tipo de Autenticación
+            let tipoTexto = '';
+            let tipoIcono = '';
+            switch(dispositivo.tipoDispositivo) {
+                case 'pin': tipoTexto = 'PIN'; tipoIcono = '<i class="fa-solid fa-keyboard"></i>'; break;
+                case 'huella': tipoTexto = 'Huella'; tipoIcono = '<i class="fa-solid fa-fingerprint"></i>'; break;
+                case 'tarjeta': tipoTexto = 'Tarjeta'; tipoIcono = '<i class="fa-solid fa-credit-card"></i>'; break;
+                case 'pin_huella': tipoTexto = 'PIN + Huella'; tipoIcono = '<i class="fa-solid fa-keyboard"></i> + <i class="fa-solid fa-fingerprint"></i>'; break;
+                case 'pin_tarjeta': tipoTexto = 'PIN + Tarjeta'; tipoIcono = '<i class="fa-solid fa-keyboard"></i> + <i class="fa-solid fa-credit-card"></i>'; break;
+                case 'huella_tarjeta': tipoTexto = 'Huella + Tarjeta'; tipoIcono = '<i class="fa-solid fa-fingerprint"></i> + <i class="fa-solid fa-credit-card"></i>'; break;
+                default: tipoTexto = dispositivo.tipoDispositivo; tipoIcono = '<i class="fa-solid fa-microchip"></i>';
+            }
             
-            const sedeBadgeClass = {
-                'sede': 'badge-sede-principal',
-                'oficina': 'badge-oficina',
-                'area': 'badge-area',
-                'almacen': 'badge-almacen'
-            }[dispositivo.tipoSede] || '';
+            // Modelo
+            let modeloTexto = dispositivo.modeloDispositivo === 'reloj_ip65' ? 'Reloj IP65' : 'Molinete ZK TS2022';
+            let modeloIcono = '<i class="fa-solid fa-microchip"></i>';
             
-            // Textos para mostrar
-            const estadoTexto = {
-                'activo': 'Activo',
-                'pausado': 'Pausado',
-                'error': 'Error',
-                'sin_conexion': 'Sin Conexión',
-                'apagado': 'Apagado'
-            }[dispositivo.estado] || dispositivo.estado;
-            
-            const sedeTexto = {
-                'sede': 'Sede Principal',
-                'oficina': 'Oficina',
-                'area': 'Área Específica',
-                'almacen': 'Almacén'
-            }[dispositivo.tipoSede] || dispositivo.tipoSede;
+            // Estado
+            let estadoTexto = '';
+            let estadoIcono = '';
+            let estadoClase = '';
+            switch(dispositivo.estado) {
+                case 'activo': estadoTexto = 'Activo'; estadoIcono = '<i class="fa-solid fa-check-circle"></i>'; estadoClase = 'badge-activo'; break;
+                case 'pausado': estadoTexto = 'Pausado'; estadoIcono = '<i class="fa-solid fa-pause-circle"></i>'; estadoClase = 'badge-pausado'; break;
+                case 'error': estadoTexto = 'Error'; estadoIcono = '<i class="fa-solid fa-exclamation-circle"></i>'; estadoClase = 'badge-error'; break;
+                case 'sin_conexion': estadoTexto = 'Sin conexion'; estadoIcono = '<i class="fa-solid fa-wifi"></i>'; estadoClase = 'badge-sin_conexion'; break;
+                default: estadoTexto = 'Apagado'; estadoIcono = '<i class="fa-solid fa-power-off"></i>'; estadoClase = 'badge-apagado';
+            }
             
             fila.innerHTML = `
-                <td>${dispositivo.nombre}</td>
+                <td class="checkbox-cell">
+                    <input type="checkbox" class="checkbox-dispositivo" data-id="${dispositivo.id}" data-nombre="${dispositivo.nombre}" onchange="actualizarContadorSeleccionados()">
+                </td>
+                <td><strong>${dispositivo.nombre}</strong></td>
                 <td>${dispositivo.numeroSerie}</td>
                 <td>${dispositivo.direccionIP}</td>
                 <td>${dispositivo.area}</td>
-                <td><span class="badge-sede ${sedeBadgeClass}">${sedeTexto}</span></td>
-                <td><span class="badge-estado ${estadoBadgeClass}">${estadoTexto}</span></td>
+                <td>${dispositivo.tipoSede}</td>
+                <td><span class="badge-modelo">${modeloIcono} ${modeloTexto}</span></td>
+                <td><span class="badge-tipo">${tipoIcono} ${tipoTexto}</span></td>
+                <td><span class="badge-estado ${estadoClase}">${estadoIcono} ${estadoTexto}</span></td>
                 <td>${dispositivo.ultimaConexion}</td>
                 <td class="acciones">
-                    <button class="btn-accion btn-editar" data-id="${dispositivo.id}" onclick="seleccionarDispositivo(${dispositivo.id})">
+                    <button class="btn-accion btn-editar" onclick="editarDispositivo(${dispositivo.id})">
                         <i class="fa-solid fa-pen"></i> Editar
                     </button>
-                    <button class="btn-accion btn-eliminar" data-id="${dispositivo.id}" onclick="eliminarDispositivo(${dispositivo.id})">
+                    <button class="btn-accion btn-eliminar" onclick="eliminarDispositivo(${dispositivo.id})">
                         <i class="fa-solid fa-trash"></i> Eliminar
                     </button>
                 </td>
             `;
-            
             cuerpoTabla.appendChild(fila);
         });
-    }
-}
-
-function seleccionarDispositivo(dispositivoId) {
-    const dispositivo = dispositivos.find(d => d.id === dispositivoId);
-    if (dispositivo) {
-        dispositivoSeleccionado = dispositivoId;
-        editarDispositivo(dispositivoId);
+        
+        actualizarContadorSeleccionados();
     }
 }
 
 function guardarDispositivo(e) {
     e.preventDefault();
     
-    const nombre = inputNombre.value.trim();
-    const numeroSerie = inputNumeroSerie.value.trim();
-    const tipoSede = selectTipoSede.value;
-    const area = inputArea.value.trim();
-    const direccion = inputDireccion.value.trim();
-    const direccionIP = inputDireccionIP.value.trim();
-    const zonaHoraria = selectZonaHoraria.value;
-    const intervalo = inputIntervalo.value;
-    const estado = selectEstado.value;
-    const tipoDispositivo = selectTipoDispositivo.value;
-    const observaciones = textareaObservaciones.value.trim();
-    
-    // Validaciones básicas
-    if (!nombre || !numeroSerie || !tipoSede || !area || !direccionIP || !zonaHoraria || !estado) {
-        mostrarMensaje('Por favor, complete todos los campos obligatorios', 'error');
-        return;
-    }
-    
-    // Validar formato de IP
-    const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
-    if (!ipRegex.test(direccionIP)) {
-        mostrarMensaje('Por favor, ingrese una dirección IP válida', 'error');
-        return;
-    }
-    
     const datosDispositivo = {
-        nombre,
-        numero_serie: numeroSerie,
-        tipo_sede: tipoSede,
-        area,
-        direccion,
-        direccion_ip: direccionIP,
-        zona_horaria: zonaHoraria,
-        intervalo: intervalo || 5,
-        estado,
-        tipo_dispositivo: tipoDispositivo,
-        observaciones
+        nombre: inputNombre.value.trim(),
+        numero_serie: inputNumeroSerie.value.trim(),
+        tipo_sede: selectTipoSede.value,
+        area: inputArea.value.trim(),
+        direccion: inputDireccion.value.trim(),
+        direccion_ip: inputDireccionIP.value.trim(),
+        zona_horaria: selectZonaHoraria.value,
+        intervalo: inputIntervalo.value || 5,
+        estado: selectEstado.value,
+        tipo_dispositivo: selectTipoDispositivo.value,
+        modelo_dispositivo: selectModeloDispositivo.value,
+        observaciones: textareaObservaciones.value.trim()
     };
     
-    // Obtener token CSRF
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-                      getCookie('csrftoken');
-    
-    if (editandoIndex !== null) {
-        // ACTUALIZAR dispositivo existente
-        const dispositivoId = editandoIndex;
-        fetch(`/dispositivos/api/dispositivos/${dispositivoId}/`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify(datosDispositivo)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                mostrarMensaje('Dispositivo actualizado correctamente');
-                limpiarFormulario();
-                cargarDispositivos();
-            } else {
-                mostrarMensaje(`Error: ${data.error}`, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarMensaje('Error al actualizar el dispositivo', 'error');
-        });
-    } else {
-        // CREAR nuevo dispositivo
-        fetch('/dispositivos/api/dispositivos/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify(datosDispositivo)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                mostrarMensaje('Dispositivo registrado correctamente');
-                limpiarFormulario();
-                cargarDispositivos();
-            } else {
-                mostrarMensaje(`Error: ${data.error}`, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarMensaje('Error al registrar el dispositivo', 'error');
-        });
-    }
-}
-
-function mostrarMensaje(mensaje, tipo = 'success') {
-    const mensajeExito = document.getElementById('mensaje-exito');
-    mensajeTexto.textContent = mensaje;
-    
-    if (tipo === 'error') {
-        mensajeExito.style.background = '#f8d7da';
-        mensajeExito.style.borderLeftColor = '#dc3545';
-        mensajeExito.style.color = '#721c24';
-        mensajeExito.querySelector('i').className = 'fa-solid fa-exclamation-circle';
-        mensajeExito.querySelector('i').style.color = '#dc3545';
-    } else {
-        mensajeExito.style.background = '#d4edda';
-        mensajeExito.style.borderLeftColor = '#28a745';
-        mensajeExito.style.color = '#155724';
-        mensajeExito.querySelector('i').className = 'fa-solid fa-check';
-        mensajeExito.querySelector('i').style.color = '#28a745';
+    if (!datosDispositivo.nombre || !datosDispositivo.numero_serie || !datosDispositivo.tipo_sede || 
+        !datosDispositivo.area || !datosDispositivo.direccion_ip || !datosDispositivo.zona_horaria || !datosDispositivo.estado) {
+        mostrarMensaje('Complete todos los campos obligatorios', 'error');
+        return;
     }
     
-    mensajeExito.classList.add('mostrar');
+    const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+    if (!ipRegex.test(datosDispositivo.direccion_ip)) {
+        mostrarMensaje('IP valida requerida', 'error');
+        return;
+    }
     
-    setTimeout(() => {
-        mensajeExito.classList.remove('mostrar');
-    }, 3000);
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+    const url = editandoIndex ? `/dispositivos/api/dispositivos/${editandoIndex}/` : '/dispositivos/api/dispositivos/';
+    const method = editandoIndex ? 'PUT' : 'POST';
+    
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify(datosDispositivo)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarMensaje(editandoIndex ? 'Dispositivo actualizado' : 'Dispositivo registrado');
+            limpiarFormulario();
+            cargarDispositivos();
+        } else {
+            mostrarMensaje(`Error: ${data.error}`, 'error');
+        }
+    })
+    .catch(error => mostrarMensaje('Error en la operacion', 'error'));
 }
 
 function limpiarFormulario() {
@@ -262,20 +184,12 @@ function limpiarFormulario() {
     btnCancelar.style.display = 'none';
     formTitle.textContent = 'Nuevo Dispositivo';
     editandoIndex = null;
-    dispositivoSeleccionado = null;
 }
 
 function editarDispositivo(dispositivoId) {
     const dispositivo = dispositivos.find(d => d.id === dispositivoId);
+    if (!dispositivo) return mostrarMensaje('Dispositivo no encontrado', 'error');
     
-    if (!dispositivo) {
-        mostrarMensaje('Dispositivo no encontrado', 'error');
-        return;
-    }
-    
-    console.log('Dispositivo a editar:', dispositivo);
-    
-    // Llenar formulario con datos existentes
     inputNombre.value = dispositivo.nombre;
     inputNumeroSerie.value = dispositivo.numeroSerie;
     selectTipoSede.value = dispositivo.tipoSede;
@@ -285,477 +199,727 @@ function editarDispositivo(dispositivoId) {
     selectZonaHoraria.value = dispositivo.zonaHoraria;
     inputIntervalo.value = dispositivo.intervalo;
     selectEstado.value = dispositivo.estado;
-    
-    // Asignar tipo dispositivo con mejor manejo
-    console.log('Tipo dispositivo a asignar:', dispositivo.tipoDispositivo);
-    selectTipoDispositivo.value = dispositivo.tipoDispositivo || 'huella';
-    console.log('Valor del select después de asignar:', selectTipoDispositivo.value);
-    
+    selectTipoDispositivo.value = dispositivo.tipoDispositivo;
+    selectModeloDispositivo.value = dispositivo.modeloDispositivo;
     textareaObservaciones.value = dispositivo.observaciones || '';
     
-    // Cambiar a modo edición
     editandoIndex = dispositivoId;
     btnCancelar.style.display = 'inline-flex';
     formTitle.textContent = 'Editar Dispositivo';
-    
-    // Hacer scroll al formulario
     document.querySelector('.form-panel').scrollIntoView({ behavior: 'smooth' });
-    
-    mostrarMensaje(`Editando dispositivo: ${dispositivo.nombre}`);
+    mostrarMensaje(`Editando: ${dispositivo.nombre}`);
 }
 
 function eliminarDispositivo(dispositivoId) {
-    if (confirm('¿Está seguro de que desea eliminar este dispositivo?')) {
-        // Obtener token CSRF
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-                          getCookie('csrftoken');
-        
-        fetch(`/dispositivos/api/dispositivos/${dispositivoId}/`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRFToken': csrfToken
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                mostrarMensaje('Dispositivo eliminado correctamente');
-                cargarDispositivos();
-                if (editandoIndex === dispositivoId) {
-                    limpiarFormulario();
-                }
-            } else {
-                mostrarMensaje(`Error: ${data.error}`, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarMensaje('Error al eliminar el dispositivo', 'error');
-        });
-    }
+    if (!confirm('¿Eliminar este dispositivo?')) return;
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+    
+    fetch(`/dispositivos/api/dispositivos/${dispositivoId}/`, {
+        method: 'DELETE',
+        headers: { 'X-CSRFToken': csrfToken }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarMensaje('Dispositivo eliminado');
+            if (editandoIndex === dispositivoId) limpiarFormulario();
+            cargarDispositivos();
+        } else {
+            mostrarMensaje(`Error: ${data.error}`, 'error');
+        }
+    })
+    .catch(error => mostrarMensaje('Error al eliminar', 'error'));
 }
 
 function nuevoDispositivo() {
     limpiarFormulario();
-    mostrarMensaje('Listo para agregar un nuevo dispositivo');
+    mostrarMensaje('Nuevo dispositivo');
 }
 
-function cancelarEdicion() {
-    limpiarFormulario();
-    mostrarMensaje('Edición cancelada');
+function mostrarMensaje(mensaje, tipo = 'success') {
+    const msgDiv = document.getElementById('mensaje-exito');
+    const msgText = document.getElementById('mensaje-texto');
+    msgText.textContent = mensaje;
+    
+    if (tipo === 'error') {
+        msgDiv.style.background = '#f8d7da';
+        msgDiv.style.borderLeftColor = '#dc3545';
+        msgDiv.style.color = '#721c24';
+        msgDiv.querySelector('i').className = 'fa-solid fa-exclamation-circle';
+    } else {
+        msgDiv.style.background = '#d4edda';
+        msgDiv.style.borderLeftColor = '#28a745';
+        msgDiv.style.color = '#155724';
+        msgDiv.querySelector('i').className = 'fa-solid fa-check';
+    }
+    
+    msgDiv.classList.add('mostrar');
+    setTimeout(() => msgDiv.classList.remove('mostrar'), 3000);
 }
 
-// ========== FUNCIONES DE LOS MENÚS DESPLEGABLES ==========
-
-// Variable para controlar el menú abierto
+// ========== MENU DESPLEGABLE ==========
 let menuAbierto = null;
 
 function toggleDropdown(menuId) {
     const menu = document.getElementById(menuId);
-    
-    // Si el menú ya está abierto, cerrarlo
     if (menuAbierto === menuId) {
         menu.classList.remove('show');
         menuAbierto = null;
         return;
     }
-    
-    // Cerrar otros menús abiertos
-    document.querySelectorAll('.dropdown-menu').forEach(m => {
-        m.classList.remove('show');
-    });
-    
-    // Abrir el menú actual
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
     menu.classList.add('show');
     menuAbierto = menuId;
 }
 
-// Cerrar menús al hacer clic fuera
 document.addEventListener('click', function(e) {
-    const dropdowns = document.querySelectorAll('.dropdown-group');
-    let clickEnDropdown = false;
+    if (!e.target.closest('.dropdown-group')) {
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+        menuAbierto = null;
+    }
+});
+
+// ========== FUNCIONES CON CHECKBOX ==========
+
+function obtenerSeleccionados() {
+    const checkboxes = document.querySelectorAll('.checkbox-dispositivo:checked');
+    return Array.from(checkboxes).map(cb => ({
+        id: parseInt(cb.getAttribute('data-id')),
+        nombre: cb.getAttribute('data-nombre')
+    }));
+}
+
+function actualizarContadorSeleccionados() {
+    const seleccionados = obtenerSeleccionados();
+    const contador = seleccionados.length;
+    const footer = document.getElementById('selection-footer');
+    const contadorSpan = document.getElementById('contador-seleccionados');
     
-    // Verificar si el clic fue en un dropdown
-    dropdowns.forEach(dropdown => {
-        if (dropdown.contains(e.target)) {
-            clickEnDropdown = true;
+    if (contadorSpan) contadorSpan.textContent = contador;
+    if (footer) footer.style.display = contador > 0 ? 'flex' : 'none';
+    
+    // Resaltar filas seleccionadas
+    document.querySelectorAll('tbody tr').forEach(row => {
+        const checkbox = row.querySelector('.checkbox-dispositivo');
+        if (checkbox && checkbox.checked) {
+            row.classList.add('seleccionado');
+        } else {
+            row.classList.remove('seleccionado');
         }
     });
     
-    // Si el clic no fue en un dropdown, cerrar todos los menús
-    if (!clickEnDropdown) {
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-            menu.classList.remove('show');
-        });
-        menuAbierto = null;
+    // Actualizar checkbox "Seleccionar todos"
+    const totalCheckboxes = document.querySelectorAll('.checkbox-dispositivo').length;
+    const checkboxesMarcados = document.querySelectorAll('.checkbox-dispositivo:checked').length;
+    const checkboxTodos = document.getElementById('checkbox-seleccionar-todos');
+    
+    if (checkboxTodos) {
+        if (totalCheckboxes > 0 && checkboxesMarcados === totalCheckboxes) {
+            checkboxTodos.checked = true;
+            checkboxTodos.indeterminate = false;
+        } else if (checkboxesMarcados > 0 && checkboxesMarcados < totalCheckboxes) {
+            checkboxTodos.checked = false;
+            checkboxTodos.indeterminate = true;
+        } else {
+            checkboxTodos.checked = false;
+            checkboxTodos.indeterminate = false;
+        }
     }
-});
+}
 
-// Prevenir que los clics dentro del menú lo cierren
-document.querySelectorAll('.dropdown-menu').forEach(menu => {
-    menu.addEventListener('click', function(e) {
-        e.stopPropagation();
+function toggleSeleccionarTodos(checkbox) {
+    document.querySelectorAll('.checkbox-dispositivo').forEach(cb => {
+        cb.checked = checkbox.checked;
     });
-});
-
-// ========== MENÚ ACCESO RÁPIDO ==========
-
-function modificarSeleccionado() {
-    if (dispositivoSeleccionado !== null) {
-        editarDispositivo(dispositivoSeleccionado);
-        // Cerrar menú después de la acción
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-            menu.classList.remove('show');
-        });
-        menuAbierto = null;
-    } else {
-        mostrarMensaje('Por favor, seleccione un dispositivo primero', 'error');
-    }
+    actualizarContadorSeleccionados();
 }
 
-function borrarSeleccionado() {
-    if (dispositivoSeleccionado !== null) {
-        eliminarDispositivo(dispositivoSeleccionado);
-        // Cerrar menú después de la acción
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-            menu.classList.remove('show');
-        });
-        menuAbierto = null;
-    } else {
-        mostrarMensaje('Por favor, seleccione un dispositivo primero', 'error');
-    }
+function seleccionarTodos() {
+    document.querySelectorAll('.checkbox-dispositivo').forEach(cb => cb.checked = true);
+    actualizarContadorSeleccionados();
 }
 
-function actualizarListado() {
-    actualizarTabla();
-    mostrarMensaje('Listado actualizado');
-    // Cerrar menú después de la acción
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.classList.remove('show');
-    });
-    menuAbierto = null;
+function deseleccionarTodos() {
+    document.querySelectorAll('.checkbox-dispositivo').forEach(cb => cb.checked = false);
+    actualizarContadorSeleccionados();
 }
 
-// ========== MENÚ DISPOSITIVO ==========
-
-function leerInformacion() {
-    if (dispositivoSeleccionado !== null) {
-        const dispositivo = dispositivos[dispositivoSeleccionado];
-        mostrarMensaje(`Leyendo información del dispositivo: ${dispositivo.nombre}...`);
-        
-        // Simular lectura de información
-        setTimeout(() => {
-            const info = `
-                <strong>Información del Dispositivo:</strong><br>
-                • Nombre: ${dispositivo.nombre}<br>
-                • N° Serie: ${dispositivo.numeroSerie}<br>
-                • IP: ${dispositivo.direccionIP}<br>
-                • Estado: ${dispositivo.estado}<br>
-                • Última conexión: ${dispositivo.ultimaConexion}<br>
-                • Firmware: v2.1.4<br>
-                • Huellas registradas: 142<br>
-                • Memoria disponible: 78%
-            `;
-            alert(info);
-            mostrarMensaje('Información del dispositivo leída correctamente');
-        }, 2000);
-    } else {
-        mostrarMensaje('Por favor, seleccione un dispositivo primero', 'error');
+function eliminarSeleccionados() {
+    const seleccionados = obtenerSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        mostrarMensaje('No hay dispositivos seleccionados', 'error');
+        return;
     }
     
-    // Cerrar menú después de la acción
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.classList.remove('show');
+    if (!confirm(`¿Eliminar ${seleccionados.length} dispositivo(s) seleccionado(s)?`)) return;
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+    let eliminados = 0;
+    let errores = 0;
+    
+    const promesas = seleccionados.map(disp => {
+        return fetch(`/dispositivos/api/dispositivos/${disp.id}/`, {
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': csrfToken }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) eliminados++;
+            else errores++;
+        })
+        .catch(() => errores++);
     });
-    menuAbierto = null;
+    
+    Promise.all(promesas).then(() => {
+        mostrarMensaje(`✅ Eliminados: ${eliminados} | ❌ Errores: ${errores}`);
+        if (editandoIndex && seleccionados.some(s => s.id === editandoIndex)) limpiarFormulario();
+        cargarDispositivos();
+    });
+}
+
+function leerInformacionSeleccionado() {
+    const seleccionados = obtenerSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        mostrarMensaje('Seleccione al menos un dispositivo', 'error');
+        return;
+    }
+    
+    if (seleccionados.length > 1) {
+        mostrarMensaje('Seleccione solo un dispositivo para leer información', 'error');
+        return;
+    }
+    
+    const dispositivo = seleccionados[0];
+    mostrarMensaje(`Leyendo información de ${dispositivo.nombre}...`);
+    
+    fetch(`/dispositivos/api/acciones/${dispositivo.id}/leer-info/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const info = data.info;
+            alert(`INFORMACION DEL DISPOSITIVO\n\n` +
+                  `Nombre: ${info.nombre}\n` +
+                  `Serie: ${info.numero_serie}\n` +
+                  `IP: ${info.ip}\n` +
+                  `Estado: ${info.estado}\n` +
+                  `Tipo: ${info.tipo}\n` +
+                  `Modelo: ${info.modelo}\n` +
+                  `Ultima conexion: ${info.ultima_conexion}\n` +
+                  `Firmware: ${info.firmware}`);
+            mostrarMensaje('Informacion leida');
+        } else {
+            mostrarMensaje(`Error: ${data.error}`, 'error');
+        }
+    })
+    .catch(error => mostrarMensaje('Error al leer informacion', 'error'));
+    
+    cerrarMenus();
 }
 
 function enrolamientoRemoto() {
-    if (dispositivoSeleccionado !== null) {
-        const dispositivo = dispositivos[dispositivoSeleccionado];
-        mostrarMensaje(`Iniciando enrolamiento remoto en: ${dispositivo.nombre}...`);
-        
-        // Simular enrolamiento remoto
-        setTimeout(() => {
-            mostrarMensaje('Modo de enrolamiento remoto activado. El dispositivo está listo para registrar nuevas huellas.');
-        }, 1500);
-    } else {
-        mostrarMensaje('Por favor, seleccione un dispositivo primero', 'error');
+    const seleccionados = obtenerSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        mostrarMensaje('Seleccione al menos un dispositivo', 'error');
+        return;
     }
     
-    // Cerrar menú después de la acción
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.classList.remove('show');
-    });
-    menuAbierto = null;
+    const disp = seleccionados[0];
+    const tiposConHuella = ['huella', 'pin_huella', 'huella_tarjeta'];
+    
+    if (!tiposConHuella.includes(disp.tipoDispositivo)) {
+        mostrarMensaje('Este dispositivo no soporta enrolamiento de huellas', 'error');
+        return;
+    }
+    
+    mostrarMensaje(`Activando enrolamiento en ${disp.nombre}...`);
+    
+    fetch(`/dispositivos/api/acciones/${disp.id}/enrolamiento/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) mostrarMensaje(data.message);
+        else mostrarMensaje(`Error: ${data.error}`, 'error');
+    })
+    .catch(error => mostrarMensaje('Error en enrolamiento', 'error'));
+    
+    cerrarMenus();
 }
 
 function configurarEnrolamiento() {
-    if (dispositivoSeleccionado !== null) {
-        const dispositivo = dispositivos[dispositivoSeleccionado];
-        
-        // Simular configuración de enrolamiento
-        const configuracion = prompt(
-            `Configurar enrolamiento para: ${dispositivo.nombre}\n\n` +
-            'Ingrese los parámetros de configuración (separados por coma):\n' +
-            'Ej: intentos=3, timeout=30, calidad=alto',
-            'intentos=3, timeout=30, calidad=alto'
-        );
-        
-        if (configuracion) {
-            mostrarMensaje(`Configuración de enrolamiento actualizada para: ${dispositivo.nombre}`);
-        }
-    } else {
-        mostrarMensaje('Por favor, seleccione un dispositivo primero', 'error');
+    const seleccionados = obtenerSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        mostrarMensaje('Seleccione al menos un dispositivo', 'error');
+        return;
     }
     
-    // Cerrar menú después de la acción
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.classList.remove('show');
-    });
-    menuAbierto = null;
+    const disp = seleccionados[0];
+    const tiposConHuella = ['huella', 'pin_huella', 'huella_tarjeta'];
+    
+    if (!tiposConHuella.includes(disp.tipoDispositivo)) {
+        mostrarMensaje('Este dispositivo no soporta configuración de enrolamiento', 'error');
+        return;
+    }
+    
+    const config = prompt('Configuracion de enrolamiento:\nEj: intentos=3, timeout=30, calidad=alto', 'intentos=3, timeout=30, calidad=alto');
+    if (!config) return;
+    
+    mostrarMensaje(`Configurando enrolamiento en ${disp.nombre}...`);
+    
+    fetch(`/dispositivos/api/acciones/${disp.id}/configurar-enrolamiento/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ configuracion: config })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) mostrarMensaje(data.message);
+        else mostrarMensaje(`Error: ${data.error}`, 'error');
+    })
+    .catch(error => mostrarMensaje('Error en configuracion', 'error'));
+    
+    cerrarMenus();
 }
 
-// ========== MENÚ MANTENIMIENTO ==========
-
 function reiniciarDispositivo() {
-    if (dispositivoSeleccionado !== null) {
-        const dispositivo = dispositivos[dispositivoSeleccionado];
-        if (confirm(`¿Está seguro de que desea reiniciar el dispositivo "${dispositivo.nombre}"?`)) {
-            mostrarMensaje(`Reiniciando dispositivo: ${dispositivo.nombre}...`);
-            
-            // Simular reinicio
-            setTimeout(() => {
-                // Actualizar estado del dispositivo
-                dispositivo.estado = 'activo';
-                dispositivo.ultimaConexion = new Date().toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                actualizarTabla();
-                mostrarMensaje('Dispositivo reiniciado correctamente');
-            }, 3000);
-        }
-    } else {
-        mostrarMensaje('Por favor, seleccione un dispositivo primero', 'error');
+    const seleccionados = obtenerSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        mostrarMensaje('Seleccione al menos un dispositivo', 'error');
+        return;
     }
     
-    // Cerrar menú después de la acción
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.classList.remove('show');
-    });
-    menuAbierto = null;
+    const disp = seleccionados[0];
+    if (!confirm(`¿Reiniciar ${disp.nombre}?`)) return;
+    
+    mostrarMensaje(`Reiniciando ${disp.nombre}...`);
+    
+    fetch(`/dispositivos/api/acciones/${disp.id}/reiniciar/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarMensaje(data.message);
+            cargarDispositivos();
+        } else {
+            mostrarMensaje(`Error: ${data.error}`, 'error');
+        }
+    })
+    .catch(error => mostrarMensaje('Error al reiniciar', 'error'));
+    
+    cerrarMenus();
 }
 
 function actualizarFirmware() {
-    if (dispositivoSeleccionado !== null) {
-        const dispositivo = dispositivos[dispositivoSeleccionado];
-        if (confirm(`¿Actualizar firmware del dispositivo "${dispositivo.nombre}" a la versión más reciente?`)) {
-            mostrarMensaje(`Actualizando firmware del dispositivo: ${dispositivo.nombre}...`);
-            
-            // Simular actualización de firmware
-            setTimeout(() => {
-                mostrarMensaje('Firmware actualizado correctamente a la versión v2.2.0');
-            }, 4000);
-        }
-    } else {
-        mostrarMensaje('Por favor, seleccione un dispositivo primero', 'error');
+    const seleccionados = obtenerSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        mostrarMensaje('Seleccione al menos un dispositivo', 'error');
+        return;
     }
     
-    // Cerrar menú después de la acción
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.classList.remove('show');
-    });
-    menuAbierto = null;
+    const disp = seleccionados[0];
+    if (!confirm(`¿Actualizar firmware de ${disp.nombre}?`)) return;
+    
+    mostrarMensaje(`Actualizando firmware de ${disp.nombre}...`);
+    
+    fetch(`/dispositivos/api/acciones/${disp.id}/actualizar-firmware/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) mostrarMensaje(data.message);
+        else mostrarMensaje(`Error: ${data.error}`, 'error');
+    })
+    .catch(error => mostrarMensaje('Error al actualizar', 'error'));
+    
+    cerrarMenus();
 }
 
-function descargarInformacion() {
-    if (dispositivoSeleccionado !== null) {
-        const dispositivo = dispositivos[dispositivoSeleccionado];
-        mostrarMensaje(`Descargando información del dispositivo: ${dispositivo.nombre}...`);
-        
-        // Simular descarga
-        setTimeout(() => {
-            const blob = new Blob([`Información del dispositivo: ${JSON.stringify(dispositivo, null, 2)}`], 
-                { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `info_${dispositivo.nombre.replace(/\s+/g, '_')}.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            mostrarMensaje('Información descargada correctamente');
-        }, 2000);
-    } else {
-        mostrarMensaje('Por favor, seleccione un dispositivo primero', 'error');
+function descargarInformacionSeleccionado() {
+    const seleccionados = obtenerSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        mostrarMensaje('Seleccione un dispositivo', 'error');
+        return;
     }
     
-    // Cerrar menú después de la acción
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.classList.remove('show');
-    });
-    menuAbierto = null;
+    const dispositivo = seleccionados[0];
+    const dispData = dispositivos.find(d => d.id === dispositivo.id);
+    if (!dispData) return;
+    
+    let modeloTexto = dispData.modeloDispositivo === 'reloj_ip65' ? 'Reloj IP65' : 'Molinete ZK TS2022';
+    
+    const info = `INFORMACION DEL DISPOSITIVO
+===================
+Nombre: ${dispData.nombre}
+Numero de Serie: ${dispData.numeroSerie}
+Direccion IP: ${dispData.direccionIP}
+Area: ${dispData.area}
+Tipo de Sede: ${dispData.tipoSede}
+Modelo: ${modeloTexto}
+Tipo Autenticacion: ${dispData.tipoDispositivo}
+Estado: ${dispData.estado}
+Ultima Conexion: ${dispData.ultimaConexion}
+Observaciones: ${dispData.observaciones || 'Ninguna'}`;
+    
+    const blob = new Blob([info], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dispositivo_${dispData.nombre.replace(/\s+/g, '_')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    mostrarMensaje('Informacion descargada');
+    cerrarMenus();
+}
+
+function modificarSeleccionado() {
+    const seleccionados = obtenerSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        mostrarMensaje('Seleccione un dispositivo para modificar', 'error');
+        return;
+    }
+    
+    if (seleccionados.length > 1) {
+        mostrarMensaje('Seleccione solo un dispositivo para modificar', 'error');
+        return;
+    }
+    
+    editarDispositivo(seleccionados[0].id);
+    cerrarMenus();
+}
+
+function borrarSeleccionado() {
+    const seleccionados = obtenerSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        mostrarMensaje('Seleccione al menos un dispositivo', 'error');
+        return;
+    }
+    
+    eliminarSeleccionados();
+    cerrarMenus();
+}
+
+function cargarModelosManual() {
+    const seleccionados = obtenerSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        mostrarMensaje('Seleccione un dispositivo', 'error');
+        return;
+    }
+    
+    if (seleccionados.length > 1) {
+        mostrarMensaje('Seleccione solo un dispositivo para cargar modelos', 'error');
+        return;
+    }
+    
+    const dispositivo = dispositivos.find(d => d.id === seleccionados[0].id);
+    if (!dispositivo) return;
+    
+    const tiposConHuella = ['huella', 'pin_huella', 'huella_tarjeta'];
+    if (!tiposConHuella.includes(dispositivo.tipoDispositivo)) {
+        mostrarMensaje('Este dispositivo no soporta carga de modelos', 'error');
+        return;
+    }
+    
+    window.dispositivoParaModelos = dispositivo;
+    document.getElementById('modal-dispositivo-nombre').textContent = dispositivo.nombre;
+    window.archivosModelos = [];
+    actualizarListaModelosModal();
+    document.getElementById('modal-cargar-modelos').style.display = 'flex';
+    cerrarMenus();
 }
 
 function exportarInformacion() {
     if (dispositivos.length === 0) {
-        mostrarMensaje('No hay dispositivos para exportar', 'error');
+        mostrarMensaje('No hay dispositivos', 'error');
         return;
     }
     
-    // Crear CSV
-    const headers = ['Nombre', 'Número Serie', 'IP', 'Área', 'Tipo Sede', 'Estado', 'Última Conexión', 'Tipo Dispositivo'];
-    const csvRows = [headers.join(',')];
+    const headers = ['ID', 'Nombre', 'Serie', 'IP', 'Area', 'Tipo Sede', 'Modelo', 'Tipo Autenticacion', 'Estado', 'Ultima Conexion'];
+    const rows = [headers.join(',')];
     
-    dispositivos.forEach(dispositivo => {
-        const row = [
-            `"${dispositivo.nombre}"`,
-            `"${dispositivo.numeroSerie}"`,
-            dispositivo.direccionIP,
-            `"${dispositivo.area}"`,
-            dispositivo.tipoSede,
-            dispositivo.estado,
-            `"${dispositivo.ultimaConexion}"`,
-            dispositivo.tipoDispositivo
-        ];
-        csvRows.push(row.join(','));
+    dispositivos.forEach(d => {
+        let modeloTexto = d.modeloDispositivo === 'reloj_ip65' ? 'Reloj IP65' : 'Molinete ZK TS2022';
+        rows.push([
+            d.id, `"${d.nombre}"`, `"${d.numeroSerie}"`, d.direccionIP, `"${d.area}"`,
+            d.tipoSede, modeloTexto, d.tipoDispositivo, d.estado, `"${d.ultimaConexion}"`
+        ].join(','));
     });
     
-    const csvContent = csvRows.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `dispositivos_biometrika_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `dispositivos_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     
-    mostrarMensaje(`Se exportaron ${dispositivos.length} dispositivos correctamente`);
-    
-    // Cerrar menú después de la acción
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.classList.remove('show');
-    });
-    menuAbierto = null;
+    mostrarMensaje(`Exportados ${dispositivos.length} dispositivos`);
+    cerrarMenus();
 }
 
 function importarInformacion() {
-    // Crear input de archivo
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.csv';
-    input.style.display = 'none';
-    
-    input.addEventListener('change', function(e) {
+    input.onchange = async (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const csvData = e.target.result;
-                    const lineas = csvData.split('\n').filter(linea => linea.trim() !== '');
-                    
-                    if (lineas.length > 1) {
-                        const dispositivosImportados = lineas.length - 1; // Excluir header
-                        mostrarMensaje(`Se importaron ${dispositivosImportados} dispositivos desde el archivo CSV`);
-                    } else {
-                        mostrarMensaje('El archivo CSV está vacío o no tiene el formato correcto', 'error');
-                    }
-                } catch (error) {
-                    mostrarMensaje('Error al procesar el archivo CSV: ' + error.message, 'error');
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            const content = ev.target.result;
+            const lineas = content.split('\n').filter(l => l.trim());
+            
+            if (lineas.length <= 1) {
+                mostrarMensaje('Archivo vacío', 'error');
+                return;
+            }
+            
+            const encabezados = lineas[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+            const datosLineas = lineas.slice(1);
+            let importados = 0, errores = 0;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+            
+            for (let i = 0; i < datosLineas.length; i++) {
+                const linea = datosLineas[i];
+                if (!linea.trim()) continue;
+                
+                const columnas = [];
+                let enComillas = false, valorActual = '';
+                for (let char of linea) {
+                    if (char === '"') enComillas = !enComillas;
+                    else if (char === ',' && !enComillas) {
+                        columnas.push(valorActual.trim());
+                        valorActual = '';
+                    } else valorActual += char;
                 }
-            };
-            reader.onerror = function() {
-                mostrarMensaje('Error al leer el archivo', 'error');
-            };
-            reader.readAsText(file);
-        }
-    });
-    
-    document.body.appendChild(input);
+                columnas.push(valorActual.trim());
+                
+                const dispositivo = {};
+                encabezados.forEach((enc, idx) => {
+                    dispositivo[enc] = columnas[idx] ? columnas[idx].replace(/^"|"$/g, '').trim() : '';
+                });
+                
+                if (!dispositivo['nombre'] || !dispositivo['numero serie']) {
+                    errores++;
+                    continue;
+                }
+                
+                const datosAPI = {
+                    nombre: dispositivo['nombre'],
+                    numero_serie: dispositivo['numero serie'],
+                    direccion_ip: dispositivo['ip'] || '192.168.1.1',
+                    area: dispositivo['area'] || 'Sin area',
+                    tipo_sede: dispositivo['tipo sede'] || 'area',
+                    tipo_dispositivo: dispositivo['autenticacion'] || 'pin_huella',
+                    modelo_dispositivo: dispositivo['modelo'] || 'reloj_ip65',
+                    estado: dispositivo['estado'] || 'activo',
+                    observaciones: dispositivo['observaciones'] || '',
+                    zona_horaria: 'America/Buenos_Aires',
+                    intervalo: 5,
+                    direccion: ''
+                };
+                
+                try {
+                    const response = await fetch('/dispositivos/api/dispositivos/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                        body: JSON.stringify(datosAPI)
+                    });
+                    const result = await response.json();
+                    if (result.success) importados++;
+                    else errores++;
+                } catch (error) {
+                    errores++;
+                }
+            }
+            
+            mostrarMensaje(`✅ Importados: ${importados} | ❌ Errores: ${errores}`);
+            cargarDispositivos();
+        };
+        reader.readAsText(file, 'UTF-8');
+    };
     input.click();
-    document.body.removeChild(input);
-    
-    // Cerrar menú después de la acción
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.classList.remove('show');
-    });
+    cerrarMenus();
+}
+
+function actualizarListado() {
+    cargarDispositivos();
+    mostrarMensaje('Listado actualizado');
+    cerrarMenus();
+}
+
+function cerrarMenus() {
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
     menuAbierto = null;
 }
 
-// ========== FUNCIÓN PARA CARGAR DESDE BASE DE DATOS ==========
+// ========== MODAL PARA MODELOS ==========
+
+let archivosModelos = [];
+
+function cerrarModalCargarModelos() {
+    document.getElementById('modal-cargar-modelos').style.display = 'none';
+    archivosModelos = [];
+    window.dispositivoParaModelos = null;
+}
+
+function inicializarModal() {
+    const uploadArea = document.getElementById('uploadAreaModal');
+    const fileInput = document.getElementById('modelos_file_input');
+    const btnSelect = document.getElementById('btn-select-files-modal');
+    const btnSubir = document.getElementById('btn-subir-modelos');
+    
+    if (!uploadArea) return;
+    
+    uploadArea.onclick = () => fileInput.click();
+    btnSelect.onclick = (e) => { e.stopPropagation(); fileInput.click(); };
+    
+    fileInput.onchange = (e) => {
+        archivosModelos = [...archivosModelos, ...Array.from(e.target.files)];
+        actualizarListaModelosModal();
+        fileInput.value = '';
+    };
+    
+    uploadArea.ondragover = (e) => { e.preventDefault(); uploadArea.classList.add('drag-over'); };
+    uploadArea.ondragleave = () => uploadArea.classList.remove('drag-over');
+    uploadArea.ondrop = (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        archivosModelos = [...archivosModelos, ...Array.from(e.dataTransfer.files)];
+        actualizarListaModelosModal();
+    };
+    
+    btnSubir.onclick = () => {
+        if (archivosModelos.length === 0) {
+            mostrarMensaje('Seleccione archivos', 'error');
+            return;
+        }
+        
+        const formData = new FormData();
+        archivosModelos.forEach((f, i) => formData.append(`modelo_${i}`, f));
+        formData.append('dispositivo_id', window.dispositivoParaModelos.id);
+        
+        mostrarMensaje('Subiendo modelos...');
+        
+        fetch('/dispositivos/api/cargar-modelos/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                mostrarMensaje(`${data.modelos_cargados} modelo(s) cargado(s)`);
+                cerrarModalCargarModelos();
+                cargarDispositivos();
+            } else {
+                mostrarMensaje(`Error: ${data.error}`, 'error');
+            }
+        })
+        .catch(() => mostrarMensaje('Error al subir', 'error'));
+    };
+}
+
+function actualizarListaModelosModal() {
+    const container = document.getElementById('lista-modelos-modal');
+    if (!container) return;
+    
+    if (archivosModelos.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = archivosModelos.map((file, idx) => `
+        <div class="modelo-item-modal">
+            <div class="modelo-info-modal">
+                <i class="fa-solid fa-fingerprint"></i>
+                <div>
+                    <div class="modelo-nombre">${file.name}</div>
+                    <div class="modelo-tamano">${(file.size / 1024).toFixed(1)} KB</div>
+                </div>
+            </div>
+            <button class="btn-remover-modelo-modal" onclick="removerModeloModal(${idx})">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+function removerModeloModal(index) {
+    archivosModelos.splice(index, 1);
+    actualizarListaModelosModal();
+}
+
+// ========== CARGAR DATOS ==========
 
 function getCookie(name) {
-    let cookieValue = null;
+    let value = null;
     if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+        document.cookie.split(';').forEach(cookie => {
+            const c = cookie.trim();
+            if (c.substring(0, name.length + 1) === (name + '=')) {
+                value = decodeURIComponent(c.substring(name.length + 1));
             }
-        }
+        });
     }
-    return cookieValue;
+    return value;
 }
 
 function cargarDispositivos() {
-    fetch('/dispositivos/api/dispositivos/', {
-        method: 'GET'
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Datos crudos del API:', data);
-        
-        // Convertir snake_case a camelCase
-        dispositivos = data.map(d => {
-            const dispositivoConvertido = {
+    fetch('/dispositivos/api/dispositivos/')
+        .then(res => res.json())
+        .then(data => {
+            dispositivos = data.map(d => ({
                 id: d.id,
                 nombre: d.nombre,
                 numeroSerie: d.numero_serie,
-                tipoSede: d.tipo_sede,
+                tipoSede: d.tipo_sede === 'sede' ? 'Sede Principal' : 
+                          d.tipo_sede === 'oficina' ? 'Oficina' :
+                          d.tipo_sede === 'area' ? 'Area Especifica' : 'Almacen',
                 area: d.area,
                 direccion: d.direccion || '',
                 direccionIP: d.direccion_ip,
                 zonaHoraria: d.zona_horaria,
                 intervalo: d.intervalo_solicitud || 5,
                 estado: d.estado,
-                tipoDispositivo: d.tipo_dispositivo && d.tipo_dispositivo.trim() ? d.tipo_dispositivo.trim() : 'huella',
+                tipoDispositivo: d.tipo_dispositivo,
+                modeloDispositivo: d.modelo_dispositivo,
                 observaciones: d.observaciones || '',
-                ultimaConexion: d.ultima_conexion || new Date().toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                })
-            };
-            console.log('Dispositivo convertido:', dispositivoConvertido);
-            return dispositivoConvertido;
-        });
-        console.log('Dispositivos cargados:', dispositivos);
-        actualizarTabla();
-    })
-    .catch(error => {
-        console.error('Error al cargar dispositivos:', error);
-        mostrarMensaje('Error al cargar dispositivos desde el servidor', 'error');
-    });
+                ultimaConexion: d.ultima_conexion || 'Nunca'
+            }));
+            actualizarTabla();
+        })
+        .catch(error => mostrarMensaje('Error al cargar datos', 'error'));
 }
 
-// ========== INICIALIZACIÓN ==========
+// ========== INICIALIZACION ==========
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Formulario
+document.addEventListener('DOMContentLoaded', () => {
     formulario.addEventListener('submit', guardarDispositivo);
+    btnCancelar.addEventListener('click', limpiarFormulario);
+    btnNuevo.addEventListener('click', nuevoDispositivo);
+    if (btnAgregarPrimero) btnAgregarPrimero.addEventListener('click', nuevoDispositivo);
     
-    // Filtros
-    btnLimpiarFiltros.addEventListener('click', function() {
+    btnLimpiarFiltros.addEventListener('click', () => {
         filtroNombre.value = '';
         filtroEstado.value = '';
         filtroTipo.value = '';
@@ -766,15 +930,13 @@ document.addEventListener('DOMContentLoaded', function() {
     filtroEstado.addEventListener('change', actualizarTabla);
     filtroTipo.addEventListener('change', actualizarTabla);
     
-    // Generar número de serie automático
-    inputNombre.addEventListener('blur', function() {
+    inputNombre.addEventListener('blur', () => {
         if (!inputNumeroSerie.value && inputNombre.value) {
             const nombre = inputNombre.value.replace(/\s+/g, '-').toLowerCase();
-            const random = Math.random().toString().substr(2, 4);
-            inputNumeroSerie.value = `SN-${nombre}-${random}`.toUpperCase();
+            inputNumeroSerie.value = `SN-${nombre}-${Math.random().toString(36).substr(2, 4)}`.toUpperCase();
         }
     });
     
-    // Cargar dispositivos desde la base de datos
     cargarDispositivos();
+    inicializarModal();
 });

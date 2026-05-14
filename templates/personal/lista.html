@@ -62,7 +62,14 @@
                                 <option value="operaciones">Operaciones</option>
                                 <option value="marketing">Marketing</option>
                                 <option value="ventas">Ventas</option>
+                                <option value="otro">Otro (Especificar)</option>
                             </select>
+                        </div>
+
+                        <div class="form-group" id="container-area-personalizada" style="display: none;">
+                            <label><i class="fa-solid fa-pen"></i> Especificar Área: <span class="required">*</span></label>
+                            <input type="text" id="area_personalizada" placeholder="Ej: Logística, Compras, Calidad, etc.">
+                            <small class="helper-text">Ingrese el nombre del área personalizada</small>
                         </div>
 
                         <div class="form-group">
@@ -226,65 +233,12 @@
                         </tr>
                     </thead>
                     <tbody id="cuerpoTabla">
-                        {% for persona in personal %}
-                        <tr data-id="{{ persona.id }}">
-                            <td>
-                                {% if persona.foto %}
-                                    <img src="{{ persona.foto.url }}" alt="{{ persona.nombre_completo }}" class="foto-pequeña">
-                                {% else %}
-                                    <div class="foto-placeholder">
-                                        <i class="fa-solid fa-user"></i>
-                                    </div>
-                                {% endif %}
-                            </td>
-                            <td><strong>#{{ persona.id }}</strong></td>
-                            <td>{{ persona.nombre_completo }}</td>
-                            <td>{{ persona.cargo }}</td>
-                            <td>{{ persona.area }}</td>
-                            <td>{{ persona.nombre_sede }}</td>
-                            <td>
-                                <span class="badge dispositivo-{{ persona.dispositivo_biometrico }}">
-                                    {% if persona.dispositivo_biometrico %}
-                                        {% if persona.dispositivo_biometrico == 'huella' %}
-                                            <i class="fa-solid fa-fingerprint"></i> Huella
-                                        {% elif persona.dispositivo_biometrico == 'tarjeta' %}
-                                            <i class="fa-solid fa-credit-card"></i> Tarjeta
-                                        {% elif persona.dispositivo_biometrico == 'facial' %}
-                                            <i class="fa-solid fa-face-smile"></i> Facial
-                                        {% else %}
-                                            {{ persona.dispositivo_biometrico }}
-                                        {% endif %}
-                                    {% else %}
-                                        <i class="fa-solid fa-ban"></i> Sin dispositivo
-                                    {% endif %}
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn-accion btn-editar" onclick="editarEmpleado({{ persona.id }})">
-                                    <i class="fa-solid fa-pen"></i> Editar
-                                </button>
-                                <button class="btn-accion btn-eliminar" onclick="eliminarEmpleado({{ persona.id }})">
-                                    <i class="fa-solid fa-trash"></i> Eliminar
-                                </button>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" style="text-align: center; padding: 40px;">
-                                <i class="fa-solid fa-inbox"></i>
-                                <p>No hay empleados registrados</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
+                        <!-- Los datos se cargan dinámicamente con JavaScript -->
                     </tbody>
                 </table>
             </div>
             
-            <div style="padding: 15px; background: #f8f9fa; text-align: right; border-top: 1px solid #dee2e6;">
-                Total: <strong>{{ personal.count }}</strong> empleados
-            </div>
-            
-            <div id="estado-vacio" class="empty-state">
+            <div id="estado-vacio" class="empty-state" style="display: none;">
                 <i class="fa-solid fa-users-slash"></i>
                 <p>No hay empleados registrados aún</p>
                 <button class="btn btn-success" id="btn-agregar-primero">

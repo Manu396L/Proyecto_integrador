@@ -2,9 +2,9 @@
 
 /* ===== CONTENIDO PRINCIPAL - AJUSTADO PARA SIDEBAR ===== */
 .contenido {
-    margin-left: 250px;
+    margin-left: -29px;
     padding: 20px 30px;
-    width: calc(100% - 250px);
+    width: calc(100% - -66px);
 }
 
 /* ===== RESUMEN DE NOTIFICACIONES ===== */

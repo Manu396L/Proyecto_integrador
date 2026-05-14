@@ -1,0 +1,196 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_tickets.css' %}">
+
+<div class="contenido">
+    <header>
+        <h1><i class="fa-solid fa-ticket"></i> Panel de Gestión de Tickets</h1>
+        <p>Administra tickets de soporte y seguimiento de incidencias.</p>
+    </header>
+
+    <div class="main-container">
+        <!-- Panel para agregar tickets -->
+        <div class="add-panel">
+            <h2><i class="fa-solid fa-plus-circle"></i> Crear Nuevo Ticket</h2>
+            
+            <div id="mensaje-exito" class="mensaje-exito" style="display: none;">
+                <i class="fa-solid fa-check"></i>
+                <span id="mensaje-texto"></span>
+            </div>
+
+            <form id="formularioTicket">
+                {% csrf_token %}
+                <fieldset>
+                    <legend><i class="fa-solid fa-tag"></i> Información del Ticket</legend>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="remitente_nombre"><i class="fa-solid fa-user"></i> Nombre del Remitente: <span class="required">*</span></label>
+                            <input type="text" id="remitente_nombre" name="remitente_nombre" placeholder="Nombre de quien reporta" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="remitente_email"><i class="fa-solid fa-envelope"></i> Email del Remitente: <span class="required">*</span></label>
+                            <input type="email" id="remitente_email" name="remitente_email" placeholder="correo@ejemplo.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="titulo"><i class="fa-solid fa-heading"></i> Título: <span class="required">*</span></label>
+                        <input type="text" id="titulo" name="titulo" placeholder="Título del ticket" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcion"><i class="fa-solid fa-align-left"></i> Descripción: <span class="required">*</span></label>
+                        <textarea id="descripcion" name="descripcion" rows="4" placeholder="Describe el problema o solicitud" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="prioridad"><i class="fa-solid fa-exclamation-triangle"></i> Prioridad:</label>
+                            <select id="prioridad" name="prioridad">
+                                <option value="baja">Baja</option>
+                                <option value="media" selected>Media</option>
+                                <option value="alta">Alta</option>
+                                <option value="urgente">Urgente</option>
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="btn-guardar">
+                        <i class="fa-solid fa-floppy-disk"></i> Crear Ticket
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btn-cancelar" style="display: none;">
+                        <i class="fa-solid fa-times"></i> Cancelar Edición
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Panel para listar tickets -->
+        <div class="list-panel">
+            <div class="header-actions">
+                <h2><i class="fa-solid fa-list-check"></i> Tickets Registrados</h2>
+                
+                <div class="dropdown">
+                    <button class="dropdown-toggle" id="dropdownMenuButton">
+                        <i class="fa-solid fa-ellipsis-vertical"></i> Opciones
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a class="dropdown-item" id="opcion-filtros"><i class="fa-solid fa-filter"></i> Mostrar/Ocultar Filtros</a>
+                        <a class="dropdown-item" id="opcion-refresh"><i class="fa-solid fa-rotate"></i> Actualizar Lista</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-section" id="filtros" style="display: none;">
+                <input type="text" id="filtro-titulo" placeholder="Filtrar por título">
+                <select id="filtro-estado">
+                    <option value="">Todos los estados</option>
+                    <option value="abierto">Abierto</option>
+                    <option value="en_progreso">En Progreso</option>
+                    <option value="resuelto">Resuelto</option>
+                    <option value="cerrado">Cerrado</option>
+                </select>
+                <select id="filtro-prioridad">
+                    <option value="">Todas las prioridades</option>
+                    <option value="baja">Baja</option>
+                    <option value="media">Media</option>
+                    <option value="alta">Alta</option>
+                    <option value="urgente">Urgente</option>
+                </select>
+                <button id="btn-limpiar-filtros" class="btn-accion">Limpiar Filtros</button>
+            </div>
+            
+            <div class="tabla-container">
+                <table id="tablaTickets">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Remitente</th>
+                            <th>Estado</th>
+                            <th>Prioridad</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTabla">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="estado-vacio" class="empty-state" style="display: none;">
+                <i class="fa-solid fa-inbox"></i>
+                <p>No hay tickets registrados aún</p>
+                <button class="btn btn-primary" id="btn-agregar-primero">
+                    <i class="fa-solid fa-plus"></i> Crear Primer Ticket
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para resolver ticket -->
+    <div id="modal-resolver" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-check-circle"></i> Resolver Ticket</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="info-ticket">
+                    <p><strong>Ticket ID:</strong> <span id="ticket-id-resolver"></span></p>
+                    <p><strong>Título:</strong> <span id="ticket-titulo-resolver"></span></p>
+                    <p><strong>Remitente:</strong> <span id="ticket-remitente-resolver"></span></p>
+                    <p><strong>Email:</strong> <span id="ticket-email-resolver"></span></p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="solucion"><i class="fa-solid fa-pen"></i> Solución / Respuesta: <span class="required">*</span></label>
+                    <textarea id="solucion" rows="5" placeholder="Describa la solución o respuesta al ticket..."></textarea>
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="enviar_email" checked>
+                        <i class="fa-solid fa-envelope"></i> Enviar respuesta por email al remitente
+                    </label>
+                </div>
+                
+                <div id="email-preview" class="email-preview" style="display: none;">
+                    <label><i class="fa-solid fa-eye"></i> Vista previa del email:</label>
+                    <div class="preview-content">
+                        <p><strong>Para:</strong> <span id="preview-email"></span></p>
+                        <p><strong>Asunto:</strong> Respuesta a su ticket #<span id="preview-id"></span></p>
+                        <div id="preview-mensaje" class="preview-mensaje"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btn-cancelar-resolver">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btn-confirmar-resolver">
+                    <i class="fa-solid fa-check"></i> Resolver Ticket
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="soporte-info">
+        <i class="fa-solid fa-headset"></i>
+        <strong>¿Necesita ayuda?</strong><br>
+        Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
+        <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+    </div>
+
+    <div class="footer">
+        <div>Copyright© Sistema Biométrico 2025</div>
+        <div>Versión 1.0</div>
+    </div>
+</div>
+
+<script src="{% static 'js/tickets.js' %}"></script>
+{% endblock %}

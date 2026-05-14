@@ -1,15 +1,20 @@
 # dispositivos/models.py
 from django.db import models
-from sedes.models import Sede
 import uuid
 
 class Dispositivo(models.Model):
     TIPO_DISPOSITIVO_CHOICES = [
-        ('huella', 'Lector de Huella'),
-        ('tarjeta', 'Lector de Tarjeta'),
-        ('facial', 'Reconocimiento Facial'),
-        ('iris', 'Escáner de Iris'),
-        ('multi', 'Multibiométrico'),
+        ('pin', 'Solo PIN'),
+        ('huella', 'Solo Huella Digital'),
+        ('tarjeta', 'Solo Tarjeta RFID'),
+        ('pin_huella', 'PIN + Huella'),
+        ('pin_tarjeta', 'PIN + Tarjeta'),
+        ('huella_tarjeta', 'Huella + Tarjeta'),
+    ]
+    
+    MODELO_DISPOSITIVO_CHOICES = [
+        ('reloj_ip65', 'Control de Acceso por Huella – Reloj – IP – IP65'),
+        ('molinete_zk', 'Molinete Biométrico ZK TS2022'),
     ]
     
     TIPO_SEDE_CHOICES = [
@@ -49,8 +54,13 @@ class Dispositivo(models.Model):
     
     # Estado y Configuración
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='activo', verbose_name='Estado')
-    tipo_dispositivo = models.CharField(max_length=20, choices=TIPO_DISPOSITIVO_CHOICES, default='huella', verbose_name='Tipo de Dispositivo')
+    tipo_dispositivo = models.CharField(max_length=20, choices=TIPO_DISPOSITIVO_CHOICES, default='pin_huella', verbose_name='Tipo de Dispositivo')
+    modelo_dispositivo = models.CharField(max_length=50, choices=MODELO_DISPOSITIVO_CHOICES, default='reloj_ip65', verbose_name='Modelo del Dispositivo')
     observaciones = models.TextField(blank=True, verbose_name='Observaciones')
+    
+    # Modelos cargados manualmente (solo para dispositivos con huella)
+    modelos_cargados = models.TextField(blank=True, verbose_name='Modelos Cargados (JSON)')
+    ultima_carga_modelos = models.DateTimeField(blank=True, null=True, verbose_name='Última Carga de Modelos')
     
     # Auditoría
     ultima_conexion = models.DateTimeField(auto_now=True, verbose_name='Última Conexión')

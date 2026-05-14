@@ -1,3 +1,4 @@
+js
 // static/js/perfil.js
 
 // Datos del empleado

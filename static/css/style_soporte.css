@@ -13,9 +13,9 @@ body {
 
 /* ===== CONTENIDO PRINCIPAL - AJUSTADO PARA SIDEBAR ===== */
 .contenido {
-    margin-left: 250px;
-    padding: 30px;
-    width: calc(100% - 250px);
+    margin-left: -5px;
+    padding: -5px;
+    width: calc(100% - -19px);
     min-height: 100vh;
 }
 

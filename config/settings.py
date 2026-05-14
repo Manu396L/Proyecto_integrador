@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'alertas',
     'soporte',
     'usuarios',
+    'tickets',
 ]
 
 MIDDLEWARE = [

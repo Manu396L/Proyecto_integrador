@@ -25,6 +25,8 @@ const formulario = document.getElementById('formularioEmpleado');
 const inputNombre = document.getElementById('nombre');
 const inputCargo = document.getElementById('cargo');
 const selectArea = document.getElementById('area');
+const inputAreaPersonalizada = document.getElementById('area_personalizada');
+const containerAreaPersonalizada = document.getElementById('container-area-personalizada');
 const inputCorreo = document.getElementById('correo');
 const selectTipoSede = document.getElementById('tipo_sede');
 const inputNombreSede = document.getElementById('nombre_sede');
@@ -52,6 +54,27 @@ const opcionRefresh = document.getElementById('opcion-refresh');
 
 // Input oculto para importar CSV
 let csvInput = null;
+
+// Función para manejar el campo de área personalizada
+function manejarAreaPersonalizada() {
+    if (selectArea.value === 'otro') {
+        containerAreaPersonalizada.style.display = 'block';
+        inputAreaPersonalizada.required = true;
+        inputAreaPersonalizada.focus();
+    } else {
+        containerAreaPersonalizada.style.display = 'none';
+        inputAreaPersonalizada.required = false;
+        inputAreaPersonalizada.value = '';
+    }
+}
+
+// Función para obtener el valor del área (ya sea de select o personalizada)
+function getAreaValue() {
+    if (selectArea.value === 'otro') {
+        return inputAreaPersonalizada.value.trim();
+    }
+    return selectArea.value;
+}
 
 // Función para crear input de archivo CSV
 function crearInputCSV() {
@@ -175,7 +198,7 @@ function actualizarTabla() {
         document.querySelectorAll('.btn-editar').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const empleadoId = parseInt(btn.getAttribute('data-id'));
+                const empleadoId = btn.getAttribute('data-id');
                 editarEmpleado(empleadoId);
             });
         });
@@ -183,7 +206,7 @@ function actualizarTabla() {
         document.querySelectorAll('.btn-eliminar').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const empleadoId = parseInt(btn.getAttribute('data-id'));
+                const empleadoId = btn.getAttribute('data-id');
                 eliminarEmpleado(empleadoId);
             });
         });
@@ -196,7 +219,7 @@ function guardarEmpleado(e) {
     
     const nombre = inputNombre.value.trim();
     const cargo = inputCargo.value.trim();
-    const area = selectArea.value;
+    const area = getAreaValue();
     const correo = inputCorreo.value.trim();
     const tipoSede = selectTipoSede.value;
     const nombreSede = inputNombreSede.value.trim();
@@ -337,11 +360,15 @@ function limpiarFormulario() {
     btnCancelar.style.display = 'none';
     formTitle.textContent = 'Nuevo Empleado';
     editandoIndex = null;
+    containerAreaPersonalizada.style.display = 'none';
+    inputAreaPersonalizada.required = false;
+    inputAreaPersonalizada.value = '';
+    selectArea.value = '';
 }
 
 // Función para editar empleado
 function editarEmpleado(empleadoId) {
-    const empleado = empleados.find(e => e.id === empleadoId);
+    const empleado = empleados.find(e => e.id == empleadoId);
     
     if (!empleado) {
         mostrarMensaje('Empleado no encontrado', 'error');
@@ -351,7 +378,19 @@ function editarEmpleado(empleadoId) {
     // Llenar formulario con datos existentes
     inputNombre.value = empleado.nombre;
     inputCargo.value = empleado.cargo;
-    selectArea.value = empleado.area;
+    
+    // Verificar si el área está en las opciones predefinidas
+    const areasPredefinidas = ['ti', 'rh', 'finanzas', 'operaciones', 'marketing', 'ventas'];
+    if (areasPredefinidas.includes(empleado.area)) {
+        selectArea.value = empleado.area;
+        containerAreaPersonalizada.style.display = 'none';
+    } else {
+        selectArea.value = 'otro';
+        containerAreaPersonalizada.style.display = 'block';
+        inputAreaPersonalizada.value = empleado.area;
+        inputAreaPersonalizada.required = true;
+    }
+    
     inputCorreo.value = empleado.correo;
     selectTipoSede.value = empleado.tipoSede;
     inputNombreSede.value = empleado.nombreSede;
@@ -391,7 +430,7 @@ function editarEmpleado(empleadoId) {
 // Función para eliminar empleado
 function eliminarEmpleado(empleadoId) {
     if (confirm('¿Está seguro de que desea eliminar este empleado?')) {
-        const empleado = empleados.find(e => e.id === empleadoId);
+        const empleado = empleados.find(e => e.id == empleadoId);
         
         if (!empleado) {
             mostrarMensaje('Empleado no encontrado', 'error');
@@ -413,7 +452,7 @@ function eliminarEmpleado(empleadoId) {
             if (data.success) {
                 mostrarMensaje('Empleado eliminado correctamente');
                 cargarPersonal();
-                if (editandoIndex === empleadoId) {
+                if (editandoIndex == empleadoId) {
                     limpiarFormulario();
                 }
             } else {
@@ -497,7 +536,6 @@ function manejarArchivoCSV(event) {
             const empleadosImportados = parsearCSV(csvData);
             
             if (empleadosImportados.length > 0) {
-                // Mostrar modal de confirmación
                 mostrarModalImportacion(empleadosImportados);
             } else {
                 mostrarMensaje('No se encontraron datos válidos en el archivo CSV', 'error');
@@ -514,7 +552,6 @@ function manejarArchivoCSV(event) {
     
     reader.readAsText(file);
     
-    // Limpiar input para permitir seleccionar el mismo archivo otra vez
     event.target.value = '';
 }
 
@@ -527,7 +564,6 @@ function parsearCSV(csvText) {
     
     const headers = lines[0].split(',').map(header => header.trim().toLowerCase());
     
-    // Validar headers mínimos requeridos
     const headersRequeridos = ['nombre', 'cargo', 'area', 'correo'];
     const headersFaltantes = headersRequeridos.filter(header => !headers.includes(header));
     
@@ -544,7 +580,6 @@ function parsearCSV(csvText) {
         const values = parsearLineaCSV(line);
         const empleado = {};
         
-        // Mapear valores a propiedades del empleado
         headers.forEach((header, index) => {
             if (index < values.length) {
                 const value = values[index].trim();
@@ -557,14 +592,14 @@ function parsearCSV(csvText) {
                         empleado.cargo = value;
                         break;
                     case 'area':
-                        empleado.area = mapearArea(value);
+                        empleado.area = value;
                         break;
                     case 'correo':
                         empleado.correo = value.endsWith('@biometrika.com') ? value : value + '@biometrika.com';
                         break;
                     case 'tipo_sede':
                     case 'tiposede':
-                        empleado.tipoSede = mapearTipoSede(value);
+                        empleado.tipoSede = value || 'sede';
                         break;
                     case 'nombre_sede':
                     case 'nombresede':
@@ -576,24 +611,22 @@ function parsearCSV(csvText) {
                         break;
                     case 'dispositivo':
                     case 'dispositivo_biometrico':
-                        empleado.dispositivo = mapearDispositivo(value);
+                        empleado.dispositivo = value || 'huella';
                         break;
                     case 'nivel_seguridad':
                     case 'nivelseguridad':
-                        empleado.nivelSeguridad = mapearNivelSeguridad(value);
+                        empleado.nivelSeguridad = value || 'medio';
                         break;
                 }
             }
         });
         
-        // Valores por defecto para campos faltantes
         if (!empleado.id) empleado.id = generarID(empleado.nombre);
         if (!empleado.tipoSede) empleado.tipoSede = 'sede';
         if (!empleado.nombreSede) empleado.nombreSede = 'Sede Central';
         if (!empleado.dispositivo) empleado.dispositivo = 'huella';
         if (!empleado.nivelSeguridad) empleado.nivelSeguridad = 'medio';
         
-        // Generar credencial según el dispositivo
         empleado.credencial = generarCredencial(empleado.dispositivo);
         empleado.foto = null;
         
@@ -603,7 +636,6 @@ function parsearCSV(csvText) {
     return empleados;
 }
 
-// Función para parsear línea CSV considerando comas dentro de comillas
 function parsearLineaCSV(line) {
     const values = [];
     let current = '';
@@ -626,54 +658,12 @@ function parsearLineaCSV(line) {
     return values;
 }
 
-// Funciones de mapeo para valores CSV
-function mapearArea(valor) {
-    const areas = {
-        'ti': 'ti', 'tecnologia': 'ti', 'tecnología': 'ti', 'sistemas': 'ti',
-        'rh': 'rh', 'recursos humanos': 'rh', 'personal': 'rh',
-        'finanzas': 'finanzas', 'contabilidad': 'finanzas',
-        'operaciones': 'operaciones', 'produccion': 'operaciones', 'producción': 'operaciones',
-        'marketing': 'marketing', 'mercadotecnia': 'marketing',
-        'ventas': 'ventas', 'comercial': 'ventas'
-    };
-    return areas[valor.toLowerCase()] || 'ti';
-}
-
-function mapearTipoSede(valor) {
-    const tipos = {
-        'sede': 'sede', 'principal': 'sede', 'central': 'sede',
-        'oficina': 'oficina', 'sucursal': 'oficina',
-        'area': 'area', 'área': 'area', 'especifica': 'area', 'específica': 'area'
-    };
-    return tipos[valor.toLowerCase()] || 'sede';
-}
-
-function mapearDispositivo(valor) {
-    const dispositivos = {
-        'huella': 'huella', 'fingerprint': 'huella',
-        'tarjeta': 'tarjeta', 'card': 'tarjeta',
-        'pin': 'pin', 'password': 'pin', 'contraseña': 'pin'
-    };
-    return dispositivos[valor.toLowerCase()] || 'huella';
-}
-
-function mapearNivelSeguridad(valor) {
-    const niveles = {
-        'bajo': 'bajo', 'low': 'bajo',
-        'medio': 'medio', 'medium': 'medio',
-        'alto': 'alto', 'high': 'alto'
-    };
-    return niveles[valor.toLowerCase()] || 'medio';
-}
-
-// Función para generar ID automático
 function generarID(nombre) {
     const nombreBase = nombre.split(' ')[0].toLowerCase();
     const random = Math.random().toString().substr(2, 3);
     return `EMP-${nombreBase}-${random}`.toUpperCase();
 }
 
-// Función para generar credencial según dispositivo
 function generarCredencial(dispositivo) {
     switch (dispositivo) {
         case 'tarjeta':
@@ -687,9 +677,7 @@ function generarCredencial(dispositivo) {
     }
 }
 
-// Función para mostrar modal de confirmación de importación
 function mostrarModalImportacion(empleadosImportados) {
-    // Crear modal
     const modal = document.createElement('div');
     modal.className = 'modal-importacion';
     modal.style.cssText = `
@@ -716,19 +704,19 @@ function mostrarModalImportacion(empleadosImportados) {
                 <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                     <thead>
                         <tr style="background: #f8f9fa;">
-                            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Nombre</th>
-                            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Cargo</th>
-                            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">Área</th>
-                            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e0e0e0;">ID</th>
+                            <th style="padding: 8px; text-align: left;">Nombre</th>
+                            <th style="padding: 8px; text-align: left;">Cargo</th>
+                            <th style="padding: 8px; text-align: left;">Área</th>
+                            <th style="padding: 8px; text-align: left;">ID</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${empleadosImportados.map(emp => `
                             <tr>
-                                <td style="padding: 8px; border-bottom: 1px solid #f0f0f0;">${emp.nombre}</td>
-                                <td style="padding: 8px; border-bottom: 1px solid #f0f0f0;">${emp.cargo}</td>
-                                <td style="padding: 8px; border-bottom: 1px solid #f0f0f0;">${emp.area}</td>
-                                <td style="padding: 8px; border-bottom: 1px solid #f0f0f0;">${emp.id}</td>
+                                <td style="padding: 8px;">${emp.nombre}</td>
+                                <td style="padding: 8px;">${emp.cargo}</td>
+                                <td style="padding: 8px;">${emp.area}</td>
+                                <td style="padding: 8px;">${emp.id}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -747,20 +735,17 @@ function mostrarModalImportacion(empleadosImportados) {
     
     document.body.appendChild(modal);
     
-    // Event listeners para los botones del modal
     document.getElementById('btn-cancelar-import').addEventListener('click', () => {
         document.body.removeChild(modal);
     });
     
     document.getElementById('btn-confirmar-import').addEventListener('click', () => {
-        // Agregar empleados importados a la lista
         empleados.push(...empleadosImportados);
         actualizarTabla();
         mostrarMensaje(`Se importaron ${empleadosImportados.length} empleados correctamente`);
         document.body.removeChild(modal);
     });
     
-    // Cerrar modal al hacer clic fuera
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             document.body.removeChild(modal);
@@ -768,20 +753,17 @@ function mostrarModalImportacion(empleadosImportados) {
     });
 }
 
-// Función para importar empleados
 function importarEmpleados() {
     crearInputCSV();
     csvInput.click();
 }
 
-// Función para exportar empleados
 function exportarEmpleados() {
     if (empleados.length === 0) {
         mostrarMensaje('No hay empleados para exportar', 'error');
         return;
     }
     
-    // Crear CSV
     const headers = ['ID', 'Nombre', 'Cargo', 'Área', 'Correo', 'Tipo Sede', 'Nombre Sede', 'Dispositivo', 'Nivel Seguridad', 'Credencial'];
     const csvRows = [headers.join(',')];
     
@@ -813,13 +795,11 @@ function exportarEmpleados() {
     mostrarMensaje('Empleados exportados correctamente');
 }
 
-// Función para actualizar listado
 function actualizarListado() {
     actualizarTabla();
     mostrarMensaje('Listado actualizado');
 }
 
-// Función para obtener token CSRF
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -835,14 +815,12 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Función para cargar empleados desde la base de datos
 function cargarPersonal() {
     fetch('/personal/api/personal/', {
         method: 'GET'
     })
     .then(response => response.json())
     .then(data => {
-        // Convertir snake_case a camelCase y asegurar estructura correcta
         empleados = data.map(p => ({
             id: p.id || p.numero_documento,
             nombre: p.nombre,
@@ -865,13 +843,11 @@ function cargarPersonal() {
     });
 }
 
-// Función para manejar el dropdown del menú de opciones
 function toggleDropdown(e) {
     e.stopPropagation();
     dropdownMenu.classList.toggle('show');
 }
 
-// Cerrar dropdown al hacer clic fuera
 function cerrarDropdown(e) {
     if (!dropdownMenu.contains(e.target) && !dropdownMenuButton.contains(e.target)) {
         dropdownMenu.classList.remove('show');
@@ -880,10 +856,8 @@ function cerrarDropdown(e) {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-    // Formulario
     formulario.addEventListener('submit', guardarEmpleado);
     
-    // Foto
     inputFoto.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -897,10 +871,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Dispositivo biométrico
     selectDispositivo.addEventListener('change', mostrarOpcionesCredencial);
+    selectArea.addEventListener('change', manejarAreaPersonalizada);
     
-    // Filtros
     btnLimpiarFiltros.addEventListener('click', function() {
         filtroNombre.value = '';
         filtroArea.value = '';
@@ -912,10 +885,8 @@ document.addEventListener('DOMContentLoaded', function() {
     filtroArea.addEventListener('change', actualizarTabla);
     filtroSede.addEventListener('change', actualizarTabla);
     
-    // Dropdown functionality
     dropdownMenuButton.addEventListener('click', toggleDropdown);
     
-    // Opciones del dropdown
     opcionImportar.addEventListener('click', function(e) {
         e.stopPropagation();
         importarEmpleados();
@@ -934,15 +905,12 @@ document.addEventListener('DOMContentLoaded', function() {
         dropdownMenu.classList.remove('show');
     });
     
-    // Cerrar dropdown al hacer clic fuera
     document.addEventListener('click', cerrarDropdown);
     
-    // Prevenir que el dropdown se cierre cuando se hace clic dentro de él
     dropdownMenu.addEventListener('click', function(e) {
         e.stopPropagation();
     });
     
-    // Generar ID automático
     inputNombre.addEventListener('blur', function() {
         if (!inputIdEmpleado.value && inputNombre.value) {
             const nombre = inputNombre.value.split(' ')[0].toLowerCase();
@@ -951,7 +919,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Generar correo automático
     inputNombre.addEventListener('blur', function() {
         if (!inputCorreo.value && inputNombre.value) {
             const nombre = inputNombre.value.split(' ')[0].toLowerCase();
@@ -963,6 +930,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Cargar personal desde la base de datos
+    btnNuevo.addEventListener('click', nuevoEmpleado);
+    btnCancelar.addEventListener('click', cancelarEdicion);
+    
     cargarPersonal();
 });
