@@ -74,7 +74,7 @@ function actualizarTabla() {
         const busqueda = filtroNombre.value.toLowerCase();
         empleadosFiltrados = empleadosFiltrados.filter(e => 
             e.nombre.toLowerCase().includes(busqueda) || 
-            e.id.toLowerCase().includes(busqueda)
+            String(e.id).toLowerCase().includes(busqueda)
         );
     }
     
@@ -535,11 +535,19 @@ function parsearCSV(csvText) {
         throw new Error('El archivo CSV está vacío o no tiene el formato correcto');
     }
     
-    const headers = lines[0].split(',').map(header => header.trim().toLowerCase());
+    const headers = lines[0].split(',').map(header => header.trim().toLowerCase().replace(/['"]/g, ''));
     
-    // Validar headers mínimos requeridos
-    const headersRequeridos = ['nombre', 'cargo', 'area', 'correo'];
+    // Validar headers mínimos requeridos (acepta con o sin tilde)
+    const headersRequeridos = ['nombre', 'cargo'];
     const headersFaltantes = headersRequeridos.filter(header => !headers.includes(header));
+    
+    // Verificar que exista area o área
+    const tieneArea = headers.includes('area') || headers.includes('área');
+    if (!tieneArea) headersFaltantes.push('area/área');
+    
+    // Verificar que exista correo
+    const tieneCorreo = headers.includes('correo');
+    if (!tieneCorreo) headersFaltantes.push('correo');
     
     if (headersFaltantes.length > 0) {
         throw new Error(`Faltan las siguientes columnas requeridas: ${headersFaltantes.join(', ')}`);
@@ -557,7 +565,7 @@ function parsearCSV(csvText) {
         // Mapear valores a propiedades del empleado
         headers.forEach((header, index) => {
             if (index < values.length) {
-                const value = values[index].trim();
+                const value = values[index].trim().replace(/^["']|["']$/g, '');
                 
                 switch (header) {
                     case 'nombre':
@@ -567,30 +575,37 @@ function parsearCSV(csvText) {
                         empleado.cargo = value;
                         break;
                     case 'area':
+                    case 'área':
                         empleado.area = mapearArea(value);
                         break;
                     case 'correo':
-                        empleado.correo = value.endsWith('@biometrika.com') ? value : value + '@biometrika.com';
+                        empleado.correo = value;
                         break;
+                    case 'tipo sede':
                     case 'tipo_sede':
                     case 'tiposede':
                         empleado.tipoSede = mapearTipoSede(value);
                         break;
+                    case 'nombre sede':
                     case 'nombre_sede':
                     case 'nombresede':
                         empleado.nombreSede = value || 'Sede Central';
                         break;
                     case 'id':
                     case 'id_empleado':
-                        empleado.id = value || generarID(empleado.nombre);
+                        empleado.id = value;
                         break;
                     case 'dispositivo':
                     case 'dispositivo_biometrico':
                         empleado.dispositivo = mapearDispositivo(value);
                         break;
+                    case 'nivel seguridad':
                     case 'nivel_seguridad':
                     case 'nivelseguridad':
                         empleado.nivelSeguridad = mapearNivelSeguridad(value);
+                        break;
+                    case 'credencial':
+                        empleado.credencial = value;
                         break;
                 }
             }
@@ -602,9 +617,8 @@ function parsearCSV(csvText) {
         if (!empleado.nombreSede) empleado.nombreSede = 'Sede Central';
         if (!empleado.dispositivo) empleado.dispositivo = 'huella';
         if (!empleado.nivelSeguridad) empleado.nivelSeguridad = 'medio';
-        
-        // Generar credencial según el dispositivo
-        empleado.credencial = generarCredencial(empleado.dispositivo);
+        if (!empleado.credencial) empleado.credencial = generarCredencial(empleado.dispositivo);
+        if (!empleado.correo) empleado.correo = '';
         empleado.foto = null;
         
         empleados.push(empleado);
@@ -651,9 +665,9 @@ function mapearArea(valor) {
 
 function mapearTipoSede(valor) {
     const tipos = {
-        'sede': 'sede', 'principal': 'sede', 'central': 'sede',
+        'sede': 'sede', 'principal': 'sede', 'central': 'sede', 'sede principal': 'sede',
         'oficina': 'oficina', 'sucursal': 'oficina',
-        'area': 'area', 'área': 'area', 'especifica': 'area', 'específica': 'area'
+        'area': 'area', 'área': 'area', 'especifica': 'area', 'específica': 'area', 'área específica': 'area'
     };
     return tipos[valor.toLowerCase()] || 'sede';
 }
@@ -762,12 +776,66 @@ function mostrarModalImportacion(empleadosImportados) {
         document.body.removeChild(modal);
     });
     
-    document.getElementById('btn-confirmar-import').addEventListener('click', () => {
-        // Agregar empleados importados a la lista
-        empleados.push(...empleadosImportados);
-        actualizarTabla();
-        mostrarMensaje(`Se importaron ${empleadosImportados.length} empleados correctamente`);
+    document.getElementById('btn-confirmar-import').addEventListener('click', async () => {
+        const btnConfirmar = document.getElementById('btn-confirmar-import');
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Importando...';
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                          getCookie('csrftoken');
+        
+        let exitosos = 0;
+        let errores = [];
+        
+        for (const emp of empleadosImportados) {
+            try {
+                const formData = new FormData();
+                formData.append('id', emp.id);
+                formData.append('nombre', emp.nombre);
+                formData.append('email', emp.correo);
+                formData.append('cargo', emp.cargo);
+                formData.append('area', emp.area);
+                formData.append('tipo_sede', emp.tipoSede);
+                formData.append('nombre_sede', emp.nombreSede);
+                formData.append('dispositivo', emp.dispositivo);
+                formData.append('nivel_seguridad', emp.nivelSeguridad);
+                formData.append('credencial', emp.credencial);
+                
+                const response = await fetch('/personal/api/personal/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    exitosos++;
+                } else {
+                    errores.push(`${emp.nombre}: ${data.error}`);
+                }
+            } catch (error) {
+                errores.push(`${emp.nombre}: Error de conexión`);
+            }
+        }
+        
         document.body.removeChild(modal);
+        
+        // Recargar datos desde el servidor
+        cargarPersonal();
+        
+        // Mostrar resultado
+        if (errores.length === 0) {
+            mostrarMensaje(`Se importaron ${exitosos} empleados correctamente`);
+        } else {
+            mostrarMensaje(
+                `Importados: ${exitosos} | Errores: ${errores.length} - ${errores[0]}${errores.length > 1 ? ' (y más)' : ''}`,
+                errores.length === empleadosImportados.length ? 'error' : 'success'
+            );
+            console.error('Errores de importación:', errores);
+        }
     });
     
     // Cerrar modal al hacer clic fuera
@@ -892,6 +960,12 @@ function cerrarDropdown(e) {
 document.addEventListener('DOMContentLoaded', function() {
     // Formulario
     formulario.addEventListener('submit', guardarEmpleado);
+    
+    // Botón Nuevo
+    btnNuevo.addEventListener('click', nuevoEmpleado);
+    
+    // Botón Cancelar
+    btnCancelar.addEventListener('click', cancelarEdicion);
     
     // Foto
     inputFoto.addEventListener('change', function(e) {

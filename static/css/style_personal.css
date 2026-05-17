@@ -13,9 +13,8 @@ body {
 
 /* ===== CONTENIDO PRINCIPAL - AJUSTADO PARA SIDEBAR ===== */
 .contenido {
-    margin-left: 250px;
     padding: 20px;
-    width: calc(100% - 250px);
+    width: 100%;
 }
 
 /* Ocultar botón volver (ya existe sidebar) */
@@ -607,15 +606,12 @@ tbody tr:hover {
 /* Responsive */
 @media (max-width: 1024px) {
     .contenido {
-        margin-left: 250px;
         padding: 20px;
     }
 }
 
 @media (max-width: 768px) {
     .contenido {
-        margin-left: 70px;
-        width: calc(100% - 70px);
         padding: 15px;
     }
     
@@ -645,8 +641,6 @@ tbody tr:hover {
 
 @media (max-width: 480px) {
     .contenido {
-        margin-left: 0;
-        width: 100%;
         padding: 10px;
     }
     

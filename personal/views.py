@@ -110,8 +110,13 @@ def api_personal(request, persona_id=None):
     elif request.method == 'PUT':
         persona = get_object_or_404(Persona, id=persona_id)
         try:
+            # Django no parsea request.POST para PUT, hay que parsearlo manualmente
+            from django.http.multipartparser import MultiPartParser
+            parser = MultiPartParser(request.META, request, request.upload_handlers)
+            put_data, put_files = parser.parse()
+            
             # Obtener datos del formulario (multipart/form-data)
-            email = request.POST.get('email', persona.email).strip()
+            email = put_data.get('email', persona.email).strip()
             email_actual = persona.email.strip()
             
             # Solo validar si cambió el email
@@ -120,30 +125,30 @@ def api_personal(request, persona_id=None):
                     return JsonResponse({'success': False, 'error': 'Este email ya existe'}, status=400)
             
             # Actualizar campos
-            if 'nombre' in request.POST:
-                nombres_apellidos = request.POST.get('nombre', '').split()
+            if 'nombre' in put_data:
+                nombres_apellidos = put_data.get('nombre', '').split()
                 persona.nombres = nombres_apellidos[0] if nombres_apellidos else ''
                 persona.apellidos = ' '.join(nombres_apellidos[1:]) if len(nombres_apellidos) > 1 else ''
-            persona.numero_documento = request.POST.get('numero_documento', persona.numero_documento)
+            persona.numero_documento = put_data.get('numero_documento', persona.numero_documento)
             persona.email = email
-            persona.telefono = request.POST.get('telefono', persona.telefono)
-            persona.tipo_persona = request.POST.get('tipo_persona', persona.tipo_persona)
-            persona.direccion = request.POST.get('direccion', persona.direccion)
-            persona.cargo = request.POST.get('cargo', persona.cargo)
-            persona.area = request.POST.get('area', persona.area)
-            persona.tipo_sede = request.POST.get('tipo_sede', persona.tipo_sede)
-            persona.nombre_sede = request.POST.get('nombre_sede', persona.nombre_sede)
-            persona.dispositivo_biometrico = request.POST.get('dispositivo', persona.dispositivo_biometrico)
-            persona.credencial_biometrica = request.POST.get('credencial', persona.credencial_biometrica)
-            persona.nivel_seguridad = request.POST.get('nivel_seguridad', persona.nivel_seguridad)
-            persona.activo = request.POST.get('activo', persona.activo) in ['true', 'True', '1', 'on']
+            persona.telefono = put_data.get('telefono', persona.telefono)
+            persona.tipo_persona = put_data.get('tipo_persona', persona.tipo_persona)
+            persona.direccion = put_data.get('direccion', persona.direccion)
+            persona.cargo = put_data.get('cargo', persona.cargo)
+            persona.area = put_data.get('area', persona.area)
+            persona.tipo_sede = put_data.get('tipo_sede', persona.tipo_sede)
+            persona.nombre_sede = put_data.get('nombre_sede', persona.nombre_sede)
+            persona.dispositivo_biometrico = put_data.get('dispositivo', persona.dispositivo_biometrico)
+            persona.credencial_biometrica = put_data.get('credencial', persona.credencial_biometrica)
+            persona.nivel_seguridad = put_data.get('nivel_seguridad', persona.nivel_seguridad)
+            persona.activo = put_data.get('activo', persona.activo) in ['true', 'True', '1', 'on']
             
             # Manejar foto si existe en FILES
-            if 'foto' in request.FILES:
+            if 'foto' in put_files:
                 # Eliminar foto anterior si existe
                 if persona.foto:
                     persona.foto.delete()
-                persona.foto = request.FILES['foto']
+                persona.foto = put_files['foto']
             
             persona.save()
             return JsonResponse({'success': True, 'message': 'Personal actualizado correctamente'})
