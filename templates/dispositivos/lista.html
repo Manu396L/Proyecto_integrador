@@ -331,11 +331,11 @@
                 </button>
             </div>
 
-            <div style="padding: 15px; background: #f8f9fa; text-align: right; border-top: 1px solid #dee2e6;">
-                Total: <strong>{{ dispositivos.count }}</strong> dispositivos | 
-                <span style="color: #28a745;"><i class="fa-solid fa-check-circle"></i> Activos: {{ total_activos }}</span> | 
-                <span style="color: #ffc107;"><i class="fa-solid fa-pause-circle"></i> Pausados: {{ total_pausados }}</span> | 
-                <span style="color: #dc3545;"><i class="fa-solid fa-exclamation-circle"></i> Error: {{ total_error }}</span>
+            <div id="estadisticas-footer" style="padding: 15px; background: #f8f9fa; text-align: right; border-top: 1px solid #dee2e6;">
+                Total: <strong id="total-dispositivos">{{ dispositivos.count }}</strong> dispositivos | 
+                <span style="color: #28a745;"><i class="fa-solid fa-check-circle"></i> Activos: <strong id="total-activos">{{ total_activos }}</strong></span> | 
+                <span style="color: #ffc107;"><i class="fa-solid fa-pause-circle"></i> Pausados: <strong id="total-pausados">{{ total_pausados }}</strong></span> | 
+                <span style="color: #dc3545;"><i class="fa-solid fa-exclamation-circle"></i> Error: <strong id="total-error">{{ total_error }}</strong></span>
             </div>
             
             <div id="estado-vacio" class="empty-state">

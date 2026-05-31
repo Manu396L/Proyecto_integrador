@@ -127,6 +127,19 @@ function actualizarTabla() {
     }
 }
 
+function actualizarEstadisticas() {
+    const totalDispositivos = dispositivos.length;
+    const totalActivos = dispositivos.filter(d => d.estado === 'activo').length;
+    const totalPausados = dispositivos.filter(d => d.estado === 'pausado').length;
+    const totalError = dispositivos.filter(d => d.estado === 'error').length;
+    
+    // Actualizar el HTML con los nuevos valores
+    document.getElementById('total-dispositivos').textContent = totalDispositivos;
+    document.getElementById('total-activos').textContent = totalActivos;
+    document.getElementById('total-pausados').textContent = totalPausados;
+    document.getElementById('total-error').textContent = totalError;
+}
+
 function guardarDispositivo(e) {
     e.preventDefault();
     
@@ -893,8 +906,8 @@ function cargarDispositivos() {
                 nombre: d.nombre,
                 numeroSerie: d.numero_serie,
                 tipoSede: d.tipo_sede === 'sede' ? 'Sede Principal' : 
-                          d.tipo_sede === 'oficina' ? 'Oficina' :
-                          d.tipo_sede === 'area' ? 'Area Especifica' : 'Almacen',
+                        d.tipo_sede === 'oficina' ? 'Oficina' :
+                        d.tipo_sede === 'area' ? 'Area Especifica' : 'Almacen',
                 area: d.area,
                 direccion: d.direccion || '',
                 direccionIP: d.direccion_ip,
@@ -907,6 +920,7 @@ function cargarDispositivos() {
                 ultimaConexion: d.ultima_conexion || 'Nunca'
             }));
             actualizarTabla();
+            actualizarEstadisticas();
         })
         .catch(error => mostrarMensaje('Error al cargar datos', 'error'));
 }

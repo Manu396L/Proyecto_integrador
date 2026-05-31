@@ -11,13 +11,13 @@ urlpatterns = [
     path('notificaciones/', views.notificaciones, name='notificaciones'),
 ]
 
-# URLs para recuperación de contraseña (sin login)
+# URLs para recuperación de contraseña
 password_urls = [
     path('recuperar-contraseña/', views.recuperar_contraseña, name='recuperar_contraseña'),
     path('api/recuperar-contraseña/', views.api_recuperar_contraseña, name='api_recuperar_contraseña'),
 ]
 
-# URLs para registro de nuevos usuarios (sin login)
+# URLs para registro de nuevos usuarios
 registro_urls = [
     path('registro/', views.registro_usuario, name='registro_usuario'),
     path('api/registro/', views.api_registro_usuario, name='api_registro_usuario'),

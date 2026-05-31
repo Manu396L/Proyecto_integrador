@@ -4,6 +4,7 @@ from django.utils import timezone
 class SolicitudRegistro(models.Model):
     """Modelo para almacenar las solicitudes de registro de nuevos usuarios"""
     nombre = models.CharField(max_length=150)
+    dni = models.CharField(max_length=20, verbose_name='DNI')
     email = models.EmailField()
     telefono = models.CharField(max_length=20)
     departamento = models.CharField(max_length=100)
@@ -27,4 +28,4 @@ class SolicitudRegistro(models.Model):
         ordering = ['-fecha_solicitud']
     
     def __str__(self):
-        return f"{self.nombre} - {self.estado}"
+        return f"{self.nombre} - {self.dni} - {self.estado}"

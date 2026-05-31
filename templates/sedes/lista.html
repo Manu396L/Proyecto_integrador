@@ -117,13 +117,50 @@
                     </button>
                 </div>
 
+                <!-- Menú desplegable de Opciones -->
                 <div class="dropdown">
                     <button class="dropdown-toggle" id="dropdownMenuButton">
                         <i class="fa-solid fa-ellipsis-vertical"></i> Opciones
                     </button>
                     <div class="dropdown-menu" id="dropdownMenu">
-                        <a class="dropdown-item" id="opcion-filtros"><i class="fa-solid fa-filter"></i> Mostrar/Ocultar Filtros</a>
-                        <a class="dropdown-item" id="opcion-refresh"><i class="fa-solid fa-rotate"></i> Actualizar</a>
+                        <!-- Submenú EXPORTAR -->
+                        <div class="dropdown-submenu">
+                            <a class="dropdown-item submenu-toggle">
+                                <i class="fa-solid fa-download"></i> Exportar
+                                <i class="fa-solid fa-chevron-right submenu-arrow"></i>
+                            </a>
+                            <div class="dropdown-submenu-menu">
+                                <a class="dropdown-item" onclick="exportarDatos('json')">
+                                    <i class="fa-solid fa-file-code"></i> JSON
+                                </a>
+                                <a class="dropdown-item" onclick="exportarDatos('csv')">
+                                    <i class="fa-solid fa-file-csv"></i> CSV
+                                </a>
+                            </div>
+                        </div>
+                        <!-- Submenú IMPORTAR -->
+                        <div class="dropdown-submenu">
+                            <a class="dropdown-item submenu-toggle">
+                                <i class="fa-solid fa-upload"></i> Importar
+                                <i class="fa-solid fa-chevron-right submenu-arrow"></i>
+                            </a>
+                            <div class="dropdown-submenu-menu">
+                                <a class="dropdown-item" onclick="importarDatos('json')">
+                                    <i class="fa-solid fa-file-code"></i> JSON
+                                </a>
+                                <a class="dropdown-item" onclick="importarDatos('csv')">
+                                    <i class="fa-solid fa-file-csv"></i> CSV
+                                </a>
+                            </div>
+                        </div>
+                        <!-- Actualizar -->
+                        <a class="dropdown-item" onclick="actualizarListado()">
+                            <i class="fa-solid fa-rotate"></i> Actualizar
+                        </a>
+                        <!-- Mostrar/Ocultar Filtros -->
+                        <a class="dropdown-item" id="opcion-filtros">
+                            <i class="fa-solid fa-filter"></i> Mostrar/Ocultar Filtros
+                        </a>
                     </div>
                 </div>
             </div>

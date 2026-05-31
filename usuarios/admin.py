@@ -3,19 +3,24 @@ from .models import SolicitudRegistro
 
 @admin.register(SolicitudRegistro)
 class SolicitudRegistroAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'email', 'departamento', 'estado', 'fecha_solicitud')
-    list_filter = ('estado', 'fecha_solicitud', 'departamento')
-    search_fields = ('nombre', 'email', 'departamento')
-    readonly_fields = ('fecha_solicitud',)
+    list_display = ['id', 'nombre', 'dni', 'email', 'departamento', 'fecha_solicitud', 'estado']
+    list_filter = ['estado', 'departamento', 'fecha_solicitud']
+    search_fields = ['nombre', 'dni', 'email', 'telefono']
+    readonly_fields = ['fecha_solicitud']
+    list_per_page = 20
     
     fieldsets = (
-        ('Información Personal', {
-            'fields': ('nombre', 'email', 'telefono')
+        ('Datos Personales', {
+            'fields': ('nombre', 'dni', 'email', 'telefono')
         }),
-        ('Información Laboral', {
+        ('Datos Laborales', {
             'fields': ('departamento', 'puesto', 'superior', 'fecha_ingreso')
         }),
-        ('Estado', {
-            'fields': ('estado', 'fecha_solicitud')
+        ('Estado de la Solicitud', {
+            'fields': ('estado', 'observaciones')
+        }),
+        ('Información del Sistema', {
+            'fields': ('fecha_solicitud',),
+            'classes': ('collapse',)
         }),
     )

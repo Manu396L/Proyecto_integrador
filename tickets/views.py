@@ -6,6 +6,7 @@ from django.utils import timezone
 import json
 from .models import Ticket
 
+
 @login_required
 def lista_tickets(request):
     tickets = Ticket.objects.all()

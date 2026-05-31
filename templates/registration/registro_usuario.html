@@ -10,9 +10,7 @@
     <title>Registro de Usuario - Biometrika</title>
 </head>
 <body>
-    <!-- Contenedor del registro -->
     <div class="login-container">
-        <!-- Logo -->
         <div class="logo">
             <div class="fingerprint-scanner">
                 <i class="fa-solid fa-fingerprint"></i>
@@ -37,23 +35,28 @@
             </div>
 
             <div class="input-group">
+                <label for="dni"><i class="fa-solid fa-id-card"></i> DNI <span class="required">*</span></label>
+                <input type="text" id="dni" name="dni" required placeholder="Ej: 12345678">
+            </div>
+
+            <div class="input-group">
                 <label for="email"><i class="fa-solid fa-envelope"></i> Correo Electrónico <span class="required">*</span></label>
                 <input type="email" id="email" name="email" required placeholder="ejemplo@correo.com">
             </div>
 
             <div class="input-group">
                 <label for="telefono"><i class="fa-solid fa-phone"></i> Teléfono <span class="required">*</span></label>
-                <input type="tel" id="telefono" name="telefono" required placeholder="Ej: +1 234 567 890">
+                <input type="tel" id="telefono" name="telefono" required placeholder="Ej: 123456789">
             </div>
 
             <div class="input-group">
                 <label for="departamento"><i class="fa-solid fa-building"></i> Departamento <span class="required">*</span></label>
-                <input type="text" id="departamento" name="departamento" required placeholder="Ej: Ventas, Marketing, Recursos Humanos...">
+                <input type="text" id="departamento" name="departamento" required placeholder="Ej: Ventas, Marketing, RRHH">
             </div>
 
             <div class="input-group">
                 <label for="puesto"><i class="fa-solid fa-briefcase"></i> Puesto <span class="required">*</span></label>
-                <input type="text" id="puesto" name="puesto" required placeholder="Ej: Analista de Ventas">
+                <input type="text" id="puesto" name="puesto" required placeholder="Ej: Analista">
             </div>
 
             <div class="input-group">
@@ -71,11 +74,10 @@
             </button>
 
             <div class="link-volver">
-                <a href="{% url 'login' %}"><i class="fa-solid fa-arrow-left"></i> Volver al inicio de sesión</a>
+                <a href="{% url 'login' %}"><i class="fa-solid fa-arrow-left"></i> Volver al inicio</a>
             </div>
         </form>
 
-        <!-- Información de soporte -->
         <div class="soporte-info">
             <i class="fa-solid fa-headset"></i>
             <strong>¿Necesita ayuda?</strong><br>
@@ -84,7 +86,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <div class="footer">
         <div>Copyright© Sistema Biométrico 2025</div>
         <div>Versión 1.0</div>

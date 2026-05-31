@@ -3,16 +3,16 @@ from .models import Sede, Area
 
 @admin.register(Sede)
 class SedeAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'ciudad', 'email', 'activo', 'fecha_creacion')
-    list_filter = ('activo', 'ciudad', 'fecha_creacion')
-    search_fields = ('nombre', 'ciudad', 'email')
+    list_display = ('id', 'nombre', 'codigo_unico', 'dispositivo_biometrico', 'nivel_seguridad', 'activo', 'fecha_creacion')
+    list_filter = ('activo', 'nivel_seguridad', 'dispositivo_biometrico')
+    search_fields = ('nombre', 'codigo_unico', 'direccion')
     readonly_fields = ('fecha_creacion',)
     fieldsets = (
-        ('Información General', {
-            'fields': ('nombre', 'direccion', 'ciudad', 'email')
+        ('Información de la Sede', {
+            'fields': ('nombre', 'codigo_unico', 'direccion')
         }),
-        ('Contacto', {
-            'fields': ('telefono', 'encargado')
+        ('Configuración de Seguridad', {
+            'fields': ('dispositivo_biometrico', 'nivel_seguridad')
         }),
         ('Estado', {
             'fields': ('activo', 'fecha_creacion')
@@ -21,21 +21,14 @@ class SedeAdmin(admin.ModelAdmin):
 
 @admin.register(Area)
 class AreaAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'sede', 'piso', 'nivel_seguridad', 'codigo_acceso')
-    list_filter = ('nivel_seguridad', 'piso', 'sede')
-    search_fields = ('nombre', 'codigo_acceso', 'descripcion')
+    list_display = ('id', 'nombre', 'sede', 'piso', 'dispositivo_biometrico', 'nivel_seguridad', 'codigo_acceso')
+    list_filter = ('nivel_seguridad', 'dispositivo_biometrico', 'sede')
+    search_fields = ('nombre', 'codigo_acceso')
     fieldsets = (
-        ('Información General', {
-            'fields': ('sede', 'nombre', 'descripcion', 'piso')
+        ('Información del Área', {
+            'fields': ('sede', 'nombre', 'piso', 'codigo_acceso')
         }),
-        ('Seguridad y Acceso', {
-            'fields': ('codigo_acceso', 'nivel_seguridad')
+        ('Configuración de Seguridad', {
+            'fields': ('dispositivo_biometrico', 'nivel_seguridad')
         }),
     )
-    
-    def save_model(self, request, obj, form, change):
-        """Override para hacer logging cuando se guarda"""
-        print(f"✅ Guardando área: {obj.nombre}")
-        print(f"   Nivel de seguridad: {obj.nivel_seguridad}")
-        super().save_model(request, obj, form, change)
-        print(f"   ✅ Guardada con éxito")

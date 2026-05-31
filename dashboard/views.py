@@ -39,11 +39,25 @@ def dashboard(request):
     # Últimos accesos
     ultimos_accesos = RegistroAcceso.objects.select_related('persona').order_by('-fecha_hora')[:10]
     
-    # Estadísticas por sede
+    # Estadísticas por sede - Usando solo campos que existen
     sedes = Sede.objects.all()
     areas_por_sede = {}
+    sedes_lista = []
+    
     for sede in sedes:
-        areas_por_sede[sede.id] = Area.objects.filter(sede=sede).count()
+        # Contar áreas por sede
+        areas_count = Area.objects.filter(sede=sede).count()
+        areas_por_sede[str(sede.id)] = areas_count
+        
+        # Crear lista de sedes para el template (SIN ciudad)
+        sedes_lista.append({
+            'id': sede.id,
+            'nombre': sede.nombre,
+            'direccion': sede.direccion,
+            'activo': sede.activo,
+            'areas_count': areas_count,
+            'codigo': sede.codigo_unico or f"SED-{sede.id:03d}"
+        })
     
     # Actividad de la semana
     accesos_semana = RegistroAcceso.objects.filter(
@@ -62,7 +76,7 @@ def dashboard(request):
         'ultimos_accesos': ultimos_accesos,
         'personal_reciente': personal_reciente,
         'alertas_pendientes': alertas_pendientes,
-        'sedes': sedes,
+        'sedes': sedes_lista,
         'areas_por_sede': json.dumps(areas_por_sede),
     }
     

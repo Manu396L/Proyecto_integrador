@@ -1,6 +1,4 @@
 /* static/css/style_usuario_nuevo.css */
-
-/* Reset */
 * {
     margin: 0;
     padding: 0;
@@ -8,7 +6,6 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Fondo general */
 body {
     display: flex;
     flex-direction: column;
@@ -19,7 +16,6 @@ body {
     padding: 20px;
 }
 
-/* Contenedor del registro */
 .login-container {
     background: #fff;
     padding: 40px 30px;
@@ -32,7 +28,6 @@ body {
     margin-bottom: 20px;
 }
 
-/* Logo */
 .logo {
     margin-bottom: 20px;
 }
@@ -49,7 +44,6 @@ body {
     font-weight: 600;
 }
 
-/* Títulos */
 h2 {
     color: #2c3e50;
     margin-bottom: 8px;
@@ -58,13 +52,11 @@ h2 {
 }
 
 .subtitulo {
-    text-align: center;
     color: #7f8c8d;
     margin-bottom: 25px;
     font-size: 14px;
 }
 
-/* Mensaje de éxito */
 .mensaje-exito {
     background-color: #d4edda;
     color: #155724;
@@ -83,19 +75,17 @@ h2 {
     display: flex;
 }
 
-/* Mensaje de error */
 .error-message {
     margin-top: 12px;
     color: #c62828;
     font-size: 13px;
     text-align: center;
-    padding: 8px;
+    padding: 10px;
     background: #ffebee;
     border-radius: 6px;
     border: 1px solid #ffcdd2;
 }
 
-/* Inputs */
 .input-group {
     text-align: left;
     margin-bottom: 18px;
@@ -116,33 +106,25 @@ h2 {
     width: 18px;
 }
 
-.input-group input, 
-.input-group select {
+.input-group input {
     width: 100%;
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 14px;
-    transition: border-color 0.3s;
+    transition: all 0.3s;
 }
 
-.input-group input:focus, 
-.input-group select:focus {
+.input-group input:focus {
     border-color: #1abc9c;
     outline: none;
-    box-shadow: 0 0 6px rgba(26,188,156,0.25);
-}
-
-.input-group input.error {
-    border-color: #e74c3c;
-    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+    box-shadow: 0 0 0 2px rgba(26,188,156,0.1);
 }
 
 .required {
     color: #e74c3c;
 }
 
-/* Botón de registro */
 .login-button {
     width: 100%;
     padding: 14px;
@@ -153,7 +135,7 @@ h2 {
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.3s, transform 0.15s ease;
+    transition: background 0.3s, transform 0.15s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -162,7 +144,7 @@ h2 {
 }
 
 .login-button:hover {
-    background: #34495e;
+    background: #1abc9c;
     transform: translateY(-2px);
 }
 
@@ -172,7 +154,6 @@ h2 {
     transform: none;
 }
 
-/* Link volver */
 .link-volver {
     text-align: center;
     margin-top: 20px;
@@ -185,18 +166,13 @@ h2 {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.3s ease;
+    transition: color 0.3s;
 }
 
 .link-volver a:hover {
     color: #1abc9c;
 }
 
-.link-volver i {
-    font-size: 16px;
-}
-
-/* Información de soporte */
 .soporte-info {
     text-align: center;
     margin-top: 25px;
@@ -211,25 +187,19 @@ h2 {
 
 .soporte-info i {
     color: #1abc9c;
-    margin-bottom: 8px;
-    font-size: 18px;
-}
-
-.soporte-info strong {
-    color: #2c3e50;
+    margin-right: 5px;
 }
 
 .soporte-info a {
     color: #1abc9c;
-    font-weight: 600;
     text-decoration: none;
+    font-weight: 600;
 }
 
 .soporte-info a:hover {
-    color: #16a085;
+    text-decoration: underline;
 }
 
-/* Footer */
 .footer {
     background: #2c3e50;
     padding: 15px 30px;
@@ -243,7 +213,6 @@ h2 {
     border-radius: 8px;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     body {
         padding: 15px;

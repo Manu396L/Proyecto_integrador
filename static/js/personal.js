@@ -24,6 +24,7 @@ const filtroSede = document.getElementById('filtro-sede');
 // Elementos del formulario
 const formulario = document.getElementById('formularioEmpleado');
 const inputNombre = document.getElementById('nombre');
+const inputDni = document.getElementById('dni');
 const inputCargo = document.getElementById('cargo');
 const selectArea = document.getElementById('area');
 const inputAreaPersonalizada = document.getElementById('area_personalizada');
@@ -379,6 +380,7 @@ function actualizarTabla() {
                         `<div class="foto-placeholder"><i class="fa-solid fa-user"></i></div>`
                     }
                 </td>
+                <td class="dni-cell"><strong>${empleado.numero_documento || 'N/A'}</strong></td>
                 <td class="id-cell">${empleado.id}</td>
                 <td class="nombre-cell"><strong>${empleado.nombre}</strong></td>
                 <td class="cargo-cell">${empleado.cargo}</td>
@@ -422,7 +424,10 @@ function actualizarTabla() {
 function guardarEmpleado(e) {
     e.preventDefault();
     
+    console.log('=== INICIANDO GUARDADO DE EMPLEADO ===');
+    
     const nombre = inputNombre.value.trim();
+    const dni = inputDni.value.trim();
     const cargo = inputCargo.value.trim();
     const area = getAreaValue();
     const correo = inputCorreo.value.trim();
@@ -432,7 +437,20 @@ function guardarEmpleado(e) {
     const dispositivo = selectDispositivo.value;
     const nivelSeguridad = selectNivelSeguridad.value;
     
-    if (!nombre || !cargo || !area || !correo || !tipoSede || !nombreSede || !id || !dispositivo || !nivelSeguridad) {
+    console.log('Valores obtenidos del formulario:');
+    console.log('- nombre:', nombre, '| longitud:', nombre.length);
+    console.log('- dni:', dni, '| longitud:', dni.length);
+    console.log('- cargo:', cargo, '| longitud:', cargo.length);
+    console.log('- area:', area, '| longitud:', area.length);
+    console.log('- correo:', correo, '| longitud:', correo.length);
+    console.log('- tipoSede:', tipoSede);
+    console.log('- nombreSede:', nombreSede, '| longitud:', nombreSede.length);
+    console.log('- id:', id, '| longitud:', id.length);
+    console.log('- dispositivo:', dispositivo);
+    console.log('- nivelSeguridad:', nivelSeguridad);
+    
+    if (!nombre || !dni || !cargo || !area || !correo || !tipoSede || !nombreSede || !id || !dispositivo || !nivelSeguridad) {
+        console.log('Validación fallida - campos vacíos');
         mostrarMensaje('Complete todos los campos obligatorios', 'error');
         return;
     }
@@ -453,28 +471,43 @@ function guardarEmpleado(e) {
         credencial = huellaStatus.classList.contains('registrada') ? 'huella_registrada' : '';
     }
     
-    const datosEmpleado = {
-        id,
-        nombre,
-        email: correo,
-        cargo,
-        area,
-        tipo_sede: tipoSede,
-        nombre_sede: nombreSede,
-        dispositivo,
-        nivel_seguridad: nivelSeguridad,
-        credencial,
-        foto: fotoActual,
-        metodo_adicional: obtenerDatosAdicionales()
-    };
-    
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+    
+    // Crear FormData para enviar archivo + datos
+    const formData = new FormData();
+    formData.append('nombre', nombre);
+    formData.append('numero_documento', dni);
+    formData.append('email', correo);
+    formData.append('cargo', cargo);
+    formData.append('area', area);
+    formData.append('tipo_sede', tipoSede);
+    formData.append('nombre_sede', nombreSede);
+    formData.append('dispositivo', dispositivo);
+    formData.append('nivel_seguridad', nivelSeguridad);
+    formData.append('credencial', credencial);
+    
+    const datosAdicionales = obtenerDatosAdicionales();
+    if (datosAdicionales) {
+        formData.append('metodo_adicional', JSON.stringify(datosAdicionales));
+    }
+    
+    // Debug: verificar contenido del FormData
+    console.log('=== FormData construido ===');
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+    }
+    
+    // Agregar archivo de foto si existe
+    if (inputFoto.files && inputFoto.files[0]) {
+        formData.append('foto', inputFoto.files[0]);
+        console.log('Foto agregada:', inputFoto.files[0].name);
+    }
     
     if (editandoIndex !== null) {
         fetch(`/personal/api/personal/${editandoIndex}/`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-            body: JSON.stringify(datosEmpleado)
+            headers: { 'X-CSRFToken': csrfToken },
+            body: formData
         })
         .then(response => response.json())
         .then(data => {
@@ -490,8 +523,8 @@ function guardarEmpleado(e) {
     } else {
         fetch('/personal/api/personal/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-            body: JSON.stringify(datosEmpleado)
+            headers: { 'X-CSRFToken': csrfToken },
+            body: formData
         })
         .then(response => response.json())
         .then(data => {
@@ -537,6 +570,7 @@ function mostrarMensaje(mensaje, tipo = 'success') {
 
 function limpiarFormulario() {
     formulario.reset();
+    inputFoto.value = '';
     fotoActual = null;
     fotoPreview.innerHTML = '<i class="fa-solid fa-user"></i><span>Sin foto</span>';
     fotoPreview.classList.remove('has-image');
@@ -570,6 +604,7 @@ function editarEmpleado(empleadoId) {
     }
     
     inputNombre.value = empleado.nombre;
+    inputDni.value = empleado.numero_documento || '';
     inputCargo.value = empleado.cargo;
     
     const areasPredefinidas = ['ti', 'rh', 'finanzas', 'operaciones', 'marketing', 'ventas'];
@@ -583,9 +618,9 @@ function editarEmpleado(empleadoId) {
         inputAreaPersonalizada.required = true;
     }
     
-    inputCorreo.value = empleado.correo;
-    selectTipoSede.value = empleado.tipoSede;
-    inputNombreSede.value = empleado.nombreSede;
+    inputCorreo.value = empleado.email || '';
+    selectTipoSede.value = empleado.tipoSede || 'sede';
+    inputNombreSede.value = empleado.nombreSede || '';
     inputIdEmpleado.value = empleado.id;
     selectDispositivo.value = empleado.dispositivo;
     selectNivelSeguridad.value = empleado.nivelSeguridad;
@@ -953,9 +988,10 @@ function cargarPersonal() {
             empleados = data.map(p => ({
                 id: p.id || p.numero_documento,
                 nombre: p.nombre,
+                numero_documento: p.numero_documento,
+                email: p.email,
                 cargo: p.cargo || 'N/A',
                 area: p.area || 'ti',
-                correo: p.email,
                 tipoSede: p.tipo_sede || 'sede',
                 nombreSede: p.nombre_sede || 'Sede Central',
                 dispositivo: p.dispositivo || 'huella',

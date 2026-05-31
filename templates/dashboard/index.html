@@ -158,7 +158,34 @@
         </table>
     </div>
 </div>
-
+<!-- Sección de Sedes -->
+<div class="panel">
+    <h3><i class="fa-solid fa-building"></i> Sedes Registradas</h3>
+    <div class="tabla-container">
+        <table class="tabla-mini">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Áreas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sede in sedes %}
+                <tr>
+                    <td>SED-{{ sede.id|stringformat:"03d" }}</td>
+                    <td>{{ sede.nombre }}</td>
+                    <td>{{ sede.areas.count }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">No hay sedes registradas</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 <!-- Alertas Pendientes -->
 <div class="actividad">
     <h2><i class="fa-solid fa-exclamation-circle"></i> Alertas Pendientes</h2>

@@ -1,21 +1,17 @@
-// static/js/usuario_nuevo.js - VERSIÓN COMPLETA
-
+// static/js/usuario_nuevo.js
 document.addEventListener('DOMContentLoaded', function() {
     const formulario = document.getElementById('formularioRegistro');
     const mensajeExito = document.getElementById('mensaje-exito');
-    const btnEnviar = document.getElementById('btnEnviar');
-
-    // Establecer fecha mínima para el campo de fecha (hoy)
     const fechaIngreso = document.getElementById('fecha_ingreso');
     if (fechaIngreso) {
         const hoy = new Date().toISOString().split('T')[0];
-        fechaIngreso.min = hoy;
+        fechaIngreso.max = hoy;
+        fechaIngreso.min = '1990-01-01';
     }
 
     if (formulario) {
         formulario.addEventListener('submit', function(e) {
             e.preventDefault();
-            
             if (validarFormulario()) {
                 enviarDatos();
             }
@@ -23,145 +19,107 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function validarFormulario() {
-        const campos = [
-            { id: 'nombre', nombre: 'Nombre Completo' },
-            { id: 'email', nombre: 'Correo Electrónico' },
-            { id: 'telefono', nombre: 'Teléfono' },
-            { id: 'departamento', nombre: 'Departamento' },
-            { id: 'puesto', nombre: 'Puesto' },
-            { id: 'superior', nombre: 'Superior' },
-            { id: 'fecha_ingreso', nombre: 'Fecha de Ingreso' }
-        ];
-
-        let formularioValido = true;
-        let primerError = null;
-
-        // Validar campos obligatorios
+        let valido = true;
+        const campos = ['nombre', 'dni', 'email', 'telefono', 'departamento', 'puesto', 'superior', 'fecha_ingreso'];
+        
         campos.forEach(campo => {
-            const elemento = document.getElementById(campo.id);
+            const elemento = document.getElementById(campo);
             if (elemento && !elemento.value.trim()) {
-                formularioValido = false;
-                resaltarError(elemento);
-                if (!primerError) {
-                    primerError = elemento;
-                }
+                valido = false;
+                elemento.style.borderColor = '#e74c3c';
+                elemento.style.boxShadow = '0 0 0 2px rgba(231, 76, 60, 0.2)';
             } else if (elemento) {
-                quitarError(elemento);
+                elemento.style.borderColor = '#ccc';
+                elemento.style.boxShadow = 'none';
             }
         });
 
-        // Validación específica para email
+        const dni = document.getElementById('dni');
+        if (dni && dni.value && !/^\d{7,8}$/.test(dni.value)) {
+            valido = false;
+            dni.style.borderColor = '#e74c3c';
+            dni.style.boxShadow = '0 0 0 2px rgba(231, 76, 60, 0.2)';
+            mostrarError('DNI inválido (debe tener 7 u 8 dígitos)');
+        }
+
         const email = document.getElementById('email');
-        if (email && email.value && !validarEmail(email.value)) {
-            formularioValido = false;
-            resaltarError(email);
-            if (!primerError) {
-                primerError = email;
-            }
-            mostrarError('Por favor, ingrese un correo electrónico válido.');
+        if (email && email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+            valido = false;
+            email.style.borderColor = '#e74c3c';
+            email.style.boxShadow = '0 0 0 2px rgba(231, 76, 60, 0.2)';
+            mostrarError('Email inválido');
         }
 
-        // Validación específica para teléfono
         const telefono = document.getElementById('telefono');
-        if (telefono && telefono.value && !validarTelefono(telefono.value)) {
-            formularioValido = false;
-            resaltarError(telefono);
-            if (!primerError) {
-                primerError = telefono;
-            }
-            mostrarError('Por favor, ingrese un número de teléfono válido.');
+        if (telefono && telefono.value && !/^[\+]?[0-9\s\-\(\)]{8,}$/.test(telefono.value)) {
+            valido = false;
+            telefono.style.borderColor = '#e74c3c';
+            telefono.style.boxShadow = '0 0 0 2px rgba(231, 76, 60, 0.2)';
+            mostrarError('Teléfono inválido');
         }
 
-        if (!formularioValido && primerError) {
-            primerError.focus();
-            if (!document.querySelector('.error-message')) {
-                mostrarError('Por favor, complete todos los campos obligatorios correctamente.');
+        const fechaIngresoElem = document.getElementById('fecha_ingreso');
+        if (fechaIngresoElem && fechaIngresoElem.value) {
+            const fecha = new Date(fechaIngresoElem.value);
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            if (fecha > hoy) {
+                valido = false;
+                fechaIngresoElem.style.borderColor = '#e74c3c';
+                mostrarError('La fecha de ingreso no puede ser futura');
             }
         }
 
-        return formularioValido;
-    }
-
-    function validarEmail(email) {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
-    }
-
-    function validarTelefono(telefono) {
-        const regex = /^[\+]?[0-9\s\-\(\)]{8,}$/;
-        return regex.test(telefono);
-    }
-
-    function resaltarError(elemento) {
-        elemento.style.borderColor = '#e74c3c';
-        elemento.style.boxShadow = '0 0 0 2px rgba(231, 76, 60, 0.2)';
-        elemento.classList.add('error');
-    }
-
-    function quitarError(elemento) {
-        elemento.style.borderColor = '#ccc';
-        elemento.style.boxShadow = 'none';
-        elemento.classList.remove('error');
+        return valido;
     }
 
     function mostrarError(mensaje) {
-        const errorAnterior = document.querySelector('.error-message');
-        if (errorAnterior) {
-            errorAnterior.remove();
+        let errorDiv = document.querySelector('.error-message');
+        if (errorDiv) {
+            errorDiv.remove();
         }
-
-        const errorDiv = document.createElement('div');
+        errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
         errorDiv.textContent = mensaje;
-        
         const boton = formulario.querySelector('.login-button');
         formulario.insertBefore(errorDiv, boton);
-    }
-
-    function obtenerDatosFormulario() {
-        return {
-            nombre: document.getElementById('nombre')?.value || '',
-            email: document.getElementById('email')?.value || '',
-            telefono: document.getElementById('telefono')?.value || '',
-            departamento: document.getElementById('departamento')?.value || '',
-            puesto: document.getElementById('puesto')?.value || '',
-            superior: document.getElementById('superior')?.value || '',
-            fecha_ingreso: document.getElementById('fecha_ingreso')?.value || '',
-            fecha_solicitud: new Date().toISOString()
-        };
+        setTimeout(() => {
+            if (errorDiv) errorDiv.remove();
+        }, 4000);
     }
 
     function enviarDatos() {
-        const errorAnterior = document.querySelector('.error-message');
-        if (errorAnterior) {
-            errorAnterior.remove();
-        }
-
-        const boton = formulario.querySelector('.login-button');
+        const boton = document.querySelector('.login-button');
         const textoOriginal = boton.innerHTML;
-        
-        boton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
         boton.disabled = true;
+        boton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
 
-        const datos = obtenerDatosFormulario();
-        
-        // Obtener CSRF token
+        const datos = {
+            nombre: document.getElementById('nombre')?.value.trim() || '',
+            dni: document.getElementById('dni')?.value.trim() || '',
+            email: document.getElementById('email')?.value.trim() || '',
+            telefono: document.getElementById('telefono')?.value.trim() || '',
+            departamento: document.getElementById('departamento')?.value.trim() || '',
+            puesto: document.getElementById('puesto')?.value.trim() || '',
+            superior: document.getElementById('superior')?.value.trim() || '',
+            fecha_ingreso: document.getElementById('fecha_ingreso')?.value || ''
+        };
+
+        console.log('Enviando datos:', datos);
+
         function getCookie(name) {
-            let cookieValue = null;
+            let value = null;
             if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
+                document.cookie.split(';').forEach(cookie => {
+                    const c = cookie.trim();
+                    if (c.startsWith(name + '=')) {
+                        value = decodeURIComponent(c.substring(name.length + 1));
                     }
-                }
+                });
             }
-            return cookieValue;
+            return value;
         }
 
-        // Enviar al servidor
         fetch('/usuarios/api/registro/', {
             method: 'POST',
             headers: {
@@ -174,12 +132,10 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 mensajeExito.classList.add('mostrar');
-                mensajeExito.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
+                formulario.reset();
                 setTimeout(() => {
-                    formulario.reset();
                     mensajeExito.classList.remove('mostrar');
-                }, 3000);
+                }, 4000);
             } else {
                 mostrarError(data.message || 'Error al enviar la solicitud');
             }
@@ -189,40 +145,19 @@ document.addEventListener('DOMContentLoaded', function() {
             mostrarError('Error de conexión. Por favor, intente nuevamente.');
         })
         .finally(() => {
-            boton.innerHTML = textoOriginal;
             boton.disabled = false;
+            boton.innerHTML = textoOriginal;
         });
     }
 
     // Validación en tiempo real
     const inputs = formulario.querySelectorAll('input');
-    inputs.forEach(campo => {
-        campo.addEventListener('blur', function() {
-            if (this.value.trim()) {
-                quitarError(this);
-                
-                if (this.type === 'email' && this.value) {
-                    if (!validarEmail(this.value)) {
-                        resaltarError(this);
-                    }
-                }
-                
-                if (this.id === 'telefono' && this.value) {
-                    if (!validarTelefono(this.value)) {
-                        resaltarError(this);
-                    }
-                }
-            }
-        });
-
-        campo.addEventListener('input', function() {
-            if (this.value.trim()) {
-                quitarError(this);
-                const errorAnterior = document.querySelector('.error-message');
-                if (errorAnterior) {
-                    errorAnterior.remove();
-                }
-            }
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            this.style.borderColor = '#ccc';
+            this.style.boxShadow = 'none';
+            const errorDiv = document.querySelector('.error-message');
+            if (errorDiv) errorDiv.remove();
         });
     });
 });
