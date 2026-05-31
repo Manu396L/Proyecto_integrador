@@ -12,5 +12,6 @@ urlpatterns = [
     path('api/eliminar/<int:reporte_id>/', views.eliminar_reporte, name='eliminar_reporte'),
     path('api/estadisticas/', views.estadisticas_api, name='estadisticas_api'),
     
+    path('exportar/<str:formato>/', views.exportar_datos, name='exportar_datos'),
     path('exportar/<int:reporte_id>/<str:formato>/', views.exportar_reporte, name='exportar_reporte'),
 ]
