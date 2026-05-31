@@ -13,6 +13,14 @@ import csv
 import io
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from docx import Document
+from docx.shared import Inches, Pt
+from xml.dom import minidom
+from xml.etree.ElementTree import Element, SubElement, tostring
 from .models import Reporte, ConfiguracionReporte
 from personal.models import RegistroAcceso, Persona
 from dispositivos.models import Dispositivo
@@ -298,16 +306,21 @@ def eliminar_reporte(request, reporte_id):
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 
+# ==================== FUNCIONES DE EXPORTACIÓN ====================
+
 @login_required
 def exportar_reporte(request, reporte_id, formato):
+    """Exportar un reporte guardado"""
     reporte = get_object_or_404(Reporte, id=reporte_id)
     
     if not reporte.archivo:
         return JsonResponse({'success': False, 'message': 'El reporte no tiene archivo asociado'}, status=400)
     
+    content = reporte.archivo.read()
+    
     if formato == 'csv':
-        response = HttpResponse(reporte.archivo.read(), content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename="{reporte.archivo.name}"'
+        response = HttpResponse(content, content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="reporte_{reporte.id}.csv"'
         return response
     
     elif formato == 'json':
@@ -315,34 +328,36 @@ def exportar_reporte(request, reporte_id, formato):
         response['Content-Disposition'] = f'attachment; filename="reporte_{reporte.id}.json"'
         return response
     
-    elif formato in ['excel', 'xlsx']:
-        csv_content = reporte.archivo.read().decode('utf-8')
-        reader = csv.reader(io.StringIO(csv_content))
-        
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Reporte General"
-        
-        header_fill = PatternFill(start_color="2C3E50", end_color="2C3E50", fill_type="solid")
-        header_font = Font(color="FFFFFF", bold=True)
-        
-        for row_idx, row in enumerate(reader, 1):
-            for col_idx, value in enumerate(row, 1):
-                cell = ws.cell(row=row_idx, column=col_idx, value=value)
-                if row_idx == 1 or (value and str(value).startswith('===')):
-                    cell.font = Font(bold=True)
-                    cell.fill = header_fill
-                    cell.font = header_font
-        
+    elif formato == 'xml':
+        xml_content = exportar_xml_desde_csv(content.decode('utf-8'), reporte)
+        response = HttpResponse(xml_content, content_type='application/xml')
+        response['Content-Disposition'] = f'attachment; filename="reporte_{reporte.id}.xml"'
+        return response
+    
+    elif formato == 'txt':
+        response = HttpResponse(content, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename="reporte_{reporte.id}.txt"'
+        return response
+    
+    elif formato in ['xlsx', 'xls']:
+        wb = exportar_excel_desde_csv(content.decode('utf-8'), reporte)
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = f'attachment; filename="reporte_{reporte.id}.xlsx"'
         wb.save(response)
         return response
     
-    elif formato == 'txt':
-        content = reporte.archivo.read().decode('utf-8')
-        response = HttpResponse(content, content_type='text/plain')
-        response['Content-Disposition'] = f'attachment; filename="reporte_{reporte.id}.txt"'
+    elif formato == 'pdf':
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="reporte_{reporte.id}.pdf"'
+        pdf_content = exportar_pdf_desde_csv(content.decode('utf-8'), reporte)
+        response.write(pdf_content)
+        return response
+    
+    elif formato == 'docx':
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        response['Content-Disposition'] = f'attachment; filename="reporte_{reporte.id}.docx"'
+        doc = exportar_docx_desde_csv(content.decode('utf-8'), reporte)
+        doc.save(response)
         return response
     
     return JsonResponse({'success': False, 'message': 'Formato no soportado'}, status=400)
@@ -350,6 +365,7 @@ def exportar_reporte(request, reporte_id, formato):
 
 @login_required
 def exportar_datos(request, formato):
+    """Exportar datos actuales sin guardar reporte"""
     fecha_inicio = request.GET.get('fecha_inicio')
     fecha_fin = request.GET.get('fecha_fin')
     dispositivo_id = request.GET.get('dispositivo_id')
@@ -378,64 +394,325 @@ def exportar_datos(request, formato):
         registros = registros.filter(tipo_acceso=tipo_acceso)
     
     if formato == 'csv':
-        response = HttpResponse(content_type='text/csv; charset=utf-8')
-        response['Content-Disposition'] = f'attachment; filename="reporte_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv"'
-        response.write('\ufeff')
-        
-        writer = csv.writer(response)
-        writer.writerow(['ID', 'Usuario', 'Documento', 'Dispositivo', 'Fecha/Hora', 'Tipo Acceso'])
-        
-        for r in registros:
-            writer.writerow([
-                r.id,
-                r.persona.nombres + ' ' + r.persona.apellidos if r.persona else 'N/A',
-                r.persona.numero_documento if r.persona else 'N/A',
-                r.dispositivo.nombre if r.dispositivo else 'N/A',
-                r.fecha_hora.strftime('%Y-%m-%d %H:%M:%S') if r.fecha_hora else '',
-                r.tipo_acceso
-            ])
-        return response
-    
+        return exportar_csv(registros)
+    elif formato == 'xlsx':
+        return exportar_excel(registros)
     elif formato == 'json':
-        data = []
-        for r in registros:
-            data.append({
-                'id': r.id,
-                'usuario': r.persona.nombres + ' ' + r.persona.apellidos if r.persona else None,
-                'documento': r.persona.numero_documento if r.persona else None,
-                'dispositivo': r.dispositivo.nombre if r.dispositivo else None,
-                'fecha_hora': r.fecha_hora.strftime('%Y-%m-%d %H:%M:%S') if r.fecha_hora else None,
-                'tipo_acceso': r.tipo_acceso
-            })
-        response = HttpResponse(json.dumps(data, ensure_ascii=False, indent=2), content_type='application/json')
-        response['Content-Disposition'] = f'attachment; filename="reporte_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
-        return response
+        return exportar_json(registros)
+    elif formato == 'xml':
+        return exportar_xml(registros)
+    elif formato == 'txt':
+        return exportar_txt(registros)
+    elif formato == 'pdf':
+        return exportar_pdf(registros)
+    elif formato == 'docx':
+        return exportar_docx(registros)
+    else:
+        return JsonResponse({'error': 'Formato no soportado'}, status=400)
+
+
+# ==================== FUNCIONES DE EXPORTACIÓN PARA DATOS EN VIVO ====================
+
+def exportar_csv(registros):
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="reporte_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv"'
+    response.write('\ufeff')
     
-    elif formato == 'excel':
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Registros"
-        
-        headers = ['ID', 'Usuario', 'Documento', 'Dispositivo', 'Fecha/Hora', 'Tipo Acceso']
-        for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col, value=header)
-            cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = PatternFill(start_color="2C3E50", end_color="2C3E50", fill_type="solid")
-        
-        for row, r in enumerate(registros, 2):
-            ws.cell(row=row, column=1, value=r.id)
-            ws.cell(row=row, column=2, value=r.persona.nombres + ' ' + r.persona.apellidos if r.persona else 'N/A')
-            ws.cell(row=row, column=3, value=r.persona.numero_documento if r.persona else 'N/A')
-            ws.cell(row=row, column=4, value=r.dispositivo.nombre if r.dispositivo else 'N/A')
-            ws.cell(row=row, column=5, value=r.fecha_hora.strftime('%Y-%m-%d %H:%M:%S') if r.fecha_hora else '')
-            ws.cell(row=row, column=6, value=r.tipo_acceso)
-        
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = f'attachment; filename="reporte_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
-        wb.save(response)
-        return response
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Usuario', 'Documento', 'Dispositivo', 'Fecha/Hora', 'Tipo Acceso'])
     
-    return JsonResponse({'error': 'Formato no soportado'}, status=400)
+    for r in registros:
+        writer.writerow([
+            r.id,
+            r.persona.nombres + ' ' + r.persona.apellidos if r.persona else 'N/A',
+            r.persona.numero_documento if r.persona else 'N/A',
+            r.dispositivo.nombre if r.dispositivo else 'N/A',
+            r.fecha_hora.strftime('%Y-%m-%d %H:%M:%S') if r.fecha_hora else '',
+            r.tipo_acceso
+        ])
+    return response
+
+
+def exportar_excel(registros):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Registros Biométricos"
+    
+    headers = ['ID', 'Usuario', 'Documento', 'Dispositivo', 'Fecha/Hora', 'Tipo Acceso']
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill(start_color="2C3E50", end_color="2C3E50", fill_type="solid")
+        cell.alignment = Alignment(horizontal='center')
+    
+    for row, r in enumerate(registros, 2):
+        ws.cell(row=row, column=1, value=r.id)
+        ws.cell(row=row, column=2, value=r.persona.nombres + ' ' + r.persona.apellidos if r.persona else 'N/A')
+        ws.cell(row=row, column=3, value=r.persona.numero_documento if r.persona else 'N/A')
+        ws.cell(row=row, column=4, value=r.dispositivo.nombre if r.dispositivo else 'N/A')
+        ws.cell(row=row, column=5, value=r.fecha_hora.strftime('%Y-%m-%d %H:%M:%S') if r.fecha_hora else '')
+        ws.cell(row=row, column=6, value=r.tipo_acceso)
+    
+    for col in range(1, 7):
+        ws.column_dimensions[chr(64 + col)].width = 20
+    
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="reporte_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+    wb.save(response)
+    return response
+
+
+def exportar_json(registros):
+    data = []
+    for r in registros:
+        data.append({
+            'id': r.id,
+            'usuario': r.persona.nombres + ' ' + r.persona.apellidos if r.persona else None,
+            'documento': r.persona.numero_documento if r.persona else None,
+            'dispositivo': r.dispositivo.nombre if r.dispositivo else None,
+            'fecha_hora': r.fecha_hora.strftime('%Y-%m-%d %H:%M:%S') if r.fecha_hora else None,
+            'tipo_acceso': r.tipo_acceso
+        })
+    
+    response = HttpResponse(json.dumps(data, ensure_ascii=False, indent=2), content_type='application/json')
+    response['Content-Disposition'] = f'attachment; filename="reporte_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
+    return response
+
+
+def exportar_xml(registros):
+    root = Element('reporte')
+    root.set('fecha_generacion', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    root.set('total_registros', str(registros.count()))
+    
+    registros_elem = SubElement(root, 'registros')
+    
+    for r in registros:
+        registro_elem = SubElement(registros_elem, 'registro')
+        SubElement(registro_elem, 'id').text = str(r.id)
+        SubElement(registro_elem, 'usuario').text = r.persona.nombres + ' ' + r.persona.apellidos if r.persona else 'N/A'
+        SubElement(registro_elem, 'documento').text = r.persona.numero_documento if r.persona else 'N/A'
+        SubElement(registro_elem, 'dispositivo').text = r.dispositivo.nombre if r.dispositivo else 'N/A'
+        SubElement(registro_elem, 'fecha_hora').text = r.fecha_hora.strftime('%Y-%m-%d %H:%M:%S') if r.fecha_hora else ''
+        SubElement(registro_elem, 'tipo_acceso').text = r.tipo_acceso
+    
+    xml_str = minidom.parseString(tostring(root)).toprettyxml(indent="  ")
+    
+    response = HttpResponse(xml_str, content_type='application/xml')
+    response['Content-Disposition'] = f'attachment; filename="reporte_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xml"'
+    return response
+
+
+def exportar_txt(registros):
+    content = []
+    content.append("=" * 80)
+    content.append("REPORTE DE REGISTROS BIOMÉTRICOS")
+    content.append(f"Fecha de generación: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    content.append(f"Total de registros: {registros.count()}")
+    content.append("=" * 80)
+    content.append("")
+    content.append(f"{'ID':<6} {'USUARIO':<35} {'DOCUMENTO':<15} {'DISPOSITIVO':<20} {'FECHA/HORA':<20} {'TIPO':<10}")
+    content.append("-" * 106)
+    
+    for r in registros:
+        usuario = (r.persona.nombres + ' ' + r.persona.apellidos) if r.persona else 'N/A'
+        content.append(f"{r.id:<6} {usuario:<35} {(r.persona.numero_documento if r.persona else 'N/A'):<15} {(r.dispositivo.nombre if r.dispositivo else 'N/A'):<20} {(r.fecha_hora.strftime('%Y-%m-%d %H:%M') if r.fecha_hora else ''):<20} {r.tipo_acceso:<10}")
+    
+    content.append("=" * 80)
+    
+    response = HttpResponse('\n'.join(content), content_type='text/plain')
+    response['Content-Disposition'] = f'attachment; filename="reporte_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt"'
+    return response
+
+
+def exportar_pdf(registros):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(letter))
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=16, textColor=colors.HexColor('#2C3E50'))
+    elements.append(Paragraph("Reporte de Registros Biométricos", title_style))
+    elements.append(Spacer(1, 12))
+    
+    date_style = ParagraphStyle('DateStyle', parent=styles['Normal'], fontSize=10, textColor=colors.grey)
+    elements.append(Paragraph(f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}", date_style))
+    elements.append(Spacer(1, 20))
+    
+    data = [['ID', 'Usuario', 'Documento', 'Dispositivo', 'Fecha/Hora', 'Tipo Acceso']]
+    for r in registros[:100]:
+        data.append([
+            str(r.id),
+            (r.persona.nombres + ' ' + r.persona.apellidos if r.persona else 'N/A')[:30],
+            (r.persona.numero_documento if r.persona else 'N/A')[:15],
+            (r.dispositivo.nombre if r.dispositivo else 'N/A')[:20],
+            r.fecha_hora.strftime('%d/%m/%Y %H:%M') if r.fecha_hora else '',
+            r.tipo_acceso
+        ])
+    
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2C3E50')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+    ]))
+    
+    elements.append(table)
+    doc.build(elements)
+    
+    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="reporte_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+    return response
+
+
+def exportar_docx(registros):
+    document = Document()
+    
+    title = document.add_heading('Reporte de Registros Biométricos', 0)
+    title.alignment = 1
+    
+    document.add_paragraph(f"Fecha de generación: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+    document.add_paragraph(f"Total de registros: {registros.count()}")
+    document.add_paragraph()
+    
+    table = document.add_table(rows=1, cols=6)
+    table.style = 'Table Grid'
+    
+    headers = ['ID', 'Usuario', 'Documento', 'Dispositivo', 'Fecha/Hora', 'Tipo Acceso']
+    for i, header in enumerate(headers):
+        cell = table.cell(0, i)
+        cell.text = header
+        cell.paragraphs[0].runs[0].bold = True
+    
+    for r in registros[:200]:
+        row = table.add_row()
+        row.cells[0].text = str(r.id)
+        row.cells[1].text = r.persona.nombres + ' ' + r.persona.apellidos if r.persona else 'N/A'
+        row.cells[2].text = r.persona.numero_documento if r.persona else 'N/A'
+        row.cells[3].text = r.dispositivo.nombre if r.dispositivo else 'N/A'
+        row.cells[4].text = r.fecha_hora.strftime('%d/%m/%Y %H:%M') if r.fecha_hora else ''
+        row.cells[5].text = r.tipo_acceso
+    
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    response['Content-Disposition'] = f'attachment; filename="reporte_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx"'
+    document.save(response)
+    return response
+
+
+# ==================== FUNCIONES PARA EXPORTAR DESDE CSV GUARDADO ====================
+
+def exportar_excel_desde_csv(csv_content, reporte):
+    reader = csv.reader(io.StringIO(csv_content))
+    wb = Workbook()
+    ws = wb.active
+    ws.title = f"Reporte {reporte.id}"
+    
+    header_fill = PatternFill(start_color="2C3E50", end_color="2C3E50", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True)
+    
+    for row_idx, row in enumerate(reader, 1):
+        for col_idx, value in enumerate(row, 1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=value)
+            if row_idx == 1:
+                cell.font = header_font
+                cell.fill = header_fill
+            if value and str(value).startswith('==='):
+                cell.font = Font(bold=True)
+    
+    for col in range(1, 5):
+        ws.column_dimensions[chr(64 + col)].width = 25
+    
+    return wb
+
+
+def exportar_pdf_desde_csv(csv_content, reporte):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(letter))
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=16, textColor=colors.HexColor('#2C3E50'))
+    elements.append(Paragraph(f"Reporte #{reporte.id}", title_style))
+    elements.append(Spacer(1, 12))
+    
+    date_style = ParagraphStyle('DateStyle', parent=styles['Normal'], fontSize=10, textColor=colors.grey)
+    elements.append(Paragraph(f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}", date_style))
+    elements.append(Spacer(1, 20))
+    
+    reader = csv.reader(io.StringIO(csv_content))
+    data = list(reader)
+    
+    if data:
+        table = Table(data[:50])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2C3E50')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        elements.append(table)
+    
+    doc.build(elements)
+    return buffer.getvalue()
+
+
+def exportar_docx_desde_csv(csv_content, reporte):
+    document = Document()
+    title = document.add_heading(f'Reporte #{reporte.id} - {reporte.titulo}', 0)
+    title.alignment = 1
+    
+    document.add_paragraph(f"Tipo: {reporte.get_tipo_display()}")
+    document.add_paragraph(f"Período: {reporte.fecha_inicio} al {reporte.fecha_fin}")
+    document.add_paragraph(f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+    document.add_paragraph()
+    
+    reader = csv.reader(io.StringIO(csv_content))
+    data = list(reader)
+    
+    if data:
+        table = document.add_table(rows=1, cols=len(data[0]))
+        table.style = 'Table Grid'
+        
+        for i, header in enumerate(data[0]):
+            cell = table.cell(0, i)
+            cell.text = header
+            cell.paragraphs[0].runs[0].bold = True
+        
+        for row_data in data[1:50]:
+            row = table.add_row()
+            for i, value in enumerate(row_data):
+                if i < len(row.cells):
+                    row.cells[i].text = value
+    
+    return document
+
+
+def exportar_xml_desde_csv(csv_content, reporte):
+    root = Element('reporte')
+    root.set('id', str(reporte.id))
+    root.set('titulo', reporte.titulo)
+    root.set('fecha_generacion', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    
+    reader = csv.reader(io.StringIO(csv_content))
+    data = list(reader)
+    
+    if data:
+        headers = data[0] if len(data) > 0 else []
+        registros_elem = SubElement(root, 'contenido')
+        
+        for row in data[1:51]:
+            registro_elem = SubElement(registros_elem, 'fila')
+            for i, value in enumerate(row):
+                if i < len(headers):
+                    SubElement(registro_elem, headers[i].replace(' ', '_').lower()).text = value
+    
+    return minidom.parseString(tostring(root)).toprettyxml(indent="  ")
 
 
 @login_required
