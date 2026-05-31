@@ -3,10 +3,10 @@ from .models import Reporte, ConfiguracionReporte
 
 @admin.register(Reporte)
 class ReporteAdmin(admin.ModelAdmin):
-    list_display = ('titulo', 'tipo', 'estado', 'fecha_creacion', 'total_registros')
+    list_display = ('id', 'titulo', 'tipo', 'estado', 'fecha_creacion', 'total_registros', 'accesos_exitosos', 'accesos_fallidos')
     list_filter = ('tipo', 'estado', 'fecha_creacion')
     search_fields = ('titulo', 'descripcion')
-    readonly_fields = ('fecha_creacion', 'fecha_generacion', 'total_registros')
+    readonly_fields = ('fecha_creacion', 'fecha_generacion', 'total_registros', 'accesos_exitosos', 'accesos_fallidos')
     fieldsets = (
         ('Información General', {
             'fields': ('titulo', 'tipo', 'descripcion', 'estado')
@@ -19,7 +19,6 @@ class ReporteAdmin(admin.ModelAdmin):
         }),
         ('Métricas', {
             'fields': ('total_registros', 'accesos_exitosos', 'accesos_fallidos'),
-            'classes': ('collapse',)
         }),
         ('Archivo', {
             'fields': ('archivo',),
@@ -32,11 +31,3 @@ class ConfiguracionReporteAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'tipo', 'frecuencia', 'activa', 'email_destino')
     list_filter = ('tipo', 'frecuencia', 'activa')
     search_fields = ('nombre', 'email_destino')
-    fieldsets = (
-        ('Configuración', {
-            'fields': ('nombre', 'tipo', 'frecuencia', 'activa')
-        }),
-        ('Notificación', {
-            'fields': ('email_destino',)
-        }),
-    )

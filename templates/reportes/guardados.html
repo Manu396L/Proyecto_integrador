@@ -1,0 +1,177 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/guardados.css' %}">
+
+<div class="contenido">
+    <header>
+        <h1><i class="fa-solid fa-file-alt"></i> Reportes Guardados</h1>
+        <p>Historial de reportes generados automáticamente</p>
+    </header>
+
+    <div class="resumen-reportes">
+        <div class="resumen-item total">
+            <div class="resumen-valor" id="totalReportes">0</div>
+            <div class="resumen-label">Total Reportes</div>
+        </div>
+        <div class="resumen-item exitosos">
+            <div class="resumen-valor" id="completadosCount">0</div>
+            <div class="resumen-label">Completados</div>
+        </div>
+        <div class="resumen-item fallidos">
+            <div class="resumen-valor" id="pendientesCount">0</div>
+            <div class="resumen-label">En Proceso/Error</div>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <a href="{% url 'reportes:index' %}" class="btn-filtro btn-aplicar">
+            <i class="fa-solid fa-chart-bar"></i> Nuevo Reporte
+        </a>
+        <button class="btn-filtro btn-limpiar" onclick="actualizarListado()">
+            <i class="fa-solid fa-rotate"></i> Actualizar
+        </button>
+    </div>
+
+    <div class="tabla-reportes">
+        <h2><i class="fa-solid fa-list"></i> Reportes Generados</h2>
+        <div class="desplazamiento">
+            <table id="tablaReportes">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Rango Fechas</th>
+                        <th>Registros</th>
+                        <th>Exitosos</th>
+                        <th>Fallidos</th>
+                        <th>Fecha Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyReportes">
+                    {% for reporte in reportes %}
+                    <tr data-id="{{ reporte.id }}">
+                        <td><strong>#{{ reporte.id }}</strong></td>
+                        <td>{{ reporte.titulo|truncatechars:40 }}</td>
+                        <td>{{ reporte.get_tipo_display }}</td>
+                        <td>
+                            {% if reporte.estado == 'COMPLETADO' %}
+                                <span class="estado-registro estado-exitoso">
+                                    <i class="fa-solid fa-check-circle"></i> Completado
+                                </span>
+                            {% elif reporte.estado == 'PROCESANDO' %}
+                                <span class="estado-registro estado-pendiente">
+                                    <i class="fa-solid fa-spinner fa-pulse"></i> Procesando
+                                </span>
+                            {% else %}
+                                <span class="estado-registro estado-fallido">
+                                    <i class="fa-solid fa-exclamation-triangle"></i> Error
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>
+                                {{ reporte.fecha_inicio|date:"d/m/Y" }}<br>
+                                <i class="fa-solid fa-arrow-right"></i> {{ reporte.fecha_fin|date:"d/m/Y" }}
+                            </small>
+                        </td>
+                        <td><strong>{{ reporte.total_registros }}</strong></td>
+                        <td style="color: #27ae60;"><i class="fa-solid fa-check-circle"></i> {{ reporte.accesos_exitosos }}</td>
+                        <td style="color: #e74c3c;"><i class="fa-solid fa-xmark-circle"></i> {{ reporte.accesos_fallidos }}</td>
+                        <td><small>{{ reporte.fecha_creacion|date:"d/m/Y H:i" }}</small></td>
+                        <td class="acciones">
+                            <button class="btn-accion btn-editar" onclick="verDetalle({{ reporte.id }})" title="Ver Detalle">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button class="btn-accion btn-eliminar" onclick="eliminarReporte({{ reporte.id }})" title="Eliminar">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            {% if reporte.archivo %}
+                            <button class="btn-accion btn-descargar" onclick="descargarReporte({{ reporte.id }}, 'csv')" title="Descargar CSV">
+                                <i class="fa-solid fa-download"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row">
+                        <td colspan="10">
+                            <div class="empty-state">
+                                <i class="fa-solid fa-inbox"></i>
+                                <p>No hay reportes guardados todavía</p>
+                                <a href="{% url 'reportes:index' %}" class="btn-filtro btn-aplicar">
+                                    <i class="fa-solid fa-plus"></i> Generar primer reporte
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="soporte-info">
+        <i class="fa-solid fa-headset"></i>
+        <div class="soporte-content">
+            <strong>¿Necesita ayuda?</strong><br>
+            Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
+            <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div>Copyright© Sistema Biométrico 2025</div>
+        <div>Versión 1.0</div>
+    </div>
+</div>
+
+<!-- Modal Exportar -->
+<div id="modalExportar" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-file-export"></i> Exportar Reporte</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="export-options">
+                <h4>Formato de Exportación</h4>
+                <div class="export-option">
+                    <input type="radio" id="export-csv" name="export-format" value="csv" checked>
+                    <label for="export-csv">
+                        <i class="fa-solid fa-file-csv"></i>
+                        <div><strong>CSV File</strong><span>Para otras aplicaciones</span></div>
+                    </label>
+                </div>
+                <div class="export-option">
+                    <input type="radio" id="export-excel" name="export-format" value="excel">
+                    <label for="export-excel">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <div><strong>Excel Spreadsheet</strong><span>Para análisis de datos</span></div>
+                    </label>
+                </div>
+                <div class="export-option">
+                    <input type="radio" id="export-json" name="export-format" value="json">
+                    <label for="export-json">
+                        <i class="fa-solid fa-file-code"></i>
+                        <div><strong>JSON File</strong><span>Para desarrolladores</span></div>
+                    </label>
+                </div>
+            </div>
+            <div class="export-actions">
+                <button class="btn-exportar-modal" id="btnExportarAhora">
+                    <i class="fa-solid fa-download"></i> Exportar Ahora
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="notificacion" class="notificacion" style="display: none;"></div>
+
+<script src="{% static 'js/guardados.js' %}"></script>
+{% endblock %}

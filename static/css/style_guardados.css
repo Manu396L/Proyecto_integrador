@@ -1,25 +1,11 @@
-/* static/css/style_reporte.css - CORREGIDO */
+/* guardados.css - Estilos específicos para la página de reportes guardados */
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-body {
-    background-color: #f4f6f9;
-}
-
-/* ===== CONTENIDO PRINCIPAL - CORREGIDO PARA SIDEBAR ===== */
 .contenido {
-    margin-left: -15px;
-    padding: 10px;
-    width: calc(100% - -27px);
-    min-height: 100vh;
+    margin-left: 250px;
+    padding: 20px;
+    width: calc(100% - 250px);
 }
 
-/* Header */
 header {
     margin-bottom: 25px;
 }
@@ -28,7 +14,6 @@ header h1 {
     color: #2c3e50;
     font-size: 24px;
     font-weight: 600;
-    margin-bottom: 5px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -45,7 +30,7 @@ header p {
     margin-top: 5px;
 }
 
-/* ===== RESUMEN DE REPORTES ===== */
+/* Resumen */
 .resumen-reportes {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -59,29 +44,19 @@ header p {
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border-top: 4px solid #3498db;
+    transition: transform 0.3s ease;
 }
 
 .resumen-item:hover {
     transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
-.resumen-item.total {
-    border-top-color: #3498db;
-}
-
-.resumen-item.exitosos {
-    border-top-color: #27ae60;
-}
-
-.resumen-item.fallidos {
-    border-top-color: #e74c3c;
-}
+.resumen-item.total { border-top: 4px solid #3498db; }
+.resumen-item.exitosos { border-top: 4px solid #27ae60; }
+.resumen-item.fallidos { border-top: 4px solid #e74c3c; }
 
 .resumen-valor {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
     color: #2c3e50;
     margin-bottom: 5px;
@@ -93,89 +68,26 @@ header p {
     font-weight: 500;
 }
 
-/* ===== FILTROS DE REPORTES ===== */
-.filtros-reportes {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    margin-bottom: 25px;
-}
-
-.filtros-reportes h3 {
-    color: #2c3e50;
-    margin-bottom: 15px;
-    font-size: 16px;
+/* Header Actions */
+.header-actions {
     display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.filtros-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 15px;
-    margin-bottom: 15px;
-}
-
-.filtro-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.filtro-group label {
-    margin-bottom: 6px;
-    font-weight: 600;
-    color: #2c3e50;
-    font-size: 12px;
-}
-
-.filtro-group select,
-.filtro-group input {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 13px;
-    transition: border-color 0.3s;
-    background: white;
-}
-
-.filtro-group select:focus,
-.filtro-group input:focus {
-    border-color: #1abc9c;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(26,188,156,0.1);
-}
-
-.botones-filtro {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
+    margin-bottom: 20px;
     flex-wrap: wrap;
 }
 
 .btn-filtro {
-    padding: 8px 16px;
+    padding: 10px 20px;
     border: none;
     border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    gap: 8px;
+    font-size: 13px;
     text-decoration: none;
-}
-
-.btn-limpiar {
-    background: #95a5a6;
-    color: white;
-}
-
-.btn-limpiar:hover {
-    background: #7f8c8d;
-    transform: translateY(-1px);
+    transition: all 0.3s;
 }
 
 .btn-aplicar {
@@ -185,20 +97,20 @@ header p {
 
 .btn-aplicar:hover {
     background: #2980b9;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
 }
 
-.btn-exportar {
-    background: #27ae60;
+.btn-limpiar {
+    background: #95a5a6;
     color: white;
 }
 
-.btn-exportar:hover {
-    background: #219653;
-    transform: translateY(-1px);
+.btn-limpiar:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
 }
 
-/* ===== TABLA DE REPORTES ===== */
+/* Tabla */
 .tabla-reportes {
     background: white;
     border-radius: 12px;
@@ -216,7 +128,6 @@ header p {
     align-items: center;
     gap: 8px;
     border-bottom: 1px solid #eee;
-    background: #f8f9fa;
 }
 
 .desplazamiento {
@@ -249,25 +160,16 @@ header p {
     background-color: #f8f9fa;
 }
 
-/* ===== BADGES Y ESTADOS ===== */
-.badge {
+/* Estados */
+.estado-registro {
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-}
-
-.tipo-acceso-exitoso {
-    background: #d4edda;
-    color: #155724;
-}
-
-.tipo-acceso-fallido {
-    background: #f8d7da;
-    color: #721c24;
+    gap: 5px;
+    white-space: nowrap;
 }
 
 .estado-exitoso {
@@ -285,43 +187,73 @@ header p {
     color: #856404;
 }
 
-.dot-green {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #28a745;
-    margin-right: 4px;
+/* Acciones */
+.acciones {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
-.dot-red {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #dc3545;
-    margin-right: 4px;
-}
-
-/* ===== BOTONES PEQUEÑOS ===== */
-.btn-small {
-    background: #3498db;
-    color: white;
+.btn-accion {
+    padding: 6px 10px;
     border: none;
-    padding: 4px 8px;
     border-radius: 4px;
-    font-size: 10px;
     cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
     display: inline-flex;
     align-items: center;
     gap: 4px;
 }
 
-.btn-small:hover {
-    background: #2980b9;
+.btn-editar {
+    background: #3498db;
+    color: white;
 }
 
-/* ===== MODAL DE EXPORTACIÓN ===== */
+.btn-editar:hover {
+    background: #2980b9;
+    transform: scale(1.05);
+}
+
+.btn-eliminar {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-eliminar:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
+.btn-descargar {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-descargar:hover {
+    background: #219653;
+    transform: scale(1.05);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px;
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: #ccc;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    color: #7f8c8d;
+    margin-bottom: 20px;
+}
+
+/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -336,13 +268,12 @@ header p {
 
 .modal-content {
     background-color: white;
-    margin: 5% auto;
+    margin: 10% auto;
     border-radius: 12px;
     width: 90%;
-    max-width: 550px;
+    max-width: 450px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     animation: slideIn 0.3s ease;
-    overflow: hidden;
 }
 
 .modal-header {
@@ -364,7 +295,7 @@ header p {
 
 .close {
     color: white;
-    font-size: 22px;
+    font-size: 24px;
     font-weight: bold;
     cursor: pointer;
     transition: color 0.3s;
@@ -378,7 +309,6 @@ header p {
     padding: 20px;
 }
 
-/* ===== OPCIONES DE EXPORTACIÓN ===== */
 .export-options {
     margin-bottom: 20px;
 }
@@ -416,7 +346,7 @@ header p {
 }
 
 .export-option label i {
-    font-size: 18px;
+    font-size: 20px;
     color: #1abc9c;
 }
 
@@ -431,7 +361,6 @@ header p {
     font-size: 11px;
 }
 
-/* ===== ACCIONES DE EXPORTACIÓN ===== */
 .export-actions {
     display: flex;
     gap: 10px;
@@ -442,23 +371,23 @@ header p {
     background: #2c3e50;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 10px 25px;
     border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    gap: 8px;
+    font-size: 13px;
+    transition: all 0.3s;
 }
 
 .btn-exportar-modal:hover {
     background: #34495e;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
 }
 
-/* ===== NOTIFICACIONES ===== */
+/* Notificación */
 .notificacion {
     position: fixed;
     top: 20px;
@@ -489,16 +418,14 @@ header p {
     border-left: 4px solid #17a2b8;
 }
 
-/* ===== SOPORTE INFO ===== */
+/* Soporte */
 .soporte-info {
     background-color: #e8f4fc;
-    border: 1px solid #3498db;
     border-radius: 8px;
     padding: 15px;
     margin: 20px auto;
     text-align: center;
     max-width: 500px;
-    color: #2c3e50;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -508,15 +435,6 @@ header p {
 .soporte-info i {
     font-size: 24px;
     color: #3498db;
-    flex-shrink: 0;
-}
-
-.soporte-content {
-    text-align: left;
-}
-
-.soporte-info strong {
-    color: #2c3e50;
 }
 
 .soporte-info a {
@@ -525,11 +443,7 @@ header p {
     font-weight: 600;
 }
 
-.soporte-info a:hover {
-    text-decoration: underline;
-}
-
-/* ===== FOOTER ===== */
+/* Footer */
 .footer {
     background: #2c3e50;
     padding: 12px 20px;
@@ -542,7 +456,7 @@ header p {
     margin-top: 20px;
 }
 
-/* ===== ANIMACIONES ===== */
+/* Animaciones */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -559,16 +473,12 @@ header p {
     }
 }
 
-/* ===== RESPONSIVE ===== */
+/* Responsive */
 @media (max-width: 1024px) {
     .contenido {
         margin-left: 250px;
         padding: 20px;
         width: calc(100% - 250px);
-    }
-
-    .filtros-grid {
-        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -583,11 +493,7 @@ header p {
         grid-template-columns: 1fr;
     }
 
-    .filtros-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .botones-filtro {
+    .header-actions {
         flex-direction: column;
     }
 
@@ -596,22 +502,13 @@ header p {
         justify-content: center;
     }
 
-    .modal-content {
-        margin: 15% auto;
-        width: 95%;
-    }
-
-    .export-actions {
+    .acciones {
         flex-direction: column;
     }
 
-    .soporte-info {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .soporte-content {
-        text-align: center;
+    .btn-accion {
+        width: 100%;
+        justify-content: center;
     }
 
     .footer {
@@ -627,4 +524,14 @@ header p {
         width: 100%;
         padding: 10px;
     }
+
+    .modal-content {
+        margin: 20% auto;
+        width: 95%;
+    }
+}
+
+/* Estilos para fila vacía */
+.empty-row td {
+    padding: 0 !important;
 }

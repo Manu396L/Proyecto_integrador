@@ -9,8 +9,7 @@
         <h1><i class="fa-solid fa-chart-bar"></i> Reportes - Sistema Biometrika</h1>
     </header>
     
-    <!-- Resumen de reportes -->
-    <section class="resumen-reportes">
+    <div class="resumen-reportes">
         <div class="resumen-item total">
             <div class="resumen-valor">{{ total_registros|default:"0" }}</div>
             <div class="resumen-label">Registros Totales</div>
@@ -23,10 +22,9 @@
             <div class="resumen-valor">{{ accesos_fallidos|default:"0" }}</div>
             <div class="resumen-label">Autenticaciones Fallidas</div>
         </div>
-    </section>
+    </div>
     
-    <!-- Filtros -->
-    <section class="filtros-reportes">
+    <div class="filtros-reportes">
         <h3><i class="fa-solid fa-filter"></i> Filtros de Búsqueda</h3>
         <form method="GET" class="filtros-form">
             <div class="filtros-grid">
@@ -44,7 +42,7 @@
                         <option value="">Todos los dispositivos</option>
                         {% for dispositivo in dispositivos %}
                             <option value="{{ dispositivo.id }}" {% if dispositivo.id|stringformat:"s" == dispositivo_id %}selected{% endif %}>
-                                {{ dispositivo.nombre }} - {{ dispositivo.tipo_dispositivo }}
+                                {{ dispositivo.nombre }}
                             </option>
                         {% endfor %}
                     </select>
@@ -59,7 +57,7 @@
                 </div>
             </div>
             <div class="botones-filtro">
-                <button type="submit" class="btn-filtro btn-aplicar" id="btnAplicar">
+                <button type="submit" class="btn-filtro btn-aplicar">
                     <i class="fa-solid fa-filter"></i> Aplicar Filtros
                 </button>
                 <a href="{% url 'reportes:index' %}" class="btn-filtro btn-limpiar">
@@ -67,10 +65,9 @@
                 </a>
             </div>
         </form>
-    </section>
+    </div>
     
-    <!-- Tabla de reportes -->
-    <section class="tabla-reportes">
+    <div class="tabla-reportes">
         <h2><i class="fa-solid fa-list"></i> Registros Biométricos</h2>
         <div class="desplazamiento">
             <table id="tablaReportes">
@@ -86,13 +83,13 @@
                         <th>Detalles</th>
                     </tr>
                 </thead>    
-                <tbody id="tbodyReportes">
+                <tbody>
                     {% for registro in registros %}
                     <tr>
                         <td><strong>#{{ registro.id }}</strong></td>
-                        <td>{{ registro.persona.nombre_completo }}</td>
-                        <td>{{ registro.dispositivo.nombre }}</td>
-                        <td>{{ registro.fecha_hora|date:"d/m/Y H:i:s" }}</td>
+                        <td>{{ registro.persona.nombre_completo|default:"N/A" }}</td>
+                        <td>{{ registro.dispositivo.nombre|default:"N/A" }}</td>
+                        <td>{{ registro.fecha_hora|date:"d/m/Y H:i:s"|default:"N/A" }}</td>
                         <td>
                             <span class="badge tipo-acceso-{{ registro.tipo_acceso }}">
                                 {% if registro.tipo_acceso == 'exitoso' %}
@@ -100,7 +97,7 @@
                                 {% elif registro.tipo_acceso == 'fallido' %}
                                     <i class="fa-solid fa-xmark-circle"></i> Fallido
                                 {% else %}
-                                    <i class="fa-solid fa-question-circle"></i> {{ registro.tipo_acceso }}
+                                    {{ registro.tipo_acceso }}
                                 {% endif %}
                             </span>
                         </td>
@@ -113,16 +110,10 @@
                                 {% endif %}
                             </span>
                         </td>
-                        <td>
-                            {% if registro.temperatura %}
-                                {{ registro.temperatura }}°C
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
+                        <td>{{ registro.temperatura|default:"N/A" }}°C</td>
                         <td>
                             {% if registro.motivo_denegado %}
-                                <button class="btn-small" onclick="verDetalle('{{ registro.motivo_denegado }}')">
+                                <button class="btn-small" onclick="alert('{{ registro.motivo_denegado }}')">
                                     <i class="fa-solid fa-info-circle"></i> Ver
                                 </button>
                             {% else %}
@@ -147,9 +138,8 @@
             <span style="color: #dc3545; font-weight: 600;"><i class="fa-solid fa-xmark-circle"></i> {{ accesos_fallidos }} fallidos</span> |
             <span style="color: #0066cc; font-weight: 600;"><i class="fa-solid fa-calendar-days"></i> {{ registros_semana }} últimos 7 días</span>
         </div>
-    </section>
+    </div>
 
-    <!-- Información de Soporte -->
     <div class="soporte-info">
         <i class="fa-solid fa-headset"></i>
         <div class="soporte-content">
@@ -159,14 +149,12 @@
         </div>
     </div>
     
-    <!-- Footer -->
     <div class="footer">
         <div>Copyright© Sistema Biométrico 2025</div>
         <div>Versión 1.0</div>
     </div>
 </div>
 
-<!-- Modal de Exportación -->
 <div id="modalExportar" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -207,33 +195,7 @@
                     </label>
                 </div>
             </div>
-
-            <div class="export-sections">
-                <h4>Secciones a Incluir</h4>
-                <div class="sections-grid">
-                    <div class="section-checkbox">
-                        <input type="checkbox" id="section-datos" checked>
-                        <label for="section-datos">Datos de Registros</label>
-                    </div>
-                    <div class="section-checkbox">
-                        <input type="checkbox" id="section-resumen" checked>
-                        <label for="section-resumen">Resumen Estadístico</label>
-                    </div>
-                    <div class="section-checkbox">
-                        <input type="checkbox" id="section-graficos">
-                        <label for="section-graficos">Gráficos</label>
-                    </div>
-                    <div class="section-checkbox">
-                        <input type="checkbox" id="section-filtros">
-                        <label for="section-filtros">Configuración de Filtros</label>
-                    </div>
-                </div>
-            </div>
-
             <div class="export-actions">
-                <button class="btn-programar" id="btnProgramar">
-                    <i class="fa-solid fa-clock"></i> Programar
-                </button>
                 <button class="btn-exportar-modal" id="btnExportarAhora">
                     <i class="fa-solid fa-download"></i> Exportar Ahora
                 </button>
@@ -242,7 +204,6 @@
     </div>
 </div>
 
-<!-- Notificación -->
 <div id="notificacion" class="notificacion" style="display: none;"></div>
 
 <script src="{% static 'js/reporte.js' %}"></script>

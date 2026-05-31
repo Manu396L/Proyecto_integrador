@@ -1,0 +1,165 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/detalle.css' %}">
+
+<div class="contenido">
+    <header>
+        <h1><i class="fa-solid fa-file-alt"></i> Detalle del Reporte</h1>
+        <p>Información detallada del reporte generado</p>
+    </header>
+
+    <div class="volver">
+        <a href="{% url 'reportes:guardados' %}" class="btn-volver">
+            <i class="fa-solid fa-arrow-left"></i> Volver a Reportes Guardados
+        </a>
+    </div>
+
+    <div class="resumen-reportes" id="resumen">
+        <div class="resumen-item total">
+            <div class="resumen-valor">{{ reporte.total_registros }}</div>
+            <div class="resumen-label">Total Registros</div>
+        </div>
+        <div class="resumen-item exitosos">
+            <div class="resumen-valor">{{ reporte.accesos_exitosos }}</div>
+            <div class="resumen-label">Autenticaciones Exitosas</div>
+        </div>
+        <div class="resumen-item fallidos">
+            <div class="resumen-valor">{{ reporte.accesos_fallidos }}</div>
+            <div class="resumen-label">Autenticaciones Fallidas</div>
+        </div>
+    </div>
+
+    <div class="info-reporte">
+        <h2><i class="fa-solid fa-info-circle"></i> Información General</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">ID Reporte:</span>
+                <span class="info-value"><strong>#{{ reporte.id }}</strong></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Título:</span>
+                <span class="info-value">{{ reporte.titulo }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tipo de Reporte:</span>
+                <span class="info-value">{{ reporte.get_tipo_display }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Estado:</span>
+                <span class="info-value">
+                    {% if reporte.estado == 'COMPLETADO' %}
+                        <span class="estado-badge completado"><i class="fa-solid fa-check-circle"></i> Completado</span>
+                    {% elif reporte.estado == 'PROCESANDO' %}
+                        <span class="estado-badge procesando"><i class="fa-solid fa-spinner fa-pulse"></i> Procesando</span>
+                    {% else %}
+                        <span class="estado-badge error"><i class="fa-solid fa-exclamation-triangle"></i> Error</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Rango de Fechas:</span>
+                <span class="info-value">
+                    <i class="fa-solid fa-calendar"></i> {{ reporte.fecha_inicio|date:"d/m/Y" }}
+                    <i class="fa-solid fa-arrow-right"></i>
+                    {{ reporte.fecha_fin|date:"d/m/Y" }}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Fecha de Creación:</span>
+                <span class="info-value">{{ reporte.fecha_creacion|date:"d/m/Y H:i:s" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Fecha de Generación:</span>
+                <span class="info-value">{{ reporte.fecha_generacion|date:"d/m/Y H:i:s"|default:"Pendiente" }}</span>
+            </div>
+            {% if reporte.dispositivo %}
+            <div class="info-item">
+                <span class="info-label">Dispositivo Filtrado:</span>
+                <span class="info-value">{{ reporte.dispositivo.nombre }}</span>
+            </div>
+            {% endif %}
+            {% if reporte.persona %}
+            <div class="info-item">
+                <span class="info-label">Persona Filtrada:</span>
+                <span class="info-value">{{ reporte.persona.nombre_completo }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="metricas-reporte">
+        <h2><i class="fa-solid fa-chart-simple"></i> Métricas de Rendimiento</h2>
+        <div class="metricas-grid">
+            <div class="metrica-card">
+                <div class="metrica-titulo">Tasa de Éxito</div>
+                <div class="metrica-valor" id="tasaExito">
+                    {% widthratio reporte.accesos_exitosos reporte.total_registros 100 %}%
+                </div>
+                <div class="metrica-bar">
+                    <div class="bar-exito" style="width: {% widthratio reporte.accesos_exitosos reporte.total_registros 100 %}%"></div>
+                </div>
+            </div>
+            <div class="metrica-card">
+                <div class="metrica-titulo">Tasa de Falla</div>
+                <div class="metrica-valor" id="tasaFalla">
+                    {% widthratio reporte.accesos_fallidos reporte.total_registros 100 %}%
+                </div>
+                <div class="metrica-bar">
+                    <div class="bar-fallo" style="width: {% widthratio reporte.accesos_fallidos reporte.total_registros 100 %}%"></div>
+                </div>
+            </div>
+            <div class="metrica-card">
+                <div class="metrica-titulo">Ratio Éxito/Falla</div>
+                <div class="metrica-valor" id="ratio">
+                    {% if reporte.accesos_fallidos > 0 %}
+                        {{ reporte.accesos_exitosos|floatformat:0 }}:{{ reporte.accesos_fallidos|floatformat:0 }}
+                    {% else %}
+                        ∞
+                    {% endif %}
+                </div>
+            </div>
+            <div class="metrica-card">
+                <div class="metrica-titulo">Promedio Diario</div>
+                <div class="metrica-valor" id="promedioDiario">
+                    {% widthratio reporte.total_registros reporte.fecha_inicio|timesince:reporte.fecha_fin|slice:":2"|add:1 1 %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="exportar-reporte">
+        <h2><i class="fa-solid fa-download"></i> Exportar Reporte</h2>
+        <div class="exportar-botones">
+            <button class="btn-exportar" onclick="exportarReporte({{ reporte.id }}, 'csv')">
+                <i class="fa-solid fa-file-csv"></i> Exportar CSV
+            </button>
+            <button class="btn-exportar" onclick="exportarReporte({{ reporte.id }}, 'excel')">
+                <i class="fa-solid fa-file-excel"></i> Exportar Excel
+            </button>
+            <button class="btn-exportar" onclick="exportarReporte({{ reporte.id }}, 'json')">
+                <i class="fa-solid fa-file-code"></i> Exportar JSON
+            </button>
+        </div>
+    </div>
+
+    <div class="soporte-info">
+        <i class="fa-solid fa-headset"></i>
+        <div class="soporte-content">
+            <strong>¿Necesita ayuda?</strong><br>
+            Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
+            <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div>Copyright© Sistema Biométrico 2025</div>
+        <div>Versión 1.0</div>
+    </div>
+</div>
+
+<div id="notificacion" class="notificacion" style="display: none;"></div>
+
+<script src="{% static 'js/detalle.js' %}"></script>
+{% endblock %}
