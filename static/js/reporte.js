@@ -1,7 +1,4 @@
-// static/js/reporte.js - VERSIÓN CORREGIDA
-
-let paginaActual = 1;
-const registrosPorPagina = 10;
+// static/js/reporte.js - VERSIÓN COMPLETA PARA EXPORTACIÓN
 
 document.addEventListener('DOMContentLoaded', function() {
     inicializarEventos();
@@ -9,32 +6,85 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function inicializarEventos() {
+    // Botones de filtro
     const btnAplicar = document.getElementById('btnAplicar');
     const btnLimpiar = document.getElementById('btnLimpiar');
-    const modalExportar = document.getElementById('modalExportar');
-    const closeModal = document.querySelector('.close');
-    const btnExportarAhora = document.getElementById('btnExportarAhora');
-    const btnProgramar = document.getElementById('btnProgramar');
     
     if (btnAplicar) btnAplicar.addEventListener('click', aplicarFiltros);
     if (btnLimpiar) btnLimpiar.addEventListener('click', limpiarFiltros);
-    
-    // Botón exportar (si existe en la página)
-    const btnExportar = document.getElementById('btnExportar');
-    if (btnExportar && modalExportar) {
-        btnExportar.addEventListener('click', () => modalExportar.style.display = 'block');
-    }
-    
-    if (closeModal && modalExportar) {
-        closeModal.addEventListener('click', () => modalExportar.style.display = 'none');
-        window.addEventListener('click', (event) => {
-            if (event.target === modalExportar) modalExportar.style.display = 'none';
-        });
-    }
-    
-    if (btnExportarAhora) btnExportarAhora.addEventListener('click', exportarReporteActual);
-    if (btnProgramar) btnProgramar.addEventListener('click', () => mostrarNotificacion('Funcionalidad en desarrollo', 'info'));
 }
+
+// ==================== FILTROS ====================
+
+function aplicarFiltros() {
+    const fechaInicio = document.getElementById('fecha_inicio')?.value || '';
+    const fechaFin = document.getElementById('fecha_fin')?.value || '';
+    const dispositivoId = document.getElementById('dispositivo_id')?.value || '';
+    const tipoAcceso = document.getElementById('tipo_acceso')?.value || '';
+    
+    const params = new URLSearchParams();
+    if (fechaInicio) params.append('fecha_inicio', fechaInicio);
+    if (fechaFin) params.append('fecha_fin', fechaFin);
+    if (dispositivoId) params.append('dispositivo_id', dispositivoId);
+    if (tipoAcceso) params.append('tipo_acceso', tipoAcceso);
+    
+    window.location.href = `/reportes/?${params.toString()}`;
+}
+
+function limpiarFiltros() {
+    window.location.href = '/reportes/';
+}
+
+// ==================== EXPORTACIÓN DE DATOS ====================
+
+function exportarDatos(formato) {
+    const fechaInicio = document.getElementById('fecha_inicio')?.value || '';
+    const fechaFin = document.getElementById('fecha_fin')?.value || '';
+    const dispositivoId = document.getElementById('dispositivo_id')?.value || '';
+    const tipoAcceso = document.getElementById('tipo_acceso')?.value || '';
+    
+    const params = new URLSearchParams();
+    if (fechaInicio) params.append('fecha_inicio', fechaInicio);
+    if (fechaFin) params.append('fecha_fin', fechaFin);
+    if (dispositivoId) params.append('dispositivo_id', dispositivoId);
+    if (tipoAcceso) params.append('tipo_acceso', tipoAcceso);
+    
+    const url = `/reportes/exportar/${formato}/?${params.toString()}`;
+    
+    mostrarNotificacion(`Exportando en formato ${formato.toUpperCase()}...`, 'info');
+    
+    // Crear un enlace temporal para descarga
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la exportación');
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `reporte_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.${formato}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(downloadUrl);
+        
+        mostrarNotificacion(`Exportación completada (${formato.toUpperCase()})`, 'success');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion(`Error al exportar en formato ${formato.toUpperCase()}`, 'error');
+    });
+}
+
+// ==================== ESTADÍSTICAS ====================
 
 async function cargarEstadisticas() {
     try {
@@ -53,41 +103,7 @@ async function cargarEstadisticas() {
     }
 }
 
-function aplicarFiltros() {
-    const fechaInicio = document.getElementById('filtro-fecha-inicio')?.value || '';
-    const fechaFin = document.getElementById('filtro-fecha-fin')?.value || '';
-    const tipo = document.getElementById('filtro-tipo')?.value || '';
-    const estado = document.getElementById('filtro-estado')?.value || '';
-    const dispositivo = document.getElementById('filtro-dispositivo')?.value || '';
-    const usuario = document.getElementById('filtro-usuario')?.value || '';
-    
-    const params = new URLSearchParams();
-    if (fechaInicio) params.append('fecha_inicio', fechaInicio);
-    if (fechaFin) params.append('fecha_fin', fechaFin);
-    if (tipo) params.append('tipo_acceso', tipo);
-    if (estado) params.append('estado', estado);
-    if (dispositivo) params.append('dispositivo_id', dispositivo);
-    if (usuario) params.append('usuario', usuario);
-    
-    window.location.href = `/reportes/?${params.toString()}`;
-}
-
-function limpiarFiltros() {
-    window.location.href = '/reportes/';
-}
-
-function exportarReporteActual() {
-    const formato = document.querySelector('input[name="export-format"]:checked')?.value || 'csv';
-    const params = new URLSearchParams(window.location.search);
-    
-    params.append('formato', formato);
-    params.append('exportar', 'true');
-    
-    window.location.href = `${window.location.pathname}?${params.toString()}`;
-    
-    mostrarNotificacion(`Exportando reporte en formato ${formato.toUpperCase()}...`, 'success');
-    cerrarModal();
-}
+// ==================== REPORTES GUARDADOS ====================
 
 function verDetalleReporte(reporteId) {
     window.location.href = `/reportes/detalle/${reporteId}/`;
@@ -152,10 +168,7 @@ function generarNuevoReporte() {
     .catch(error => mostrarNotificacion('Error al generar reporte', 'error'));
 }
 
-function cerrarModal() {
-    const modal = document.getElementById('modalExportar');
-    if (modal) modal.style.display = 'none';
-}
+// ==================== NOTIFICACIONES ====================
 
 function mostrarNotificacion(mensaje, tipo) {
     const notificacion = document.getElementById('notificacion');
@@ -170,6 +183,8 @@ function mostrarNotificacion(mensaje, tipo) {
     }, 3000);
 }
 
+// ==================== UTILIDADES ====================
+
 function getCookie(name) {
     let value = null;
     if (document.cookie && document.cookie !== '') {
@@ -183,8 +198,14 @@ function getCookie(name) {
     return value;
 }
 
+// ==================== PAGINACIÓN (opcional) ====================
+
+let paginaActual = 1;
+const registrosPorPagina = 10;
+
 function cambiarPagina(pagina) {
     paginaActual = pagina;
+    // Aquí iría la lógica para cargar la página correspondiente
 }
 
 function actualizarPaginacion(totalRegistros) {

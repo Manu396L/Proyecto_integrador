@@ -65,6 +65,32 @@
                 </a>
             </div>
         </form>
+        
+        <!-- Botones de Exportación -->
+        <div class="exportar-botones">
+            <span class="exportar-label"><i class="fa-solid fa-download"></i> Exportar datos:</span>
+            <button onclick="exportarDatos('csv')" class="btn-exportar btn-csv" title="Exportar a CSV">
+                <i class="fa-solid fa-file-csv"></i> CSV
+            </button>
+            <button onclick="exportarDatos('xlsx')" class="btn-exportar btn-excel" title="Exportar a Excel">
+                <i class="fa-solid fa-file-excel"></i> Excel
+            </button>
+            <button onclick="exportarDatos('json')" class="btn-exportar btn-json" title="Exportar a JSON">
+                <i class="fa-solid fa-file-code"></i> JSON
+            </button>
+            <button onclick="exportarDatos('xml')" class="btn-exportar btn-xml" title="Exportar a XML">
+                <i class="fa-solid fa-file-code"></i> XML
+            </button>
+            <button onclick="exportarDatos('txt')" class="btn-exportar btn-txt" title="Exportar a TXT">
+                <i class="fa-solid fa-file-lines"></i> TXT
+            </button>
+            <button onclick="exportarDatos('pdf')" class="btn-exportar btn-pdf" title="Exportar a PDF">
+                <i class="fa-solid fa-file-pdf"></i> PDF
+            </button>
+            <button onclick="exportarDatos('docx')" class="btn-exportar btn-docx" title="Exportar a DOCX">
+                <i class="fa-solid fa-file-word"></i> DOCX
+            </button>
+        </div>
     </div>
     
     <div class="tabla-reportes">
@@ -75,68 +101,99 @@
                     <tr>
                         <th>ID</th>
                         <th>Usuario</th>
+                        <th>Tipo Documento</th>
+                        <th>N° Documento</th>
                         <th>Dispositivo</th>
+                        <th>Sede</th>
+                        <th>Área</th>
                         <th>Fecha/Hora</th>
                         <th>Tipo Acceso</th>
                         <th>Estado</th>
-                        <th>Temperatura</th>
-                        <th>Detalles</th>
+                        <th>Motivo Denegado</th>
+                        <th>Nivel Seguridad</th>
+                        <th>Tipo Dispositivo</th>
                     </tr>
                 </thead>    
                 <tbody>
                     {% for registro in registros %}
-                    <tr>
-                        <td><strong>#{{ registro.id }}</strong></td>
-                        <td>{{ registro.persona.nombre_completo|default:"N/A" }}</td>
-                        <td>{{ registro.dispositivo.nombre|default:"N/A" }}</td>
-                        <td>{{ registro.fecha_hora|date:"d/m/Y H:i:s"|default:"N/A" }}</td>
-                        <td>
-                            <span class="badge tipo-acceso-{{ registro.tipo_acceso }}">
-                                {% if registro.tipo_acceso == 'exitoso' %}
-                                    <i class="fa-solid fa-check-circle"></i> Exitoso
-                                {% elif registro.tipo_acceso == 'fallido' %}
-                                    <i class="fa-solid fa-xmark-circle"></i> Fallido
-                                {% else %}
-                                    {{ registro.tipo_acceso }}
-                                {% endif %}
-                            </span>
+                    <tr class="fila-registro">
+                        <td data-label="ID"><strong>#{{ registro.id }}</strong></td>
+                        <td data-label="Usuario">
+                            {{ registro.persona.nombres|default:"" }} {{ registro.persona.apellidos|default:"" }}
+                            {% if not registro.persona.nombres %}-{% endif %}
                         </td>
-                        <td>
-                            <span class="badge estado-{{ registro.tipo_acceso }}">
-                                {% if registro.tipo_acceso == 'exitoso' %}
-                                    <span class="dot-green"></span> Autorizado
-                                {% else %}
-                                    <span class="dot-red"></span> Denegado
-                                {% endif %}
-                            </span>
-                        </td>
-                        <td>{{ registro.temperatura|default:"N/A" }}°C</td>
-                        <td>
-                            {% if registro.motivo_denegado %}
-                                <button class="btn-small" onclick="alert('{{ registro.motivo_denegado }}')">
-                                    <i class="fa-solid fa-info-circle"></i> Ver
-                                </button>
+                        <td data-label="Tipo Documento">{{ registro.persona.get_tipo_documento_display|default:"-" }}</td>
+                        <td data-label="N° Documento">{{ registro.persona.numero_documento|default:"-" }}</td>
+                        <td data-label="Dispositivo">{{ registro.dispositivo.nombre|default:"-" }}</td>
+                        <td data-label="Sede">
+                            {% if registro.dispositivo.sede %}
+                                {{ registro.dispositivo.sede.nombre }}
                             {% else %}
-                                N/A
+                                -
+                            {% endif %}
+                        </td>
+                        <td data-label="Área">
+                            {% if registro.dispositivo.area %}
+                                {{ registro.dispositivo.area.nombre }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td data-label="Fecha/Hora">{{ registro.fecha_hora|date:"d/m/Y H:i:s"|default:"-" }}</td>
+                        <td data-label="Tipo Acceso">
+                            {% if registro.tipo_acceso == 'exitoso' %}
+                                <span class="badge badge-exitoso"><i class="fa-solid fa-check-circle"></i> Exitoso</span>
+                            {% elif registro.tipo_acceso == 'fallido' %}
+                                <span class="badge badge-fallido"><i class="fa-solid fa-xmark-circle"></i> Fallido</span>
+                            {% else %}
+                                <span class="badge badge-desconocido">{{ registro.tipo_acceso }}</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Estado">
+                            {% if registro.tipo_acceso == 'exitoso' %}
+                                <span class="estado estado-autorizado"><i class="fa-solid fa-circle-check"></i> Autorizado</span>
+                            {% else %}
+                                <span class="estado estado-denegado"><i class="fa-solid fa-circle-exclamation"></i> Denegado</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Motivo Denegado">{{ registro.motivo_denegado|default:"-"|truncatechars:50 }}</td>
+                        <td data-label="Nivel Seguridad">
+                            {% if registro.dispositivo.nivel_seguridad %}
+                                <span class="seguridad nivel-{{ registro.dispositivo.nivel_seguridad|lower }}">
+                                    {{ registro.dispositivo.get_nivel_seguridad_display }}
+                                </span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td data-label="Tipo Dispositivo">
+                            {% if registro.dispositivo.tipo_dispositivo %}
+                                <span class="dispositivo-tipo">
+                                    <i class="fa-solid fa-microchip"></i>
+                                    {{ registro.dispositivo.get_tipo_dispositivo_display }}
+                                </span>
+                            {% else %}
+                                -
                             {% endif %}
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="8" style="text-align: center; padding: 40px;">
-                            <i class="fa-solid fa-inbox"></i>
-                            <p>No hay registros biométricos disponibles</p>
+                    <tr class="empty-row">
+                        <td colspan="13" style="text-align: center; padding: 60px;">
+                            <i class="fa-solid fa-inbox" style="font-size: 48px; color: #ccc;"></i>
+                            <p style="margin-top: 15px;">No hay registros biométricos disponibles</p>
+                            <p style="font-size: 12px; color: #999;">Utilice los filtros para buscar registros o espere a que se generen nuevos accesos</p>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        <div style="padding: 15px; background: #f8f9fa; text-align: right; border-top: 1px solid #dee2e6;">
+        <div class="total-registros">
             Total: <strong>{{ total_registros }}</strong> registros | 
-            <span style="color: #28a745; font-weight: 600;"><i class="fa-solid fa-check-circle"></i> {{ accesos_exitosos }} exitosos</span> | 
-            <span style="color: #dc3545; font-weight: 600;"><i class="fa-solid fa-xmark-circle"></i> {{ accesos_fallidos }} fallidos</span> |
-            <span style="color: #0066cc; font-weight: 600;"><i class="fa-solid fa-calendar-days"></i> {{ registros_semana }} últimos 7 días</span>
+            <span class="text-success"><i class="fa-solid fa-check-circle"></i> {{ accesos_exitosos }} exitosos</span> | 
+            <span class="text-danger"><i class="fa-solid fa-xmark-circle"></i> {{ accesos_fallidos }} fallidos</span> |
+            <span class="text-info"><i class="fa-solid fa-calendar-days"></i> {{ registros_semana }} últimos 7 días</span>
         </div>
     </div>
 
@@ -155,56 +212,46 @@
     </div>
 </div>
 
-<div id="modalExportar" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class="fa-solid fa-file-export"></i> Exportar Reporte</h3>
-            <span class="close">&times;</span>
-        </div>
-        <div class="modal-body">
-            <div class="export-options">
-                <h4>Formato de Exportación</h4>
-                <div class="export-option">
-                    <input type="radio" id="export-pdf" name="export-format" value="pdf" checked>
-                    <label for="export-pdf">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <div>
-                            <strong>PDF Document</strong>
-                            <span>Formato ideal para impresión</span>
-                        </div>
-                    </label>
-                </div>
-                <div class="export-option">
-                    <input type="radio" id="export-excel" name="export-format" value="excel">
-                    <label for="export-excel">
-                        <i class="fa-solid fa-file-excel"></i>
-                        <div>
-                            <strong>Excel Spreadsheet</strong>
-                            <span>Formato para análisis de datos</span>
-                        </div>
-                    </label>
-                </div>
-                <div class="export-option">
-                    <input type="radio" id="export-csv" name="export-format" value="csv">
-                    <label for="export-csv">
-                        <i class="fa-solid fa-file-csv"></i>
-                        <div>
-                            <strong>CSV File</strong>
-                            <span>Formato para otras aplicaciones</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-            <div class="export-actions">
-                <button class="btn-exportar-modal" id="btnExportarAhora">
-                    <i class="fa-solid fa-download"></i> Exportar Ahora
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div id="notificacion" class="notificacion" style="display: none;"></div>
 
 <script src="{% static 'js/reporte.js' %}"></script>
+
+<script>
+// Función para exportar datos con los filtros actuales
+function exportarDatos(formato) {
+    const fechaInicio = document.getElementById('fecha_inicio')?.value || '';
+    const fechaFin = document.getElementById('fecha_fin')?.value || '';
+    const dispositivoId = document.getElementById('dispositivo_id')?.value || '';
+    const tipoAcceso = document.getElementById('tipo_acceso')?.value || '';
+    
+    const params = new URLSearchParams();
+    if (fechaInicio) params.append('fecha_inicio', fechaInicio);
+    if (fechaFin) params.append('fecha_fin', fechaFin);
+    if (dispositivoId) params.append('dispositivo_id', dispositivoId);
+    if (tipoAcceso) params.append('tipo_acceso', tipoAcceso);
+    
+    const url = `/reportes/exportar/${formato}/?${params.toString()}`;
+    
+    mostrarNotificacion(`Exportando en formato ${formato.toUpperCase()}...`, 'info');
+    window.location.href = url;
+    
+    setTimeout(() => {
+        mostrarNotificacion(`Exportación completada (${formato.toUpperCase()})`, 'success');
+    }, 2000);
+}
+
+function mostrarNotificacion(mensaje, tipo) {
+    const notificacion = document.getElementById('notificacion');
+    if (!notificacion) return;
+    
+    notificacion.textContent = mensaje;
+    notificacion.className = `notificacion notificacion-${tipo}`;
+    notificacion.style.display = 'block';
+    
+    setTimeout(() => {
+        notificacion.style.display = 'none';
+    }, 3000);
+}
+</script>
+
 {% endblock %}
