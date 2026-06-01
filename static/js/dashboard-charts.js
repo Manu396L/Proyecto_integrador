@@ -1,150 +1,119 @@
 // static/js/dashboard-charts.js
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si Chart.js está disponible
     if (typeof Chart === 'undefined') {
         console.error('Chart.js no está cargado');
         return;
     }
 
-    // Gráfico de Asistencia (Doughnut)
-    const asistenciaCanvas = document.getElementById('asistenciaChart');
-    if (asistenciaCanvas) {
-        const asistenciaChart = new Chart(asistenciaCanvas.getContext('2d'), {
-            type: 'doughnut',
+    // ========== 1. GRÁFICO DE ACCESOS POR HORA ==========
+    const horasCanvas = document.getElementById('accesosHorasChart');
+    if (horasCanvas) {
+        const datosHoras = JSON.parse(horasCanvas.dataset.horas || '[]');
+        new Chart(horasCanvas.getContext('2d'), {
+            type: 'line',
             data: {
-                labels: ['Asistencia', 'Ausencia', 'Tardanzas'],
+                labels: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', 
+                         '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'],
                 datasets: [{
-                    data: [245, 45, 30],
-                    backgroundColor: ['#2ecc71', '#e74c3c', '#f39c12'],
-                    borderWidth: 0
+                    label: 'Accesos',
+                    data: datosHoras,
+                    borderColor: '#1abc9c',
+                    backgroundColor: 'rgba(26, 188, 156, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#1abc9c',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true
-                        }
-                    }
-                },
-                cutout: '70%'
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, title: { display: true, text: 'Número de accesos' } } }
             }
         });
     }
-    
-    // Gráfico de Estado de Dispositivos (Doughnut)
-    const dispositivosCanvas = document.getElementById('dispositivosChart');
-    if (dispositivosCanvas) {
-        const dispositivosChart = new Chart(dispositivosCanvas.getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Online', 'Offline', 'No Autorizado'],
-                datasets: [{
-                    data: [57, 8, 2],
-                    backgroundColor: ['#2ecc71', '#e74c3c', '#f39c12'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true
-                        }
-                    }
-                },
-                cutout: '70%'
-            }
-        });
-    }
-    
-    // Gráfico de Presentismo (Doughnut)
-    const presentismoCanvas = document.getElementById('presentismoChart');
-    if (presentismoCanvas) {
-        const presentismoChart = new Chart(presentismoCanvas.getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Presentes', 'Ausentes', 'Tardanzas'],
-                datasets: [{
-                    data: [245, 45, 30],
-                    backgroundColor: ['#2ecc71', '#e74c3c', '#3498db'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true
-                        }
-                    }
-                },
-                cutout: '70%'
-            }
-        });
-    }
-    
-    // Gráfico de Excepciones de Asistencia (Bar)
-    const excepcionesCanvas = document.getElementById('excepcionesChart');
-    if (excepcionesCanvas) {
-        const excepcionesChart = new Chart(excepcionesCanvas.getContext('2d'), {
+
+    // ========== 2. GRÁFICO DE ACCESOS POR DÍA ==========
+    const diasCanvas = document.getElementById('accesosDiasChart');
+    if (diasCanvas) {
+        const datosDias = JSON.parse(diasCanvas.dataset.dias || '[]');
+        const etiquetas = JSON.parse(diasCanvas.dataset.etiquetas || '[]');
+        new Chart(diasCanvas.getContext('2d'), {
             type: 'bar',
             data: {
-                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                datasets: [
-                    {
-                        label: 'Llegadas tarde',
-                        data: [8, 6, 7, 5, 4, 0, 0],
-                        backgroundColor: '#3498db',
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Salidas temprano',
-                        data: [3, 4, 2, 5, 6, 0, 0],
-                        backgroundColor: '#e74c3c',
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Ausencia',
-                        data: [7, 6, 8, 9, 15, 0, 0],
-                        backgroundColor: '#f39c12',
-                        borderRadius: 4
-                    }
-                ]
+                labels: etiquetas,
+                datasets: [{
+                    label: 'Accesos',
+                    data: datosDias,
+                    backgroundColor: '#3498db',
+                    borderRadius: 8,
+                    barPercentage: 0.7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, title: { display: true, text: 'Accesos' } } }
+            }
+        });
+    }
+
+    // ========== 3. GRÁFICO ESTADO DE DISPOSITIVOS ==========
+    const dispositivosCanvas = document.getElementById('dispositivosChart');
+    if (dispositivosCanvas) {
+        const activos = parseInt(dispositivosCanvas.dataset.activos || '0');
+        const inactivos = parseInt(dispositivosCanvas.dataset.inactivos || '0');
+        const error = parseInt(dispositivosCanvas.dataset.error || '0');
+        
+        new Chart(dispositivosCanvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Activos', 'Inactivos', 'Error'],
+                datasets: [{
+                    data: [activos, inactivos, error],
+                    backgroundColor: ['#2ecc71', '#95a5a6', '#e74c3c'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { padding: 15, usePointStyle: true } } },
+                cutout: '65%'
+            }
+        });
+    }
+
+    // ========== 4. GRÁFICO DE ALERTAS POR NIVEL ==========
+    const alertasCanvas = document.getElementById('alertasChart');
+    if (alertasCanvas) {
+        const criticas = parseInt(alertasCanvas.dataset.criticas || '0');
+        const media = parseInt(alertasCanvas.dataset.media || '0');
+        const baja = parseInt(alertasCanvas.dataset.baja || '0');
+        const informativa = parseInt(alertasCanvas.dataset.informativa || '0');
+        
+        new Chart(alertasCanvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Críticas', 'Media', 'Baja', 'Informativa'],
+                datasets: [{
+                    data: [criticas, media, baja, informativa],
+                    backgroundColor: ['#e74c3c', '#f39c12', '#3498db', '#95a5a6'],
+                    borderWidth: 0
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: false
-                    }
+                    legend: { position: 'bottom', labels: { padding: 15, usePointStyle: true } }
                 },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 5
-                        }
-                    }
-                }
+                cutout: '65%'
             }
         });
     }

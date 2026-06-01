@@ -1,4 +1,3 @@
-<!-- templates/dashboard/index.html -->
 {% extends 'dashboard/base.html' %}
 {% load static %}
 
@@ -9,255 +8,167 @@
 <div class="panels">
     <div class="panel">
         <h3><i class="fa-solid fa-users"></i> Total Personal</h3>
-        <p>{{ total_personal|default:"320" }}</p>
+        <p>{{ total_personal|default:"0" }}</p>
     </div>
     <div class="panel">
         <h3><i class="fa-solid fa-door-open"></i> Accesos Hoy</h3>
-        <p>{{ accesos_hoy|default:"156" }}</p>
+        <p>{{ accesos_hoy|default:"0" }}</p>
     </div>
     <div class="panel">
         <h3><i class="fa-solid fa-microchip"></i> Dispositivos Activos</h3>
-        <p>{{ dispositivos_activos|default:"57" }}</p>
+        <p>{{ dispositivos_activos|default:"0" }}</p>
     </div>
     <div class="panel">
-        <h3><i class="fa-solid fa-bell"></i> Alertas</h3>
-        <p>{{ alertas_activas|default:"8" }}</p>
+        <h3><i class="fa-solid fa-bell"></i> Alertas Activas</h3>
+        <p>{{ alertas_activas|default:"0" }}</p>
     </div>
 </div>
 
 <!-- Gráficos del Dashboard -->
 <div class="graficos-dashboard">
     <div class="grafico-card">
-        <h3><i class="fa-solid fa-chart-pie"></i> Estado de Dispositivos</h3>
+        <h3><i class="fa-solid fa-chart-line"></i> Accesos por Hora (Hoy)</h3>
         <div class="grafico-container">
-            <canvas id="dispositivosChart"></canvas>
-        </div>
-        <div class="leyenda-grafico">
-            <div class="item-leyenda"><span class="color-leyenda" style="background: #2ecc71;"></span> Online (57)</div>
-            <div class="item-leyenda"><span class="color-leyenda" style="background: #e74c3c;"></span> Offline (8)</div>
-            <div class="item-leyenda"><span class="color-leyenda" style="background: #f39c12;"></span> No Autorizado (2)</div>
+            <canvas id="accesosHorasChart" data-horas='{{ datos_grafico_horas|safe }}'></canvas>
         </div>
     </div>
     
     <div class="grafico-card">
-        <h3><i class="fa-solid fa-calendar-check"></i> Asistencia General</h3>
+        <h3><i class="fa-solid fa-chart-bar"></i> Accesos por Día (Última Semana)</h3>
         <div class="grafico-container">
-            <canvas id="asistenciaChart"></canvas>
+            <canvas id="accesosDiasChart" data-dias='{{ datos_grafico_dias|safe }}' data-etiquetas='{{ etiquetas_grafico_dias|safe }}'></canvas>
+        </div>
+    </div>
+    
+    <div class="grafico-card">
+        <h3><i class="fa-solid fa-chart-pie"></i> Estado de Dispositivos</h3>
+        <div class="grafico-container">
+            <canvas id="dispositivosChart" data-activos="{{ dispositivos_activos }}" data-inactivos="{{ dispositivos_inactivos }}" data-error="{{ dispositivos_error }}"></canvas>
+        </div>
+        <div class="leyenda-grafico">
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #2ecc71;"></span> Activos ({{ dispositivos_activos }})</div>
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #95a5a6;"></span> Inactivos ({{ dispositivos_inactivos }})</div>
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #e74c3c;"></span> Error ({{ dispositivos_error }})</div>
+        </div>
+    </div>
+    
+    <div class="grafico-card">
+        <h3><i class="fa-solid fa-triangle-exclamation"></i> Alertas por Nivel</h3>
+        <div class="grafico-container">
+            <canvas id="alertasChart" 
+                    data-criticas="{{ alertas_criticas }}" 
+                    data-media="{{ alertas_media }}" 
+                    data-baja="{{ alertas_baja }}" 
+                    data-informativa="{{ alertas_informativa }}"></canvas>
+        </div>
+        <div class="leyenda-grafico">
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #e74c3c;"></span> Críticas ({{ alertas_criticas }})</div>
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #f39c12;"></span> Media ({{ alertas_media }})</div>
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #3498db;"></span> Baja ({{ alertas_baja }})</div>
+            <div class="item-leyenda"><span class="color-leyenda" style="background: #95a5a6;"></span> Informativa ({{ alertas_informativa }})</div>
         </div>
         <div class="estadisticas-resumen">
             <div class="estadistica-item">
-                <div class="estadistica-valor">245</div>
-                <div class="estadistica-label">Presentes</div>
+                <div class="estadistica-valor">{{ total_alertas_no_resueltas|default:"0" }}</div>
+                <div class="estadistica-label">Alertas Activas</div>
             </div>
             <div class="estadistica-item">
-                <div class="estadistica-valor">45</div>
-                <div class="estadistica-label">Ausentes</div>
+                <div class="estadistica-valor">{{ alertas_activas|default:"0" }}</div>
+                <div class="estadistica-label">Total Alertas</div>
             </div>
-            <div class="estadistica-item">
-                <div class="estadistica-valor">30</div>
-                <div class="estadistica-label">Tardanzas</div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="grafico-card">
-        <h3><i class="fa-solid fa-chart-line"></i> Presentismo</h3>
-        <div class="grafico-container">
-            <canvas id="presentismoChart"></canvas>
-        </div>
-        <div class="leyenda-grafico">
-            <div class="item-leyenda"><span class="color-leyenda" style="background: #2ecc71;"></span> Presentes</div>
-            <div class="item-leyenda"><span class="color-leyenda" style="background: #e74c3c;"></span> Ausentes</div>
-            <div class="item-leyenda"><span class="color-leyenda" style="background: #3498db;"></span> Tardanzas</div>
-        </div>
-    </div>
-    
-    <div class="grafico-card">
-        <h3><i class="fa-solid fa-chart-bar"></i> Excepciones por Día</h3>
-        <div class="grafico-container">
-            <canvas id="excepcionesChart"></canvas>
-        </div>
-        <div class="leyenda-grafico">
-            <div class="item-leyenda"><span class="color-leyenda" style="background: #3498db;"></span> Llegadas tarde</div>
-            <div class="item-leyenda"><span class="color-leyenda" style="background: #e74c3c;"></span> Salidas temprano</div>
-            <div class="item-leyenda"><span class="color-leyenda" style="background: #f39c12;"></span> Ausencias</div>
         </div>
     </div>
 </div>
 
 <!-- Actividad Reciente -->
 <div class="actividad">
-    <h2><i class="fa-solid fa-clock"></i> Actividad Reciente</h2>
+    <h2><i class="fa-solid fa-clock"></i> Últimos Accesos</h2>
     <div class="desplazamiento">
-        <table>
+        <table class="tabla">
             <thead>
                 <tr>
                     <th>Usuario</th>
-                    <th>Acción</th>
                     <th>Dispositivo</th>
                     <th>Fecha/Hora</th>
                     <th>Estado</th>
                 </tr>
             </thead>
             <tbody>
-                {% for acceso in ultimos_accesos|slice:":10" %}
-                <tr>
-                    <td>{{ acceso.persona.nombre_completo|default:"Usuario" }}</td>
-                    <td>{{ acceso.get_tipo_acceso_display|default:"Acceso" }}</td>
-                    <td>{{ acceso.dispositivo.nombre|default:"BIO-001" }}</td>
+                {% for acceso in ultimos_accesos %}
+                <tr class="fila-acceso">
+                    <td>{{ acceso.persona.nombre_completo|default:"N/A" }}</td>
+                    <td>{{ acceso.dispositivo.nombre|default:"N/A" }}</td>
                     <td>{{ acceso.fecha_hora|date:"d/m/Y H:i:s" }}</td>
-                    <td>
-                        <span class="estado {% if acceso.tipo_acceso == 'ENTRADA' %}aprobado{% else %}denegado{% endif %}">
-                            {% if acceso.tipo_acceso == 'ENTRADA' %}Aprobado{% else %}Denegado{% endif %}
-                        </span>
-                    </td>
+                    <td><span class="estado {% if acceso.tipo_acceso == 'exitoso' %}aprobado{% else %}denegado{% endif %}">{{ acceso.tipo_acceso|title }}</span></td>
                 </tr>
                 {% empty %}
-                <tr>
-                    <td colspan="5" style="text-align: center;">No hay actividad reciente</td>
-                </tr>
+                <tr><td colspan="4" style="text-align: center;">No hay accesos registrados</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
 
-<!-- Personal Recientemente Agregado -->
+<!-- Personal Reciente -->
 <div class="actividad">
-    <h2><i class="fa-solid fa-user-plus"></i> Personal Recientemente Agregado</h2>
+    <h2><i class="fa-solid fa-user-plus"></i> Personal Reciente</h2>
     <div class="desplazamiento">
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Documento</th>
-                    <th>Área</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
+        <table class="tabla">
+            <thead><tr><th>Nombre</th><th>Documento</th><th>Área</th><th>Estado</th></tr></thead>
             <tbody>
                 {% for persona in personal_reciente %}
                 <tr>
                     <td>{{ persona.nombre_completo }}</td>
-                    <td>{{ persona.email|default:"N/A" }}</td>
                     <td>{{ persona.numero_documento }}</td>
-                    <td>{{ persona.area|default:"Sin área" }}</td>
-                    <td>
-                        <span class="estado {% if persona.activo %}aprobado{% else %}denegado{% endif %}">
-                            {% if persona.activo %}Activo{% else %}Inactivo{% endif %}
-                        </span>
-                    </td>
+                    <td>{{ persona.get_area_display|default:"Sin área" }}</td>
+                    <td><span class="estado aprobado">Activo</span></td>
                 </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" style="text-align: center;">No hay personal recientemente agregado</td>
-                </tr>
-                {% endfor %}
+                {% empty %}<tr><td colspan="4">No hay personal registrado</td></tr>{% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-<!-- Sección de Sedes -->
-<div class="panel">
-    <h3><i class="fa-solid fa-building"></i> Sedes Registradas</h3>
-    <div class="tabla-container">
-        <table class="tabla-mini">
-            <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Nombre</th>
-                    <th>Áreas</th>
-                </tr>
-            </thead>
+
+<!-- Sedes Registradas -->
+<div class="actividad">
+    <h2><i class="fa-solid fa-building"></i> Sedes Registradas</h2>
+    <div class="desplazamiento">
+        <table class="tabla">
+            <thead><tr><th>Código</th><th>Nombre</th><th>Áreas</th><th>Estado</th></tr></thead>
             <tbody>
                 {% for sede in sedes %}
                 <tr>
-                    <td>SED-{{ sede.id|stringformat:"03d" }}</td>
+                    <td>{{ sede.codigo }}</td>
                     <td>{{ sede.nombre }}</td>
-                    <td>{{ sede.areas.count }}</td>
+                    <td>{{ sede.areas_count }}</td>
+                    <td><span class="estado aprobado">Activa</span></td>
                 </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" class="text-center">No hay sedes registradas</td>
-                </tr>
-                {% endfor %}
+                {% empty %}<tr><td colspan="4">No hay sedes registradas</td></tr>{% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
 <!-- Alertas Pendientes -->
 <div class="actividad">
-    <h2><i class="fa-solid fa-exclamation-circle"></i> Alertas Pendientes</h2>
+    <h2><i class="fa-solid fa-exclamation-triangle"></i> Alertas Pendientes</h2>
     <div class="desplazamiento">
-        <table>
-            <thead>
-                <tr>
-                    <th>Descripción</th>
-                    <th>Tipo</th>
-                    <th>Prioridad</th>
-                    <th>Fecha</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
+        <table class="tabla">
+            <thead><tr><th>Mensaje</th><th>Nivel</th><th>Fecha</th><th>Estado</th></tr></thead>
             <tbody>
                 {% for alerta in alertas_pendientes %}
                 <tr>
-                    <td>{{ alerta.descripcion }}</td>
-                    <td>{{ alerta.tipo }}</td>
-                    <td>
-                        <span class="badge" style="background: 
-                            {% if alerta.prioridad == 'ALTA' %}#e74c3c
-                            {% elif alerta.prioridad == 'MEDIA' %}#f39c12
-                            {% else %}#3498db{% endif %};">
-                            {{ alerta.prioridad }}
-                        </span>
-                    </td>
+                    <td>{{ alerta.mensaje|truncatechars:50 }}</td>
+                    <td><span class="badge" style="background: {% if alerta.nivel == 'CRITICA' %}#e74c3c{% elif alerta.nivel == 'ALTA' %}#e67e22{% else %}#f39c12{% endif %};">{{ alerta.get_nivel_display }}</span></td>
                     <td>{{ alerta.fecha_hora|date:"d/m/Y H:i" }}</td>
-                    <td>
-                        <span class="estado {% if alerta.resuelta %}aprobado{% else %}denegado{% endif %}">
-                            {% if alerta.resuelta %}Resuelta{% else %}Pendiente{% endif %}
-                        </span>
-                    </td>
+                    <td><span class="estado denegado">Pendiente</span></td>
                 </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" style="text-align: center;">No hay alertas pendientes</td>
-                </tr>
-                {% endfor %}
+                {% empty %}<tr><td colspan="4">No hay alertas pendientes</td></tr>{% endfor %}
             </tbody>
         </table>
     </div>
 </div>
 
-<!-- Alertas del Sistema -->
-<div class="alerta-sistema">
-    <h3><i class="fa-solid fa-bell"></i> Alertas del Sistema</h3>
-    <div class="contenido-alerta">
-        <div class="mensaje alerta-exito">
-            <i class="fa-solid fa-circle-check"></i>
-            <span>Personal Total: {{ total_personal }}</span>
-        </div>
-        <div class="mensaje alerta-info">
-            <i class="fa-solid fa-info-circle"></i>
-            <span>Accesos hoy: {{ accesos_hoy }} | Dispositivos activos: {{ dispositivos_activos }}</span>
-        </div>
-        {% if alertas_activas > 0 %}
-        <div class="mensaje alerta-error">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <span>{{ alertas_activas }} alertas activas requieren atención</span>
-        </div>
-        {% endif %}
-        {% if dispositivos_inactivos > 0 %}
-        <div class="mensaje alerta-advertencia">
-            <i class="fa-solid fa-exclamation-triangle"></i>
-            <span>{{ dispositivos_inactivos }} dispositivos inactivos</span>
-        </div>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Scripts para gráficos -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="{% static 'js/dashboard-charts.js' %}"></script>
 {% endblock %}
