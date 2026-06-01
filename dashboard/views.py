@@ -5,10 +5,13 @@ from django.http import JsonResponse
 from django.utils import timezone
 from datetime import date, timedelta
 import json
+import random
 from personal.models import Persona, RegistroAcceso
 from dispositivos.models import Dispositivo
 from alertas.models import Alerta
 from sedes.models import Sede, Area
+from tickets.models import Ticket
+from usuarios.models import Notificacion, SolicitudRegistro
 
 
 @login_required
@@ -127,7 +130,6 @@ def simular_acceso(request):
             
             print(f"📡 Acceso simulado recibido: {data.get('usuario')} - {data.get('tipo_acceso')}")
             
-            # Buscar o crear persona temporal para simulación
             nombre_completo = data.get('usuario', 'Usuario Simulado')
             nombres = nombre_completo.split()[0] if ' ' in nombre_completo else nombre_completo
             apellidos = ' '.join(nombre_completo.split()[1:]) if ' ' in nombre_completo else 'Simulado'
@@ -142,7 +144,6 @@ def simular_acceso(request):
                 }
             )
             
-            # Buscar o crear dispositivo simulado
             dispositivo_nombre = data.get('dispositivo', 'Terminal Simulada')
             dispositivo, _ = Dispositivo.objects.get_or_create(
                 nombre=dispositivo_nombre,
@@ -154,7 +155,6 @@ def simular_acceso(request):
                 }
             )
             
-            # Crear registro de acceso
             acceso = RegistroAcceso.objects.create(
                 persona=persona,
                 dispositivo=dispositivo,
@@ -169,3 +169,266 @@ def simular_acceso(request):
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
     
     return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
+
+
+# ========== SIMULADOR DE DISPOSITIVOS ==========
+@csrf_exempt
+@login_required
+def simular_dispositivo(request):
+    """Simula cambios de estado en dispositivos"""
+    if request.method == 'POST':
+        try:
+            estados = ['activo', 'inactivo', 'error', 'sin_conexion']
+            estado = random.choice(estados)
+            
+            nombres_dispositivos = [
+                'Terminal Recepción', 'Terminal Oficinas', 'Terminal Laboratorio',
+                'Terminal Planta Baja', 'Terminal Piso 2', 'Terminal Gerencia'
+            ]
+            dispositivo_nombre = random.choice(nombres_dispositivos)
+            
+            dispositivo, _ = Dispositivo.objects.get_or_create(
+                nombre=dispositivo_nombre,
+                defaults={
+                    'estado': estado,
+                    'tipo_dispositivo': random.choice(['huella', 'tarjeta', 'pin']),
+                    'direccion_ip': f"192.168.{random.randint(1,255)}.{random.randint(1,255)}",
+                    'numero_serie': f"SIM_{random.randint(1000,9999)}"
+                }
+            )
+            
+            dispositivo.estado = estado
+            dispositivo.save()
+            
+            if estado in ['error', 'sin_conexion']:
+                Alerta.objects.create(
+                    tipo='DISPOSITIVO_OFFLINE',
+                    nivel='ALTA',
+                    mensaje=f"Dispositivo '{dispositivo.nombre}' cambió a estado: {estado}",
+                    dispositivo=dispositivo,
+                )
+            
+            return JsonResponse({
+                'success': True, 
+                'dispositivo': dispositivo.nombre,
+                'estado': estado,
+                'mensaje': f"Dispositivo {dispositivo.nombre} ahora está: {estado}"
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False}, status=405)
+
+
+# ========== SIMULADOR DE ALERTAS ==========
+@csrf_exempt
+@login_required
+def simular_alerta(request):
+    """Simula la creación de alertas automáticas"""
+    if request.method == 'POST':
+        try:
+            tipos_alerta = [
+                ('ACCESO_NO_AUTORIZADO', 'CRITICA'),
+                ('DISPOSITIVO_OFFLINE', 'ALTA'),
+                ('INTENTO_FALLIDO', 'MEDIA'),
+                ('PUERTA_ABIERTA', 'ALTA'),
+                ('MANTENIMIENTO', 'BAJA'),
+            ]
+            
+            tipo, nivel = random.choice(tipos_alerta)
+            
+            mensajes = {
+                'ACCESO_NO_AUTORIZADO': 'Intento de acceso no autorizado detectado',
+                'DISPOSITIVO_OFFLINE': 'Dispositivo sin comunicación',
+                'INTENTO_FALLIDO': 'Múltiples intentos fallidos de autenticación',
+                'PUERTA_ABIERTA': 'Puerta detectada abierta fuera de horario',
+                'MANTENIMIENTO': 'Mantenimiento programado requerido',
+            }
+            
+            alerta = Alerta.objects.create(
+                tipo=tipo,
+                nivel=nivel,
+                mensaje=mensajes[tipo],
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'alerta_id': alerta.id,
+                'tipo': tipo,
+                'nivel': nivel,
+                'mensaje': mensajes[tipo]
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False}, status=405)
+
+
+# ========== SIMULADOR DE TICKETS ==========
+@csrf_exempt
+@login_required
+def simular_ticket(request):
+    """Simula la creación de tickets de soporte"""
+    if request.method == 'POST':
+        try:
+            asuntos = [
+                'Problema con lector biométrico',
+                'No puedo acceder a mi cuenta',
+                'Dispositivo no responde',
+                'Error en registro de huella',
+                'Solicitud de nuevo usuario',
+                'Problema de conectividad',
+            ]
+            
+            prioridades = ['baja', 'media', 'alta', 'urgente']
+            
+            ticket = Ticket.objects.create(
+                titulo=random.choice(asuntos),
+                descripcion=f"Reporte automático. Por favor revisar el sistema.",
+                prioridad=random.choice(prioridades),
+                estado='abierto',
+                remitente_nombre=f"Usuario_{random.randint(1,100)}",
+                remitente_email=f"usuario{random.randint(1,100)}@biometrika.com"
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'ticket_id': ticket.id,
+                'titulo': ticket.titulo,
+                'prioridad': ticket.prioridad
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False}, status=405)
+
+
+# ========== SIMULADOR DE SEDES ==========
+@csrf_exempt
+@login_required
+def simular_sede(request):
+    """Simula la creación/actualización de sedes"""
+    if request.method == 'POST':
+        try:
+            nombres_sedes = [
+                'Sede Tecnológica', 'Centro de Innovación', 'Oficina Comercial',
+                'Planta Industrial Norte', 'Centro Logístico Sur', 'Torre Corporativa'
+            ]
+            
+            nombre = random.choice(nombres_sedes)
+            sede, created = Sede.objects.get_or_create(
+                nombre=nombre,
+                defaults={
+                    'codigo_unico': f"SED-{random.randint(100,999)}",
+                    'direccion': f"Calle {random.randint(1,100)} #{random.randint(1000,9999)}",
+                    'activo': True
+                }
+            )
+            
+            if created:
+                Area.objects.create(
+                    sede=sede,
+                    nombre="Recepción",
+                    piso=1,
+                    nivel_seguridad=random.choice(['bajo', 'medio', 'alto']),
+                    dispositivo_biometrico=random.choice(['huella', 'tarjeta', 'pin'])
+                )
+            
+            return JsonResponse({
+                'success': True,
+                'created': created,
+                'sede_id': sede.id,
+                'nombre': sede.nombre,
+                'accion': 'creada' if created else 'ya existía'
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False}, status=405)
+
+
+# ========== SIMULADOR DE NOTIFICACIONES ==========
+@csrf_exempt
+@login_required
+def simular_notificacion(request):
+    """Simula la creación de notificaciones del sistema"""
+    if request.method == 'POST':
+        try:
+            titulos = [
+                ('📱 Nuevo dispositivo registrado', 'DISPOSITIVO'),
+                ('⚠️ Alerta de seguridad', 'SEGURIDAD'),
+                ('👤 Nueva solicitud de registro', 'PERSONAL'),
+                ('📊 Reporte generado', 'REPORTE'),
+                ('💾 Backup completado', 'BACKUP'),
+            ]
+            
+            titulo, tipo = random.choice(titulos)
+            prioridades = ['informativa', 'baja', 'media', 'alta', 'critica']
+            prioridad = random.choice(prioridades)
+            
+            notificacion = Notificacion.objects.create(
+                titulo=titulo,
+                mensaje=f"Evento simulado: {titulo}. Revise el sistema.",
+                tipo=tipo,
+                prioridad=prioridad,
+                usuario_destino=request.user
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'notificacion_id': notificacion.id,
+                'titulo': titulo,
+                'prioridad': prioridad
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False}, status=405)
+
+
+# ========== SIMULADOR DE USUARIOS NUEVOS ==========
+@csrf_exempt
+@login_required
+def simular_usuario_nuevo(request):
+    """Simula la solicitud de registro de nuevos usuarios"""
+    if request.method == 'POST':
+        try:
+            nombres = [
+                'Juan Carlos Pérez', 'María Elena Gómez', 'Carlos Andrés López',
+                'Ana Patricia Martínez', 'Luis Fernando Rodríguez', 'Laura Isabel Fernández'
+            ]
+            
+            nombre = random.choice(nombres)
+            base_nombre = nombre.split()[0].lower()
+            dni = f"{random.randint(10000000, 99999999)}"
+            
+            solicitud = SolicitudRegistro.objects.create(
+                nombre=nombre,
+                dni=dni,
+                email=f"{base_nombre}.{random.randint(1,999)}@biometrika.com",
+                telefono=f"11{random.randint(10000000, 99999999)}",
+                departamento=random.choice(['TI', 'RH', 'Ventas', 'Marketing']),
+                puesto=random.choice(['Analista', 'Coordinador', 'Asistente', 'Gerente']),
+                superior=f"Supervisor {random.choice(['García', 'Rodríguez', 'López'])}",
+                estado='pendiente'
+            )
+            
+            Ticket.objects.create(
+                titulo=f"Solicitud de registro - {nombre} (DNI: {dni})",
+                descripcion=f"Solicitud de nuevo usuario: {nombre}\nDNI: {dni}\nEmail: {solicitud.email}",
+                prioridad='media',
+                estado='abierto',
+                remitente_nombre=nombre,
+                remitente_email=solicitud.email
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'solicitud_id': solicitud.id,
+                'nombre': nombre,
+                'dni': dni
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False}, status=405)
