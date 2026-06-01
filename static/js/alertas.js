@@ -1,15 +1,147 @@
-// static/js/alertas.js - Manejo de alertas y reportes
+// static/js/alertas.js - COMPLETO
 
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('formReportar');
+    inicializarEventos();
+});
+
+function inicializarEventos() {
+    const btnAplicar = document.querySelector('.btn-aplicar');
+    const btnLimpiar = document.querySelector('.btn-limpiar');
+    const filtroSede = document.getElementById('filtro-sede');
+    const filtroEstado = document.getElementById('filtro-estado');
+    const filtroAutenticacion = document.getElementById('filtro-autenticacion');
+    const filtroDispositivo = document.getElementById('filtro-dispositivo');
     
+    if (btnAplicar) btnAplicar.addEventListener('click', aplicarFiltros);
+    if (btnLimpiar) btnLimpiar.addEventListener('click', limpiarFiltros);
+    
+    if (filtroSede) filtroSede.addEventListener('change', aplicarFiltros);
+    if (filtroEstado) filtroEstado.addEventListener('change', aplicarFiltros);
+    if (filtroAutenticacion) filtroAutenticacion.addEventListener('change', aplicarFiltros);
+    if (filtroDispositivo) filtroDispositivo.addEventListener('input', aplicarFiltros);
+    
+    // Formulario de reporte
+    const form = document.getElementById('formReportar');
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             enviarReporte();
         });
     }
-});
+}
+
+function aplicarFiltros() {
+    const filtroSede = document.getElementById('filtro-sede')?.value.toLowerCase() || '';
+    const filtroEstado = document.getElementById('filtro-estado')?.value.toLowerCase() || '';
+    const filtroAutenticacion = document.getElementById('filtro-autenticacion')?.value.toLowerCase() || '';
+    const filtroDispositivo = document.getElementById('filtro-dispositivo')?.value.toLowerCase() || '';
+    
+    const filas = document.querySelectorAll('.tabla-alertas tbody tr:not(.sin-resultados)');
+    let visibles = 0;
+    
+    filas.forEach(fila => {
+        const textoDispositivo = fila.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+        const textoEstado = fila.querySelector('.estado-alerta')?.textContent.toLowerCase() || '';
+        const textoNivel = fila.querySelector('.nivel-alerta')?.textContent.toLowerCase() || '';
+        
+        let mostrar = true;
+        
+        if (filtroDispositivo && !textoDispositivo.includes(filtroDispositivo)) mostrar = false;
+        if (filtroEstado && !textoEstado.includes(filtroEstado)) mostrar = false;
+        
+        fila.style.display = mostrar ? '' : 'none';
+        if (mostrar) visibles++;
+    });
+    
+    mostrarNotificacion(`Filtros aplicados: ${visibles} alertas visibles`, 'info');
+    
+    if (visibles === 0) {
+        mostrarMensajeSinResultados();
+    } else {
+        ocultarMensajeSinResultados();
+    }
+}
+
+function limpiarFiltros() {
+    document.getElementById('filtro-sede').value = '';
+    document.getElementById('filtro-estado').value = '';
+    document.getElementById('filtro-autenticacion').value = '';
+    document.getElementById('filtro-dispositivo').value = '';
+    
+    const filas = document.querySelectorAll('.tabla-alertas tbody tr');
+    filas.forEach(fila => fila.style.display = '');
+    
+    ocultarMensajeSinResultados();
+    mostrarNotificacion('Filtros limpiados', 'info');
+}
+
+function mostrarMensajeSinResultados() {
+    let mensaje = document.querySelector('.sin-resultados');
+    if (!mensaje) {
+        const tbody = document.querySelector('.tabla-alertas tbody');
+        if (tbody) {
+            mensaje = document.createElement('tr');
+            mensaje.className = 'sin-resultados';
+            mensaje.innerHTML = `
+                <td colspan="8" style="text-align: center; padding: 40px;">
+                    <i class="fa-solid fa-search" style="font-size: 48px;"></i>
+                    <p>No se encontraron alertas con los filtros seleccionados</p>
+                </td>
+            `;
+            tbody.appendChild(mensaje);
+        }
+    }
+}
+
+function ocultarMensajeSinResultados() {
+    const mensaje = document.querySelector('.sin-resultados');
+    if (mensaje) mensaje.remove();
+}
+
+function marcarAlertaResuelta(alertaId) {
+    if (!confirm('¿Marcar esta alerta como resuelta?')) return;
+    
+    fetch(`/alertas/api/resolver/${alertaId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            mostrarNotificacion('Error: ' + data.message, 'error');
+        }
+    })
+    .catch(error => mostrarNotificacion('Error al resolver alerta', 'error'));
+}
+
+function marcarAlertaLeida(alertaId) {
+    fetch(`/alertas/api/leida/${alertaId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const alertaRow = document.querySelector(`tr[data-id="${alertaId}"]`);
+            if (alertaRow) {
+                const estadoSpan = alertaRow.querySelector('.estado-alerta');
+                if (estadoSpan) {
+                    estadoSpan.innerHTML = '<i class="fa-solid fa-circle"></i> Leída';
+                    estadoSpan.classList.remove('estado-pendiente');
+                    estadoSpan.classList.add('estado-leida');
+                }
+            }
+            mostrarNotificacion('Alerta marcada como leída', 'success');
+        }
+    })
+    .catch(error => mostrarNotificacion('Error', 'error'));
+}
 
 function reportarDispositivo(id, nombre) {
     document.getElementById('dispositivo_id_reportar').value = id;
@@ -27,7 +159,7 @@ function enviarReporte() {
     const descripcion = document.getElementById('descripcion_reporte').value;
     
     if (!dispositivo_id || !descripcion.trim()) {
-        alert('Por favor completa todos los campos');
+        mostrarNotificacion('Complete todos los campos', 'error');
         return;
     }
     
@@ -45,349 +177,37 @@ function enviarReporte() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Reporte enviado correctamente');
+            mostrarNotificacion('Reporte enviado correctamente', 'success');
             cerrarModal();
+            setTimeout(() => location.reload(), 1500);
         } else {
-            alert('Error: ' + data.message);
+            mostrarNotificacion('Error: ' + data.message, 'error');
         }
     })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al enviar el reporte');
-    });
+    .catch(error => mostrarNotificacion('Error al enviar reporte', 'error'));
+}
+
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const notificacion = document.getElementById('notificacion');
+    if (notificacion) {
+        notificacion.textContent = mensaje;
+        notificacion.className = `notificacion notificacion-${tipo}`;
+        notificacion.style.display = 'block';
+        setTimeout(() => notificacion.style.display = 'none', 3000);
+    } else {
+        alert(mensaje);
+    }
 }
 
 function getCookie(name) {
-    let cookieValue = null;
+    let value = null;
     if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+        document.cookie.split(';').forEach(cookie => {
+            const c = cookie.trim();
+            if (c.substring(0, name.length + 1) === (name + '=')) {
+                value = decodeURIComponent(c.substring(name.length + 1));
             }
-        }
+        });
     }
-    return cookieValue;
+    return value;
 }
-
-// Estilos para el modal
-const estilosModal = `
-    .modal {
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
-    }
-    
-    .modal-contenido {
-        background-color: white;
-        margin: 10% auto;
-        padding: 20px;
-        border-radius: 8px;
-        width: 80%;
-        max-width: 400px;
-    }
-    
-    .cerrar {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-    
-    .cerrar:hover {
-        color: black;
-    }
-    
-    .form-group {
-        margin-bottom: 15px;
-    }
-    
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
-    }
-    
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-family: inherit;
-    }
-    
-    .form-group textarea {
-        min-height: 100px;
-        resize: vertical;
-    }
-    
-    .btn {
-        background: #0066cc;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        width: 100%;
-    }
-    
-    .btn:hover {
-        background: #004fa3;
-    }
-    
-    .total-registros {
-        padding: 15px;
-        background: #f8f9fa;
-        text-align: right;
-        font-size: 14px;
-        border-top: 1px solid #dee2e6;
-    }
-    
-    .text-success { color: #28a745; font-weight: 600; }
-    .text-warning { color: #ffc107; font-weight: 600; }
-    .text-danger { color: #dc3545; font-weight: 600; }
-`;
-
-// Inyectar estilos
-const styleSheet = document.createElement('style');
-styleSheet.textContent = estilosModal;
-document.head.appendChild(styleSheet);
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Referencias a elementos del DOM
-    const btnAplicar = document.querySelector('.btn-aplicar');
-    const btnLimpiar = document.querySelector('.btn-limpiar');
-    const filtroSede = document.getElementById('filtro-sede');
-    const filtroEstado = document.getElementById('filtro-estado');
-    const filtroAutenticacion = document.getElementById('filtro-autenticacion');
-    const filtroDispositivo = document.getElementById('filtro-dispositivo');
-    const tabla = document.querySelector('.tabla-alertas tbody');
-    
-    let filasOriginales = [];
-    
-    if (tabla) {
-        filasOriginales = Array.from(tabla.querySelectorAll('tr:not(.sin-resultados)'));
-    }
-
-    // Función para aplicar filtros
-    function aplicarFiltros() {
-        const sede = filtroSede ? filtroSede.value.toLowerCase() : '';
-        const estado = filtroEstado ? filtroEstado.value.toLowerCase() : '';
-        const autenticacion = filtroAutenticacion ? filtroAutenticacion.value.toLowerCase() : '';
-        const dispositivo = filtroDispositivo ? filtroDispositivo.value.toLowerCase() : '';
-
-        if (!tabla) return;
-
-        // Mostrar todas las filas primero
-        filasOriginales.forEach(fila => {
-            fila.style.display = '';
-        });
-
-        // Aplicar filtros
-        filasOriginales.forEach(fila => {
-            const celdas = fila.querySelectorAll('td');
-            if (celdas.length === 0) return;
-            
-            const textoDispositivo = celdas[0] ? celdas[0].textContent.toLowerCase() : '';
-            const textoSede = celdas[1] ? celdas[1].textContent.toLowerCase() : '';
-            const estadoSpan = celdas[6] ? celdas[6].querySelector('.estado-dispositivo') : null;
-            const textoEstado = estadoSpan ? estadoSpan.textContent.toLowerCase() : '';
-            const authSpan = celdas[5] ? celdas[5].querySelector('.tipo-autenticacion') : null;
-            const textoAutenticacion = authSpan ? authSpan.textContent.toLowerCase() : '';
-
-            let mostrar = true;
-
-            if (sede && !textoSede.includes(sede)) mostrar = false;
-            if (estado && textoEstado !== estado) mostrar = false;
-            if (autenticacion && !textoAutenticacion.includes(autenticacion)) mostrar = false;
-            if (dispositivo && !textoDispositivo.includes(dispositivo)) mostrar = false;
-
-            fila.style.display = mostrar ? '' : 'none';
-        });
-
-        // Mostrar mensaje si no hay resultados
-        const filasVisibles = Array.from(tabla.querySelectorAll('tr')).filter(fila => 
-            fila.style.display !== 'none' && !fila.classList.contains('sin-resultados')
-        );
-
-        if (filasVisibles.length === 0) {
-            mostrarMensajeSinResultados();
-        } else {
-            ocultarMensajeSinResultados();
-        }
-
-        mostrarNotificacion('Filtros aplicados correctamente', 'success');
-    }
-
-    // Función para limpiar filtros
-    function limpiarFiltros() {
-        if (filtroSede) filtroSede.value = '';
-        if (filtroEstado) filtroEstado.value = '';
-        if (filtroAutenticacion) filtroAutenticacion.value = '';
-        if (filtroDispositivo) filtroDispositivo.value = '';
-
-        if (tabla) {
-            filasOriginales.forEach(fila => {
-                fila.style.display = '';
-            });
-        }
-
-        ocultarMensajeSinResultados();
-        mostrarNotificacion('Filtros limpiados', 'info');
-    }
-
-    // Función para reportar dispositivo
-    function reportarDispositivo(boton, dispositivoId) {
-        if(confirm(`¿Está seguro que desea reportar el dispositivo ${dispositivoId}?`)) {
-            // Enviar reporte al servidor
-            fetch(`/alertas/reportar/${dispositivoId}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ reportado: true })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    boton.innerHTML = '<i class="fa-solid fa-check"></i> Reportado';
-                    boton.style.background = '#27ae60';
-                    boton.disabled = true;
-                    
-                    const fila = boton.closest('tr');
-                    const estadoCell = fila.querySelector('.estado-dispositivo');
-                    if (estadoCell) {
-                        estadoCell.textContent = 'Reportado';
-                        estadoCell.className = 'estado-dispositivo estado-online';
-                    }
-                    
-                    mostrarNotificacion(`Dispositivo ${dispositivoId} reportado correctamente`, 'success');
-                    actualizarContadores();
-                }
-            })
-            .catch(error => {
-                mostrarNotificacion('Error al reportar dispositivo', 'error');
-            });
-        }
-    }
-
-    // Función para actualizar contadores
-    function actualizarContadores() {
-        if (!tabla) return;
-        
-        const dispositivosCriticos = tabla.querySelectorAll('.estado-caido').length;
-        const dispositivosProblemas = tabla.querySelectorAll('.estado-inestable').length;
-        const dispositivosEstables = tabla.querySelectorAll('.estado-online').length;
-
-        const criticasElem = document.querySelector('.resumen-item.criticas .resumen-valor');
-        const advertenciasElem = document.querySelector('.resumen-item.advertencias .resumen-valor');
-        const establesElem = document.querySelector('.resumen-item.estables .resumen-valor');
-
-        if (criticasElem) criticasElem.textContent = dispositivosCriticos;
-        if (advertenciasElem) advertenciasElem.textContent = dispositivosProblemas;
-        if (establesElem) establesElem.textContent = dispositivosEstables;
-    }
-
-    // Función para mostrar mensaje cuando no hay resultados
-    function mostrarMensajeSinResultados() {
-        if (!tabla) return;
-        
-        let mensaje = tabla.querySelector('.sin-resultados');
-        if (!mensaje) {
-            mensaje = document.createElement('tr');
-            mensaje.className = 'sin-resultados';
-            mensaje.innerHTML = `
-                <td colspan="8" style="text-align: center; padding: 40px; color: #7f8c8d;">
-                    <i class="fa-solid fa-search" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
-                    <h3 style="margin-bottom: 10px;">No se encontraron dispositivos</h3>
-                    <p>Intente ajustar los filtros de búsqueda</p>
-                </td>
-            `;
-            tabla.appendChild(mensaje);
-        }
-        mensaje.style.display = '';
-    }
-
-    // Función para ocultar mensaje de no resultados
-    function ocultarMensajeSinResultados() {
-        if (!tabla) return;
-        
-        const mensaje = tabla.querySelector('.sin-resultados');
-        if (mensaje) {
-            mensaje.style.display = 'none';
-        }
-    }
-
-    // Función para obtener CSRF token
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    // Función para mostrar notificaciones
-    function mostrarNotificacion(mensaje, tipo = 'info') {
-        const notificacion = document.createElement('div');
-        notificacion.className = `notificacion notificacion-${tipo}`;
-        
-        const icono = tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'exclamation-circle' : 'info-circle';
-        
-        notificacion.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <i class="fa-solid fa-${icono}"></i>
-                <span>${mensaje}</span>
-            </div>
-        `;
-
-        document.body.appendChild(notificacion);
-
-        setTimeout(() => {
-            notificacion.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => {
-                if (notificacion.parentNode) {
-                    notificacion.parentNode.removeChild(notificacion);
-                }
-            }, 300);
-        }, 3000);
-    }
-
-    // Event Listeners
-    if (btnAplicar) btnAplicar.addEventListener('click', aplicarFiltros);
-    if (btnLimpiar) btnLimpiar.addEventListener('click', limpiarFiltros);
-
-    // Eventos para botones de reportar
-    document.querySelectorAll('.btn-reportar').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const fila = this.closest('tr');
-            const dispositivoId = fila ? fila.querySelector('td:first-child strong').textContent : '';
-            reportarDispositivo(this, dispositivoId);
-        });
-    });
-
-    // Eventos para filtros en tiempo real
-    if (filtroSede) filtroSede.addEventListener('change', aplicarFiltros);
-    if (filtroEstado) filtroEstado.addEventListener('change', aplicarFiltros);
-    if (filtroAutenticacion) filtroAutenticacion.addEventListener('change', aplicarFiltros);
-    if (filtroDispositivo) filtroDispositivo.addEventListener('input', aplicarFiltros);
-
-    // Inicializar contadores
-    actualizarContadores();
-});

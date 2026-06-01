@@ -86,7 +86,16 @@ def api_personal(request, persona_id=None):
                 telefono = (request.POST.get('telefono') or '').strip()
                 direccion = (request.POST.get('direccion') or '').strip()
                 credencial = (request.POST.get('credencial') or '').strip()
-                metodo_adicional = request.POST.get('metodo_adicional')
+                metodo_adicional_raw = request.POST.get('metodo_adicional')
+                
+                # CORREGIDO: Convertir metodo_adicional de string JSON a dict
+                metodo_adicional = None
+                if metodo_adicional_raw and metodo_adicional_raw != 'null':
+                    try:
+                        metodo_adicional = json.loads(metodo_adicional_raw)
+                        print(f"  - metodo_adicional parseado: {metodo_adicional}")
+                    except:
+                        metodo_adicional = None
                 
                 if 'foto' in request.FILES:
                     print(f"Foto recibida: {request.FILES['foto'].name}")
@@ -129,7 +138,7 @@ def api_personal(request, persona_id=None):
             print(f"  - telefono: '{telefono}'")
             print(f"  - direccion: '{direccion}'")
             print(f"  - credencial: '{credencial}'")
-            print(f"  - metodo_adicional: {metodo_adicional is not None}")
+            print(f"  - metodo_adicional: {metodo_adicional}")
             
             errores = []
             
@@ -246,8 +255,17 @@ def api_personal(request, persona_id=None):
                 data = json.loads(request.body)
                 print("Procesando como JSON")
             else:
-                data = request.POST.dict()
+                data = {}
+                for key in request.POST:
+                    data[key] = request.POST[key]
                 print("Procesando como FormData")
+                
+                # CORREGIDO: Convertir metodo_adicional si viene como string
+                if 'metodo_adicional' in data and data['metodo_adicional'] and data['metodo_adicional'] != 'null':
+                    try:
+                        data['metodo_adicional'] = json.loads(data['metodo_adicional'])
+                    except:
+                        pass
             
             email = data.get('email', persona.email).strip() if data.get('email') else persona.email
             numero_documento = data.get('numero_documento', persona.numero_documento)
@@ -280,7 +298,11 @@ def api_personal(request, persona_id=None):
             persona.dispositivo_biometrico = data.get('dispositivo', persona.dispositivo_biometrico)
             persona.credencial_biometrica = data.get('credencial', persona.credencial_biometrica)
             persona.nivel_seguridad = data.get('nivel_seguridad', persona.nivel_seguridad)
-            persona.metodo_adicional = data.get('metodo_adicional', persona.metodo_adicional)
+            
+            # CORREGIDO: Guardar metodo_adicional correctamente
+            if 'metodo_adicional' in data:
+                persona.metodo_adicional = data.get('metodo_adicional')
+            
             persona.activo = data.get('activo', persona.activo)
             
             if 'foto' in request.FILES:
