@@ -6,6 +6,7 @@ app_name = 'usuarios'
 
 urlpatterns = [
     path('perfil/', views.perfil, name='perfil'),
+    path('api/perfil/', views.api_perfil, name='api_perfil'),
     path('cambiar-password/', views.cambiar_password, name='cambiar_password'),
     path('configuracion/', views.configuracion, name='configuracion'),
     path('notificaciones/', views.notificaciones, name='notificaciones'),

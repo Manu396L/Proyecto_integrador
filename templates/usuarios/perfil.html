@@ -15,7 +15,7 @@
         <div class="profile-panel">
             <div class="profile-header">
                 <div class="profile-photo-section">
-                    <div class="profile-photo">
+                    <div class="profile-photo" id="profile-photo">
                         <i class="fa-solid fa-user"></i>
                     </div>
                     <div class="profile-actions">
@@ -28,16 +28,11 @@
                     </div>
                 </div>
                 <div class="profile-info">
-                    <h2>Juan Pérez García</h2>
-                    <p class="profile-cargo">Analista de Sistemas Senior</p>
-                    <p class="profile-id">ID: EMP-001</p>
-                    <div class="status-badges">
-                        <span class="badge status-activo">
-                            <i class="fa-solid fa-circle"></i> Activo
-                        </span>
-                        <span class="badge">
-                            <i class="fa-solid fa-shield-halved"></i> Nivel: Alto
-                        </span>
+                    <h2 id="empleado-nombre">Cargando...</h2>
+                    <p class="profile-cargo" id="empleado-cargo">Cargando...</p>
+                    <p class="profile-id" id="empleado-id">Cargando...</p>
+                    <div class="status-badges" id="status-badges">
+                        <span class="badge status-activo">Cargando...</span>
                     </div>
                 </div>
             </div>
@@ -47,27 +42,35 @@
                 <div class="info-grid">
                     <div class="info-item">
                         <label><i class="fa-solid fa-id-badge"></i> ID de Empleado:</label>
-                        <span>EMP-001</span>
+                        <span id="info-id">-</span>
                     </div>
                     <div class="info-item">
                         <label><i class="fa-solid fa-signature"></i> Nombre Completo:</label>
-                        <span>Juan Pérez García</span>
+                        <span id="info-nombre">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fa-solid fa-id-card"></i> Documento:</label>
+                        <span id="info-documento">-</span>
                     </div>
                     <div class="info-item">
                         <label><i class="fa-solid fa-briefcase"></i> Cargo:</label>
-                        <span>Analista de Sistemas Senior</span>
+                        <span id="info-cargo">-</span>
                     </div>
                     <div class="info-item">
                         <label><i class="fa-solid fa-building"></i> Área/Departamento:</label>
-                        <span>Tecnología de la Información</span>
+                        <span id="info-area">-</span>
                     </div>
                     <div class="info-item">
                         <label><i class="fa-solid fa-envelope"></i> Correo:</label>
-                        <span>juan.perez@biometrika.com</span>
+                        <span id="info-correo">-</span>
                     </div>
                     <div class="info-item">
-                        <label><i class="fa-solid fa-calendar"></i> Fecha Ingreso:</label>
-                        <span>15/03/2022</span>
+                        <label><i class="fa-solid fa-location-dot"></i> Sede:</label>
+                        <span id="info-sede">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fa-solid fa-calendar"></i> Fecha Registro:</label>
+                        <span id="info-fecha-registro">-</span>
                     </div>
                 </div>
             </div>
@@ -77,52 +80,34 @@
                 <div class="info-grid">
                     <div class="info-item">
                         <label><i class="fa-solid fa-microchip"></i> Tipo Dispositivo:</label>
-                        <span>Lector de Huella Dactilar</span>
+                        <span id="info-dispositivo">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fa-solid fa-shield-halved"></i> Nivel Seguridad:</label>
+                        <span id="info-nivel-seguridad">-</span>
                     </div>
                     <div class="info-item">
                         <label><i class="fa-solid fa-key"></i> Credencial Asignada:</label>
-                        <span>Huella registrada</span>
-                    </div>
-                    <div class="info-item">
-                        <label><i class="fa-solid fa-calendar-check"></i> Último Acceso:</label>
-                        <span>Hoy, 08:15 AM</span>
+                        <span id="info-credencial">-</span>
                     </div>
                 </div>
             </div>
 
             <div class="info-section">
                 <h3><i class="fa-solid fa-clock-rotate-left"></i> Accesos Recientes</h3>
-                <div class="accesos-container">
+                <div class="accesos-container" id="accesos-container">
                     <div class="acceso-item">
-                        <div class="acceso-icon"><i class="fa-solid fa-door-open"></i></div>
+                        <div class="acceso-icon"><i class="fa-solid fa-spinner fa-pulse"></i></div>
                         <div class="acceso-info">
-                            <div class="acceso-tipo">Entrada - Sede Central</div>
-                            <div class="acceso-fecha">Hoy, 08:15 AM</div>
+                            <div class="acceso-tipo">Cargando accesos...</div>
                         </div>
-                        <div class="acceso-estado success">Exitoso</div>
-                    </div>
-                    <div class="acceso-item">
-                        <div class="acceso-icon"><i class="fa-solid fa-door-closed"></i></div>
-                        <div class="acceso-info">
-                            <div class="acceso-tipo">Salida - Sede Central</div>
-                            <div class="acceso-fecha">Ayer, 06:30 PM</div>
-                        </div>
-                        <div class="acceso-estado success">Exitoso</div>
-                    </div>
-                    <div class="acceso-item">
-                        <div class="acceso-icon"><i class="fa-solid fa-door-open"></i></div>
-                        <div class="acceso-info">
-                            <div class="acceso-tipo">Entrada - Oficina Adm.</div>
-                            <div class="acceso-fecha">Ayer, 02:15 PM</div>
-                        </div>
-                        <div class="acceso-estado success">Exitoso</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Sidebar derecho -->
-        <div class="sidebar">
+        <div class="sidebar-right">
             <div class="credential-card">
                 <div class="credential-header">
                     <i class="fa-solid fa-id-card"></i>
@@ -132,13 +117,11 @@
                     <div class="credential-photo">
                         <div><i class="fa-solid fa-user"></i></div>
                     </div>
-                    <div class="credential-info">
-                        <div class="credential-name">Juan Pérez García</div>
-                        <div class="credential-id">ID: EMP-001</div>
-                        <div class="credential-cargo">Analista de Sistemas</div>
-                    </div>
+                    <div class="credential-name" id="credential-nombre">Cargando...</div>
+                    <div class="credential-id" id="credential-id">Cargando...</div>
+                    <div class="credential-cargo" id="credential-cargo">Cargando...</div>
                     <div class="credential-footer">
-                        <div class="credential-type">Huella Digital</div>
+                        <div class="credential-type" id="credential-tipo">Cargando...</div>
                         <div class="credential-qr"><i class="fa-solid fa-qrcode"></i></div>
                     </div>
                 </div>
@@ -149,15 +132,15 @@
                 <div class="contact-info">
                     <div class="contact-item">
                         <i class="fa-solid fa-envelope"></i>
-                        <span>juan.perez@biometrika.com</span>
+                        <span id="contact-correo">-</span>
                     </div>
                     <div class="contact-item">
                         <i class="fa-solid fa-phone"></i>
-                        <span>+1 234 567 8900</span>
+                        <span id="contact-telefono">-</span>
                     </div>
                     <div class="contact-item">
                         <i class="fa-solid fa-building"></i>
-                        <span>Oficina 304 - Planta 3</span>
+                        <span id="contact-sede">-</span>
                     </div>
                 </div>
             </div>
@@ -166,11 +149,11 @@
                 <h4><i class="fa-solid fa-chart-pie"></i> Estadísticas</h4>
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <div class="stat-value">42</div>
+                        <div class="stat-value" id="stat-accesos-mes">0</div>
                         <div class="stat-label">Accesos/mes</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value">2.8</div>
+                        <div class="stat-value" id="stat-promedio-diario">0</div>
                         <div class="stat-label">Promedio/día</div>
                     </div>
                 </div>
@@ -184,9 +167,5 @@
     </div>
 </div>
 
-<script>
-    document.getElementById('fecha-generacion').textContent = new Date().toLocaleDateString('es-ES');
-    function editarPerfil() { window.location.href = '/personal/'; }
-    function imprimirPerfil() { window.print(); }
-</script>
+<script src="{% static 'js/perfil.js' %}"></script>
 {% endblock %}

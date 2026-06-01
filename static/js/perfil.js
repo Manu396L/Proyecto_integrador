@@ -1,170 +1,144 @@
-js
 // static/js/perfil.js
 
-// Datos del empleado
-const empleado = {
-    id: 'EMP-001',
-    nombre: 'Juan Pérez García',
-    cargo: 'Analista de Sistemas Senior',
-    area: 'Tecnología de la Información',
-    correo: 'juan.perez@biometrika.com',
-    tipoSede: 'Sede Principal',
-    nombreSede: 'Sede Central Corporativa',
-    direccion: 'Av. Principal #123, Ciudad Empresarial',
-    accesos: 'Edificio A, Planta 3 - Sala de Servidores, Oficina 304',
-    dispositivo: 'Lector de Huella Dactilar',
-    nivelSeguridad: 'Alto',
-    credencial: 'Huella registrada',
-    fechaIngreso: '15/03/2022',
-    ultimoAcceso: 'Hoy, 08:15 AM',
-    estado: 'activo',
-    telefono: '+1 234 567 8900',
-    oficina: 'Oficina 304 - Planta 3',
-    accesosMes: 42,
-    promedioDiario: 2.8,
-    ultimaActividad: '2 horas'
-};
-
-// Función para cargar los datos del empleado
-function cargarDatosEmpleado() {
-    // Información principal
-    const nombreElem = document.getElementById('empleado-nombre');
-    const cargoElem = document.getElementById('empleado-cargo');
-    const idElem = document.getElementById('empleado-id');
+async function cargarPerfil() {
+    console.log('Cargando perfil...');
     
-    if (nombreElem) nombreElem.textContent = empleado.nombre;
-    if (cargoElem) cargoElem.textContent = empleado.cargo;
-    if (idElem) idElem.textContent = `ID: ${empleado.id}`;
-    
-    // Badges de estado
-    const nivelSeguridadBadge = document.getElementById('nivel-seguridad-badge');
-    if (nivelSeguridadBadge) {
-        nivelSeguridadBadge.innerHTML = `<i class="fa-solid fa-shield-halved"></i> Nivel: ${empleado.nivelSeguridad}`;
-    }
-
-    // Información personal
-    const infoId = document.getElementById('info-id');
-    const infoNombre = document.getElementById('info-nombre');
-    const infoCargo = document.getElementById('info-cargo');
-    const infoArea = document.getElementById('info-area');
-    const infoCorreo = document.getElementById('info-correo');
-    const infoFechaIngreso = document.getElementById('info-fecha-ingreso');
-    
-    if (infoId) infoId.textContent = empleado.id;
-    if (infoNombre) infoNombre.textContent = empleado.nombre;
-    if (infoCargo) infoCargo.textContent = empleado.cargo;
-    if (infoArea) infoArea.textContent = empleado.area;
-    if (infoCorreo) infoCorreo.textContent = empleado.correo;
-    if (infoFechaIngreso) infoFechaIngreso.textContent = empleado.fechaIngreso;
-
-    // Información de ubicación
-    const infoTipoSede = document.getElementById('info-tipo-sede');
-    const infoNombreSede = document.getElementById('info-nombre-sede');
-    const infoDireccion = document.getElementById('info-direccion');
-    const infoAccesos = document.getElementById('info-accesos');
-    
-    if (infoTipoSede) infoTipoSede.textContent = empleado.tipoSede;
-    if (infoNombreSede) infoNombreSede.textContent = empleado.nombreSede;
-    if (infoDireccion) infoDireccion.textContent = empleado.direccion;
-    if (infoAccesos) infoAccesos.textContent = empleado.accesos;
-
-    // Credenciales de seguridad
-    const infoDispositivo = document.getElementById('info-dispositivo');
-    const infoNivelSeguridad = document.getElementById('info-nivel-seguridad');
-    const infoCredencial = document.getElementById('info-credencial');
-    const infoUltimoAcceso = document.getElementById('info-ultimo-acceso');
-    
-    if (infoDispositivo) infoDispositivo.textContent = empleado.dispositivo;
-    if (infoNivelSeguridad) infoNivelSeguridad.textContent = empleado.nivelSeguridad;
-    if (infoCredencial) infoCredencial.textContent = empleado.credencial;
-    if (infoUltimoAcceso) infoUltimoAcceso.textContent = empleado.ultimoAcceso;
-
-    // Tarjeta de credencial
-    const credentialNombre = document.getElementById('credential-nombre');
-    const credentialId = document.getElementById('credential-id');
-    const credentialCargo = document.getElementById('credential-cargo');
-    const credentialArea = document.getElementById('credential-area');
-    const credentialTipo = document.getElementById('credential-tipo');
-    
-    if (credentialNombre) credentialNombre.textContent = empleado.nombre;
-    if (credentialId) credentialId.textContent = `ID: ${empleado.id}`;
-    if (credentialCargo) credentialCargo.textContent = empleado.cargo;
-    if (credentialArea) credentialArea.textContent = empleado.area;
-    if (credentialTipo) credentialTipo.textContent = empleado.dispositivo;
-
-    // Información de contacto
-    const contactCorreo = document.getElementById('contact-correo');
-    const contactTelefono = document.getElementById('contact-telefono');
-    const contactOficina = document.getElementById('contact-oficina');
-    
-    if (contactCorreo) contactCorreo.textContent = empleado.correo;
-    if (contactTelefono) contactTelefono.textContent = empleado.telefono;
-    if (contactOficina) contactOficina.textContent = empleado.oficina;
-
-    // Estadísticas
-    const statAccesosMes = document.getElementById('stat-accesos-mes');
-    const statPromedioDiario = document.getElementById('stat-promedio-diario');
-    const statUltimaActividad = document.getElementById('stat-ultima-actividad');
-    
-    if (statAccesosMes) statAccesosMes.textContent = empleado.accesosMes;
-    if (statPromedioDiario) statPromedioDiario.textContent = empleado.promedioDiario;
-    if (statUltimaActividad) statUltimaActividad.textContent = empleado.ultimaActividad;
-
-    // Fecha de generación
-    const fechaGeneracion = document.getElementById('fecha-generacion');
-    if (fechaGeneracion) {
-        const fechaActual = new Date().toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        fechaGeneracion.textContent = fechaActual;
+    try {
+        const response = await fetch('/usuarios/api/perfil/');
+        const data = await response.json();
+        
+        if (!data.success) {
+            console.error('Error al cargar perfil');
+            return;
+        }
+        
+        console.log('Datos recibidos:', data);
+        
+        // Actualizar foto de perfil
+        const profilePhoto = document.getElementById('profile-photo');
+        if (profilePhoto) {
+            if (data.persona && data.persona.foto) {
+                profilePhoto.innerHTML = `<img src="${data.persona.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+            } else {
+                profilePhoto.innerHTML = '<i class="fa-solid fa-user"></i>';
+            }
+        }
+        
+        // Información principal
+        const nombreCompleto = data.persona ? `${data.persona.nombres} ${data.persona.apellidos}` : data.username;
+        document.getElementById('empleado-nombre').textContent = nombreCompleto;
+        document.getElementById('empleado-cargo').textContent = data.persona?.cargo || 'No especificado';
+        document.getElementById('empleado-id').textContent = `ID: ${data.id}`;
+        
+        // Badges de estado
+        const badgesContainer = document.getElementById('status-badges');
+        if (data.persona && data.persona.activo) {
+            badgesContainer.innerHTML = `
+                <span class="badge status-activo">
+                    <i class="fa-solid fa-circle"></i> Activo
+                </span>
+                <span class="badge">
+                    <i class="fa-solid fa-shield-halved"></i> Nivel: ${data.persona.nivel_display}
+                </span>
+            `;
+        } else {
+            badgesContainer.innerHTML = `
+                <span class="badge status-inactivo">
+                    <i class="fa-solid fa-circle"></i> Inactivo
+                </span>
+            `;
+        }
+        
+        // Información personal
+        document.getElementById('info-id').textContent = data.id;
+        document.getElementById('info-nombre').textContent = nombreCompleto;
+        document.getElementById('info-documento').textContent = data.persona?.numero_documento || '-';
+        document.getElementById('info-cargo').textContent = data.persona?.cargo || '-';
+        document.getElementById('info-area').textContent = data.persona?.area_display || '-';
+        document.getElementById('info-correo').textContent = data.email;
+        document.getElementById('info-sede').textContent = data.persona?.nombre_sede || '-';
+        document.getElementById('info-fecha-registro').textContent = data.persona?.fecha_creacion || '-';
+        
+        // Credenciales de seguridad
+        document.getElementById('info-dispositivo').textContent = data.persona?.dispositivo_display || '-';
+        document.getElementById('info-nivel-seguridad').textContent = data.persona?.nivel_display || '-';
+        document.getElementById('info-credencial').textContent = data.persona?.credencial_biometrica || '-';
+        
+        // Tarjeta de credencial
+        document.getElementById('credential-nombre').textContent = nombreCompleto;
+        document.getElementById('credential-id').textContent = `ID: ${data.id}`;
+        document.getElementById('credential-cargo').textContent = data.persona?.cargo || 'Empleado';
+        document.getElementById('credential-tipo').textContent = data.persona?.dispositivo_display || 'Huella';
+        
+        // Contacto
+        document.getElementById('contact-correo').textContent = data.email;
+        document.getElementById('contact-telefono').textContent = data.persona?.telefono || 'No registrado';
+        document.getElementById('contact-sede').textContent = data.persona?.nombre_sede || 'Sede Principal';
+        
+        // Estadísticas
+        if (data.estadisticas) {
+            document.getElementById('stat-accesos-mes').textContent = data.estadisticas.accesos_mes || 0;
+            document.getElementById('stat-promedio-diario').textContent = data.estadisticas.promedio_diario || 0;
+        }
+        
+        // Accesos recientes
+        const accesosContainer = document.getElementById('accesos-container');
+        if (data.ultimos_accesos && data.ultimos_accesos.length > 0) {
+            accesosContainer.innerHTML = '';
+            data.ultimos_accesos.forEach(acceso => {
+                const accesoItem = document.createElement('div');
+                accesoItem.className = 'acceso-item';
+                accesoItem.innerHTML = `
+                    <div class="acceso-icon">
+                        <i class="fa-solid ${acceso.tipo_acceso === 'exitoso' ? 'fa-door-open' : 'fa-door-closed'}"></i>
+                    </div>
+                    <div class="acceso-info">
+                        <div class="acceso-tipo">${acceso.dispositivo}</div>
+                        <div class="acceso-fecha">${acceso.fecha_hora}</div>
+                    </div>
+                    <div class="acceso-estado ${acceso.clase}">${acceso.tipo_display}</div>
+                `;
+                accesosContainer.appendChild(accesoItem);
+            });
+        } else {
+            accesosContainer.innerHTML = `
+                <div class="acceso-item">
+                    <div class="acceso-icon"><i class="fa-solid fa-info-circle"></i></div>
+                    <div class="acceso-info">
+                        <div class="acceso-tipo">No hay accesos registrados</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Fecha de generación
+        const fechaGeneracion = document.getElementById('fecha-generacion');
+        if (fechaGeneracion) {
+            const fechaActual = new Date().toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            fechaGeneracion.textContent = fechaActual;
+        }
+        
+    } catch (error) {
+        console.error('Error cargando perfil:', error);
+        document.getElementById('empleado-nombre').textContent = 'Error al cargar datos';
     }
 }
 
-// Función para editar el perfil
 function editarPerfil() {
     window.location.href = '/personal/';
 }
 
-// Función para imprimir el perfil
 function imprimirPerfil() {
     window.print();
 }
 
-// Función para cargar foto
-function cargarFoto() {
-    const profilePhoto = document.getElementById('profile-photo');
-    const credentialPhoto = document.getElementById('credential-photo');
-    
-    if (profilePhoto) {
-        profilePhoto.innerHTML = '<i class="fa-solid fa-user"></i>';
-    }
-    if (credentialPhoto) {
-        credentialPhoto.innerHTML = '<i class="fa-solid fa-user"></i>';
-    }
-}
-
-// Función para obtener parámetros de la URL
-function obtenerParametrosURL() {
-    const parametros = new URLSearchParams(window.location.search);
-    return Object.fromEntries(parametros.entries());
-}
-
-// Función para cargar empleado específico
-function cargarEmpleadoDesdeURL() {
-    const parametros = obtenerParametrosURL();
-    if (parametros.id) {
-        console.log('Cargando empleado con ID:', parametros.id);
-    }
-}
-
-// Inicializar la página
+// Inicializar
 document.addEventListener('DOMContentLoaded', function() {
-    cargarEmpleadoDesdeURL();
-    cargarDatosEmpleado();
-    cargarFoto();
-    console.log('Perfil del empleado cargado correctamente');
+    cargarPerfil();
 });

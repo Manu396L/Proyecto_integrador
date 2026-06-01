@@ -66,9 +66,153 @@ def crear_ticket_solicitud(solicitud):
 
 # ===== VISTAS CON LOGIN =====
 
+# ===== PERFIL HTML  ======
 @login_required
 def perfil(request):
-    return render(request, 'usuarios/perfil.html')
+    """Vista de perfil del usuario logueado con datos reales"""
+    from personal.models import Persona, RegistroAcceso
+    from dispositivos.models import Dispositivo
+    
+    usuario = request.user
+    
+    # Buscar la persona asociada al usuario
+    try:
+        persona = Persona.objects.get(usuario=usuario)
+    except Persona.DoesNotExist:
+        persona = None
+    
+    # Obtener accesos recientes del usuario
+    accesos_recientes = []
+    if persona:
+        accesos_recientes = RegistroAcceso.objects.filter(
+            persona=persona
+        ).order_by('-fecha_hora')[:10]
+    
+    # Calcular estadísticas
+    accesos_mes = 0
+    promedio_diario = 0
+    if persona:
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        hace_30_dias = timezone.now() - timedelta(days=30)
+        accesos_mes = RegistroAcceso.objects.filter(
+            persona=persona,
+            fecha_hora__gte=hace_30_dias
+        ).count()
+        promedio_diario = round(accesos_mes / 30, 1) if accesos_mes > 0 else 0
+    
+    # Determinar estado del badge
+    if persona and persona.activo:
+        estado_badge = '<span class="badge status-activo"><i class="fa-solid fa-circle"></i> Activo</span>'
+    else:
+        estado_badge = '<span class="badge status-inactivo"><i class="fa-solid fa-circle"></i> Inactivo</span>'
+    
+    # Nivel de seguridad
+    nivel_seguridad = persona.nivel_seguridad if persona and persona.nivel_seguridad else 'medio'
+    nivel_texto = {'bajo': 'Bajo', 'medio': 'Medio', 'alto': 'Alto'}.get(nivel_seguridad, 'Medio')
+    
+    # Método de acceso principal
+    metodo_acceso = persona.dispositivo_biometrico if persona else 'huella'
+    metodo_texto = {'huella': 'Lector de Huella Dactilar', 'tarjeta': 'Tarjeta de Acceso', 'pin': 'PIN'}.get(metodo_acceso, 'Huella Digital')
+    
+    # Credencial asignada
+    credencial = persona.credencial_biometrica if persona and persona.credencial_biometrica else 'Huella registrada'
+    
+    context = {
+        'usuario': usuario,
+        'persona': persona,
+        'accesos_recientes': accesos_recientes,
+        'accesos_mes': accesos_mes,
+        'promedio_diario': promedio_diario,
+        'estado_badge': estado_badge,
+        'nivel_seguridad_texto': nivel_texto,
+        'metodo_acceso_texto': metodo_texto,
+        'credencial_asignada': credencial,
+    }
+    
+    return render(request, 'usuarios/perfil.html', context)
+
+
+@login_required
+def api_perfil(request):
+    """API para obtener datos del perfil en tiempo real"""
+    from personal.models import Persona, RegistroAcceso
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    usuario = request.user
+    
+    try:
+        persona = Persona.objects.get(usuario=usuario)
+    except Persona.DoesNotExist:
+        persona = None
+    
+    # Datos básicos
+    data = {
+        'success': True,
+        'id': usuario.id,
+        'username': usuario.username,
+        'email': usuario.email,
+        'first_name': usuario.first_name,
+        'last_name': usuario.last_name,
+    }
+    
+    if persona:
+        data['persona'] = {
+            'id': persona.id,
+            'nombres': persona.nombres,
+            'apellidos': persona.apellidos,
+            'numero_documento': persona.numero_documento,
+            'cargo': persona.cargo,
+            'area': persona.area,
+            'area_display': persona.get_area_display() if persona.area else 'N/A',
+            'tipo_sede': persona.tipo_sede,
+            'nombre_sede': persona.nombre_sede,
+            'dispositivo_biometrico': persona.dispositivo_biometrico,
+            'dispositivo_display': persona.get_dispositivo_biometrico_display() if persona.dispositivo_biometrico else 'N/A',
+            'nivel_seguridad': persona.nivel_seguridad,
+            'nivel_display': persona.get_nivel_seguridad_display() if persona.nivel_seguridad else 'Medio',
+            'credencial_biometrica': persona.credencial_biometrica or 'Huella registrada',
+            'activo': persona.activo,
+            'foto': persona.foto.url if persona.foto else None,
+            'telefono': persona.telefono,
+            'direccion': persona.direccion,
+            'fecha_creacion': persona.fecha_registro.strftime('%d/%m/%Y') if persona.fecha_registro else '',
+        }
+        
+        # Calcular estadísticas
+        hace_30_dias = timezone.now() - timedelta(days=30)
+        accesos_mes = RegistroAcceso.objects.filter(
+            persona=persona,
+            fecha_hora__gte=hace_30_dias
+        ).count()
+        promedio_diario = round(accesos_mes / 30, 1) if accesos_mes > 0 else 0
+        
+        data['estadisticas'] = {
+            'accesos_mes': accesos_mes,
+            'promedio_diario': promedio_diario,
+        }
+        
+        # Últimos accesos
+        ultimos_accesos = RegistroAcceso.objects.filter(
+            persona=persona
+        ).order_by('-fecha_hora')[:5]
+        
+        data['ultimos_accesos'] = []
+        for acceso in ultimos_accesos:
+            data['ultimos_accesos'].append({
+                'id': acceso.id,
+                'tipo_acceso': acceso.tipo_acceso,
+                'tipo_display': 'Exitoso' if acceso.tipo_acceso == 'exitoso' else 'Fallido',
+                'fecha_hora': acceso.fecha_hora.strftime('%d/%m/%Y %H:%M:%S'),
+                'dispositivo': acceso.dispositivo.nombre if acceso.dispositivo else 'N/A',
+                'clase': 'success' if acceso.tipo_acceso == 'exitoso' else 'danger',
+            })
+    
+    return JsonResponse(data)
+
+
 
 @login_required
 def cambiar_password(request):

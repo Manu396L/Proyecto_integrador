@@ -605,3 +605,21 @@ header h1 i {
         font-size: 12px;
     }
 }
+
+.status-inactivo {
+    background: rgba(231,76,60,0.2);
+    color: #e74c3c;
+    border: 1px solid rgba(231,76,60,0.3);
+}
+
+.acceso-estado.danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.sidebar-right {
+    flex: 0 0 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
