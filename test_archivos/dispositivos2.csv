@@ -1,0 +1,41 @@
+nombre,numero_serie,tipo_dispositivo,direccion_ip,estado,ultima_conexion,nivel_seguridad
+Terminal Recepción,BIO-001,huella,192.168.1.10,activo,2024-06-01 08:00:00,medio
+Terminal Oficinas,BIO-002,tarjeta,192.168.1.11,activo,2024-06-01 08:05:00,medio
+Terminal Laboratorio,BIO-003,huella,192.168.1.12,activo,2024-06-01 08:10:00,alto
+Terminal Piso 2,BIO-004,pin,192.168.1.13,inactivo,2024-05-31 18:00:00,bajo
+Terminal Gerencia,BIO-005,huella,192.168.1.14,activo,2024-06-01 08:15:00,alto
+Terminal RH,BIO-006,tarjeta,192.168.1.15,activo,2024-06-01 08:20:00,medio
+Terminal Finanzas,BIO-007,pin,192.168.1.16,error,2024-05-31 15:30:00,alto
+Terminal Marketing,BIO-008,huella,192.168.1.17,inactivo,2024-05-30 10:00:00,bajo
+Terminal Ventas,BIO-009,huella,192.168.1.18,activo,2024-06-01 08:25:00,medio
+Terminal Operaciones,BIO-010,tarjeta,192.168.1.19,activo,2024-06-01 08:30:00,medio
+Terminal Recepción Norte,BIO-011,huella,192.168.2.10,activo,2024-06-01 08:35:00,bajo
+Terminal Oficinas Norte,BIO-012,tarjeta,192.168.2.11,sin_conexion,2024-05-29 14:00:00,medio
+Terminal Bodega Norte,BIO-013,huella,192.168.2.12,activo,2024-06-01 08:40:00,bajo
+Terminal Call Center Norte,BIO-014,pin,192.168.2.13,activo,2024-06-01 08:45:00,medio
+Terminal Ventas Sur,BIO-015,pin,192.168.3.10,error,2024-05-31 16:00:00,medio
+Terminal Almacén Sur,BIO-016,tarjeta,192.168.3.11,activo,2024-06-01 08:50:00,bajo
+Terminal Logística Sur,BIO-017,huella,192.168.3.12,activo,2024-06-01 08:55:00,medio
+Terminal Data Center Este,BIO-018,huella,192.168.4.10,activo,2024-06-01 09:00:00,alto
+Terminal Sala Servidores,BIO-019,huella,192.168.4.11,activo,2024-06-01 09:05:00,alto
+Terminal Call Center Oeste,BIO-020,huella,192.168.5.10,inactivo,2024-05-28 12:00:00,bajo
+Terminal Control Acceso,BIO-021,huella,192.168.6.10,activo,2024-06-01 09:10:00,medio
+Terminal Planta Industrial,BIO-022,pin,192.168.7.10,activo,2024-06-01 09:15:00,alto
+Terminal Centro Logístico,BIO-023,huella,192.168.8.10,activo,2024-06-01 09:20:00,medio
+Terminal Capacitación,BIO-024,huella,192.168.9.10,sin_conexion,2024-05-27 10:00:00,bajo
+Terminal Torre Corporativa,BIO-025,huella,192.168.10.10,activo,2024-06-01 09:25:00,alto
+Terminal Regional Norte,BIO-026,tarjeta,192.168.11.10,activo,2024-06-01 09:30:00,medio
+Terminal Regional Sur,BIO-027,huella,192.168.12.10,error,2024-05-30 17:00:00,medio
+Terminal Oficina Comercial,BIO-028,pin,192.168.13.10,activo,2024-06-01 09:35:00,bajo
+Dispositivo Móvil 1,BIO-029,huella,10.0.0.1,activo,2024-06-01 09:40:00,medio
+Dispositivo Móvil 2,BIO-030,huella,10.0.0.2,inactivo,2024-05-29 11:00:00,bajo
+Dispositivo Móvil 3,BIO-031,tarjeta,10.0.0.3,activo,2024-06-01 09:45:00,medio
+Terminal Emergencia,BIO-032,huella,192.168.99.10,activo,2024-06-01 09:50:00,bajo
+Terminal Vigilancia,BIO-033,huella,192.168.1.20,activo,2024-06-01 09:55:00,alto
+Terminal Parqueo,BIO-034,tarjeta,192.168.1.21,sin_conexion,2024-05-30 20:00:00,bajo
+Terminal Comedor,BIO-035,huella,192.168.1.22,activo,2024-06-01 10:00:00,bajo
+Terminal Gimnasio,BIO-036,pin,192.168.1.23,inactivo,2024-05-28 08:00:00,bajo
+Terminal Sala Juntas,BIO-037,huella,192.168.1.24,activo,2024-06-01 10:05:00,medio
+Terminal Auditorio,BIO-038,tarjeta,192.168.1.25,activo,2024-06-01 10:10:00,medio
+Terminal Biblioteca,BIO-039,huella,192.168.1.26,error,2024-05-31 14:00:00,bajo
+Terminal Capilla,BIO-040,huella,192.168.1.27,activo,2024-06-01 10:15:00,bajo

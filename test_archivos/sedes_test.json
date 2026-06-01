@@ -1,0 +1,10 @@
+[
+    {"nombre": "Sede Central", "codigo_unico": "SED-001", "direccion": "Av. Principal 123, Ciudad", "activo": true},
+    {"nombre": "Sede Norte", "codigo_unico": "SED-002", "direccion": "Calle Norte 456, Ciudad", "activo": true},
+    {"nombre": "Sede Sur", "codigo_unico": "SED-003", "direccion": "Calle Sur 789, Ciudad", "activo": true},
+    {"nombre": "Sede Este", "codigo_unico": "SED-004", "direccion": "Av. Este 101, Ciudad", "activo": true},
+    {"nombre": "Sede Oeste", "codigo_unico": "SED-005", "direccion": "Av. Oeste 202, Ciudad", "activo": true},
+    {"nombre": "Oficina Gubernamental", "codigo_unico": "SED-006", "direccion": "Plaza Principal 303, Ciudad", "activo": true},
+    {"nombre": "Planta Industrial", "codigo_unico": "SED-007", "direccion": "Parque Industrial 404, Ciudad", "activo": true},
+    {"nombre": "Centro Logístico", "codigo_unico": "SED-008", "direccion": "Av. Logística 505, Ciudad", "activo": true}
+]

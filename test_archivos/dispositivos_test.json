@@ -1,0 +1,16 @@
+[
+    {"nombre": "Terminal Recepción", "numero_serie": "BIO-001", "tipo_dispositivo": "huella", "direccion_ip": "192.168.1.10", "estado": "activo"},
+    {"nombre": "Terminal Oficinas", "numero_serie": "BIO-002", "tipo_dispositivo": "tarjeta", "direccion_ip": "192.168.1.11", "estado": "activo"},
+    {"nombre": "Terminal Laboratorio", "numero_serie": "BIO-003", "tipo_dispositivo": "huella", "direccion_ip": "192.168.1.12", "estado": "activo"},
+    {"nombre": "Terminal Piso 2", "numero_serie": "BIO-004", "tipo_dispositivo": "pin", "direccion_ip": "192.168.1.13", "estado": "activo"},
+    {"nombre": "Terminal Recepción Norte", "numero_serie": "BIO-005", "tipo_dispositivo": "huella", "direccion_ip": "192.168.2.10", "estado": "activo"},
+    {"nombre": "Terminal Oficinas Norte", "numero_serie": "BIO-006", "tipo_dispositivo": "tarjeta", "direccion_ip": "192.168.2.11", "estado": "inactivo"},
+    {"nombre": "Terminal Ventas Sur", "numero_serie": "BIO-007", "tipo_dispositivo": "pin", "direccion_ip": "192.168.3.10", "estado": "activo"},
+    {"nombre": "Terminal Almacén", "numero_serie": "BIO-008", "tipo_dispositivo": "huella", "direccion_ip": "192.168.3.11", "estado": "activo"},
+    {"nombre": "Terminal Data Center", "numero_serie": "BIO-009", "tipo_dispositivo": "huella", "direccion_ip": "192.168.4.10", "estado": "activo"},
+    {"nombre": "Terminal Call Center", "numero_serie": "BIO-010", "tipo_dispositivo": "huella", "direccion_ip": "192.168.5.10", "estado": "activo"},
+    {"nombre": "Terminal Gerencia", "numero_serie": "BIO-011", "tipo_dispositivo": "huella", "direccion_ip": "192.168.1.14", "estado": "activo"},
+    {"nombre": "Terminal RH", "numero_serie": "BIO-012", "tipo_dispositivo": "tarjeta", "direccion_ip": "192.168.1.15", "estado": "activo"},
+    {"nombre": "Terminal Finanzas", "numero_serie": "BIO-013", "tipo_dispositivo": "pin", "direccion_ip": "192.168.1.16", "estado": "activo"},
+    {"nombre": "Terminal Marketing", "numero_serie": "BIO-014", "tipo_dispositivo": "huella", "direccion_ip": "192.168.1.17", "estado": "inactivo"}
+]

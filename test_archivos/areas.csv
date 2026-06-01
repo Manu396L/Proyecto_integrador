@@ -1,0 +1,25 @@
+sede_nombre,nombre,piso,nivel_seguridad,dispositivo_biometrico
+Sede Central,Recepción,1,bajo,huella
+Sede Central,Oficinas Administrativas,2,medio,tarjeta
+Sede Central,Sala de Servidores,3,alto,huella
+Sede Central,Laboratorio,1,alto,pin
+Sede Central,Sala de Juntas,2,medio,tarjeta
+Sede Central,Gerencia,3,alto,huella
+Sede Central,RH,2,medio,tarjeta
+Sede Central,Finanzas,2,alto,pin
+Sede Central,TI,3,alto,huella
+Sede Central,Marketing,1,medio,huella
+Sede Central,Ventas,1,bajo,tarjeta
+Sede Central,Operaciones,2,medio,huella
+Sede Norte,Recepción Norte,1,bajo,huella
+Sede Norte,Oficinas Norte,2,medio,huella
+Sede Norte,Bodega Norte,0,bajo,tarjeta
+Sede Norte,Call Center Norte,1,medio,pin
+Sede Sur,Área de Ventas,1,bajo,pin
+Sede Sur,Almacén,0,medio,tarjeta
+Sede Sur,Logística,1,medio,huella
+Sede Este,Centro de Datos,2,alto,huella
+Sede Este,Sala de Reuniones,1,medio,tarjeta
+Sede Oeste,Call Center,1,bajo,huella
+Centro Logístico,Control de Acceso,1,medio,huella
+Planta Industrial,Producción,1,alto,pin

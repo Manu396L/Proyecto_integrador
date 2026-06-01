@@ -1,4 +1,4 @@
-// personal.js - COMPLETO CON CHECKBOXES Y SELECCIÓN MÚLTIPLE
+// personal.js - COMPLETO CON CHECKBOXES, SELECCIÓN MÚLTIPLE E IMPORTACIÓN CSV FUNCIONAL
 
 let empleados = [];
 let editandoIndex = null;
@@ -346,13 +346,11 @@ function actualizarTabla() {
                 'operaciones': 'Operaciones', 'marketing': 'Marketing', 'ventas': 'Ventas'
             }[empleado.area] || empleado.area;
             
-            // Método Acceso (principal)
             const metodoIcono = empleado.dispositivo === 'huella' ? 'fa-fingerprint' : 
                                 empleado.dispositivo === 'tarjeta' ? 'fa-credit-card' : 'fa-key';
             const metodoTexto = empleado.dispositivo === 'huella' ? 'Huella' : 
                                 empleado.dispositivo === 'tarjeta' ? 'Tarjeta' : 'PIN';
             
-            // Método Adicional (si existe)
             let adicionalHtml = '';
             if (empleado.metodo_adicional && empleado.metodo_adicional.activo && empleado.metodo_adicional.tipo) {
                 const iconoAdicional = getIconoMetodo(empleado.metodo_adicional.tipo);
@@ -437,20 +435,7 @@ function guardarEmpleado(e) {
     const dispositivo = selectDispositivo.value;
     const nivelSeguridad = selectNivelSeguridad.value;
     
-    console.log('Valores obtenidos del formulario:');
-    console.log('- nombre:', nombre, '| longitud:', nombre.length);
-    console.log('- dni:', dni, '| longitud:', dni.length);
-    console.log('- cargo:', cargo, '| longitud:', cargo.length);
-    console.log('- area:', area, '| longitud:', area.length);
-    console.log('- correo:', correo, '| longitud:', correo.length);
-    console.log('- tipoSede:', tipoSede);
-    console.log('- nombreSede:', nombreSede, '| longitud:', nombreSede.length);
-    console.log('- id:', id, '| longitud:', id.length);
-    console.log('- dispositivo:', dispositivo);
-    console.log('- nivelSeguridad:', nivelSeguridad);
-    
     if (!nombre || !dni || !cargo || !area || !correo || !tipoSede || !nombreSede || !id || !dispositivo || !nivelSeguridad) {
-        console.log('Validación fallida - campos vacíos');
         mostrarMensaje('Complete todos los campos obligatorios', 'error');
         return;
     }
@@ -473,7 +458,6 @@ function guardarEmpleado(e) {
     
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
     
-    // Crear FormData para enviar archivo + datos
     const formData = new FormData();
     formData.append('nombre', nombre);
     formData.append('numero_documento', dni);
@@ -491,16 +475,8 @@ function guardarEmpleado(e) {
         formData.append('metodo_adicional', JSON.stringify(datosAdicionales));
     }
     
-    // Debug: verificar contenido del FormData
-    console.log('=== FormData construido ===');
-    for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-    }
-    
-    // Agregar archivo de foto si existe
     if (inputFoto.files && inputFoto.files[0]) {
         formData.append('foto', inputFoto.files[0]);
-        console.log('Foto agregada:', inputFoto.files[0].name);
     }
     
     if (editandoIndex !== null) {
@@ -549,19 +525,16 @@ function mostrarMensaje(mensaje, tipo = 'success') {
         mensajeExito.style.borderLeftColor = '#dc3545';
         mensajeExito.style.color = '#721c24';
         mensajeExito.querySelector('i').className = 'fa-solid fa-exclamation-circle';
-        mensajeExito.querySelector('i').style.color = '#dc3545';
     } else if (tipo === 'info') {
         mensajeExito.style.background = '#e3f2fd';
         mensajeExito.style.borderLeftColor = '#2196f3';
         mensajeExito.style.color = '#0c5460';
         mensajeExito.querySelector('i').className = 'fa-solid fa-info-circle';
-        mensajeExito.querySelector('i').style.color = '#2196f3';
     } else {
         mensajeExito.style.background = '#d4edda';
         mensajeExito.style.borderLeftColor = '#28a745';
         mensajeExito.style.color = '#155724';
         mensajeExito.querySelector('i').className = 'fa-solid fa-check';
-        mensajeExito.querySelector('i').style.color = '#28a745';
     }
     
     mensajeExito.classList.add('mostrar');
@@ -779,7 +752,7 @@ function eliminarSeleccionados() {
     });
 }
 
-// ===== FUNCIONES DE IMPORTAR/EXPORTAR =====
+// ===== FUNCIONES DE IMPORTAR/EXPORTAR CORREGIDAS =====
 
 function crearInputCSV() {
     if (!csvInput) {
@@ -797,15 +770,36 @@ function manejarArchivoCSV(event) {
     if (!file) return;
     
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const csvData = e.target.result;
             const empleadosImportados = parsearCSV(csvData);
-            if (empleadosImportados.length > 0) {
-                mostrarModalImportacion(empleadosImportados);
-            } else {
-                mostrarMensaje('No se encontraron datos válidos', 'error');
+            
+            if (empleadosImportados.length === 0) {
+                mostrarMensaje('No se encontraron datos válidos en el CSV', 'error');
+                return;
             }
+            
+            mostrarMensaje(`Importando ${empleadosImportados.length} empleados...`, 'info');
+            
+            let exitosos = 0;
+            let errores = 0;
+            
+            for (const empleado of empleadosImportados) {
+                const success = await enviarEmpleadoBackend(empleado);
+                if (success) {
+                    exitosos++;
+                } else {
+                    errores++;
+                }
+            }
+            
+            mostrarMensaje(`✅ Importación completada: ${exitosos} exitosos, ${errores} errores`, 'success');
+            
+            if (exitosos > 0) {
+                cargarPersonal();
+            }
+            
         } catch (error) {
             mostrarMensaje('Error al procesar CSV: ' + error.message, 'error');
         }
@@ -813,89 +807,147 @@ function manejarArchivoCSV(event) {
     reader.onerror = function() {
         mostrarMensaje('Error al leer el archivo', 'error');
     };
-    reader.readAsText(file);
+    reader.readAsText(file, 'UTF-8');
     event.target.value = '';
 }
 
-function parsearCSV(csvText) {
-    const lines = csvText.split('\n').filter(line => line.trim() !== '');
-    if (lines.length < 2) throw new Error('Archivo vacío');
+async function enviarEmpleadoBackend(empleado) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
     
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    const headersRequeridos = ['nombre', 'cargo', 'area', 'correo'];
-    const headersFaltantes = headersRequeridos.filter(h => !headers.includes(h));
-    if (headersFaltantes.length > 0) {
-        throw new Error(`Faltan columnas: ${headersFaltantes.join(', ')}`);
+    const formData = new FormData();
+    formData.append('nombre', empleado.nombre);
+    formData.append('numero_documento', empleado.numero_documento);
+    formData.append('email', empleado.correo);
+    formData.append('cargo', empleado.cargo);
+    formData.append('area', empleado.area);
+    formData.append('tipo_sede', empleado.tipoSede);
+    formData.append('nombre_sede', empleado.nombreSede);
+    formData.append('dispositivo', empleado.dispositivo);
+    formData.append('nivel_seguridad', empleado.nivelSeguridad);
+    formData.append('credencial', empleado.credencial || '');
+    
+    if (empleado.metodo_adicional && empleado.metodo_adicional.tipo) {
+        formData.append('metodo_adicional', JSON.stringify(empleado.metodo_adicional));
     }
     
-    const empleadosImportados = [];
+    try {
+        const response = await fetch('/personal/api/personal/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            body: formData
+        });
+        const data = await response.json();
+        return data.success === true;
+    } catch (error) {
+        console.error('Error enviando empleado:', error);
+        return false;
+    }
+}
+
+function parsearCSV(csvText) {
+    const lines = csvText.split(/\r?\n/).filter(line => line.trim());
+    if (lines.length < 2) throw new Error('Archivo CSV vacío o inválido');
+    
+    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+    
+    const empleados = [];
     
     for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
+        if (!lines[i].trim()) continue;
         
         const values = [];
-        let current = '', inQuotes = false;
-        for (let char of line) {
-            if (char === '"') inQuotes = !inQuotes;
-            else if (char === ',' && !inQuotes) {
+        let current = '';
+        let inQuotes = false;
+        
+        for (let j = 0; j < lines[i].length; j++) {
+            const char = lines[i][j];
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
                 values.push(current);
                 current = '';
-            } else current += char;
+            } else {
+                current += char;
+            }
         }
         values.push(current);
         
-        const empleado = {};
-        headers.forEach((header, idx) => {
-            if (idx < values.length) {
-                const value = values[idx].trim();
-                switch (header) {
-                    case 'nombre': empleado.nombre = value; break;
-                    case 'cargo': empleado.cargo = value; break;
-                    case 'area': empleado.area = value; break;
-                    case 'correo': empleado.correo = value.endsWith('@biometrika.com') ? value : value + '@biometrika.com'; break;
-                    case 'tipo_sede': empleado.tipoSede = value || 'sede'; break;
-                    case 'nombre_sede': empleado.nombreSede = value || 'Sede Central'; break;
-                    case 'id': empleado.id = value; break;
-                    case 'dispositivo': empleado.dispositivo = value || 'huella'; break;
-                    case 'nivel_seguridad': empleado.nivelSeguridad = value || 'medio'; break;
-                }
+        const empleado = {
+            nombre: '',
+            numero_documento: '',
+            correo: '',
+            cargo: '',
+            area: '',
+            tipoSede: 'sede',
+            nombreSede: 'Sede Central',
+            dispositivo: 'huella',
+            nivelSeguridad: 'medio',
+            credencial: '',
+            metodo_adicional: null
+        };
+        
+        for (let j = 0; j < headers.length && j < values.length; j++) {
+            const header = headers[j];
+            const value = values[j].replace(/^"|"$/g, '').trim();
+            
+            switch (header) {
+                case 'nombre':
+                case 'nombres':
+                    empleado.nombre = value;
+                    break;
+                case 'numero_documento':
+                case 'dni':
+                case 'documento':
+                    empleado.numero_documento = value;
+                    break;
+                case 'email':
+                case 'correo':
+                    empleado.correo = value;
+                    break;
+                case 'cargo':
+                    empleado.cargo = value;
+                    break;
+                case 'area':
+                    empleado.area = value;
+                    break;
+                case 'tipo_sede':
+                    empleado.tipoSede = value;
+                    break;
+                case 'nombre_sede':
+                    empleado.nombreSede = value;
+                    break;
+                case 'dispositivo':
+                    empleado.dispositivo = value;
+                    break;
+                case 'nivel_seguridad':
+                    empleado.nivelSeguridad = value;
+                    break;
+                case 'metodo_adicional':
+                    if (value && value.trim()) {
+                        empleado.metodo_adicional = {
+                            activo: true,
+                            tipo: value,
+                            tipo_texto: value === 'huella' ? 'Huella' : value === 'tarjeta' ? 'Tarjeta' : 'PIN',
+                            nivel_seguridad: empleado.nivelSeguridad || 'medio',
+                            nivel_texto: empleado.nivelSeguridad === 'bajo' ? 'Bajo' : empleado.nivelSeguridad === 'alto' ? 'Alto' : 'Medio',
+                            credencial: value === 'tarjeta' ? 'TARJ-' + Math.random().toString(36).substr(2, 8).toUpperCase() : 
+                                       value === 'pin' ? Math.floor(100000 + Math.random() * 900000).toString() : 'huella_registrada',
+                            icono: value === 'huella' ? 'fa-fingerprint' : value === 'tarjeta' ? 'fa-credit-card' : 'fa-key'
+                        };
+                    }
+                    break;
             }
-        });
+        }
         
-        if (!empleado.id) empleado.id = generarID(empleado.nombre);
-        if (!empleado.tipoSede) empleado.tipoSede = 'sede';
-        if (!empleado.nombreSede) empleado.nombreSede = 'Sede Central';
-        if (!empleado.dispositivo) empleado.dispositivo = 'huella';
-        if (!empleado.nivelSeguridad) empleado.nivelSeguridad = 'medio';
-        empleado.credencial = generarCredencial(empleado.dispositivo);
-        empleado.foto = null;
-        empleado.metodo_adicional = null;
-        
-        empleadosImportados.push(empleado);
+        if (empleado.nombre && empleado.numero_documento && empleado.correo && empleado.cargo && empleado.area) {
+            if (!empleado.credencial) {
+                empleado.credencial = generarCredencial(empleado.dispositivo);
+            }
+            empleados.push(empleado);
+        }
     }
     
-    return empleadosImportados;
-}
-
-function parsearLineaCSV(line) {
-    const values = [];
-    let current = '', inQuotes = false;
-    for (let char of line) {
-        if (char === '"') inQuotes = !inQuotes;
-        else if (char === ',' && !inQuotes) {
-            values.push(current);
-            current = '';
-        } else current += char;
-    }
-    values.push(current);
-    return values;
-}
-
-function generarID(nombre) {
-    const nombreBase = nombre.split(' ')[0].toLowerCase();
-    const random = Math.random().toString().substr(2, 3);
-    return `EMP-${nombreBase}-${random}`.toUpperCase();
+    return empleados;
 }
 
 function generarCredencial(dispositivo) {
@@ -905,39 +957,6 @@ function generarCredencial(dispositivo) {
         case 'huella': return 'huella_registrada';
         default: return '';
     }
-}
-
-function mostrarModalImportacion(empleadosImportados) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-importacion';
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:2000;';
-    
-    modal.innerHTML = `
-        <div style="background:white;padding:30px;border-radius:12px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;">
-            <h3 style="color:#2c3e50;margin-bottom:20px;"><i class="fa-solid fa-file-import" style="color:#1abc9c;"></i> Confirmar Importación</h3>
-            <p>Se encontraron <strong>${empleadosImportados.length}</strong> empleados.</p>
-            <div style="max-height:300px;overflow-y:auto;margin:20px 0;border:1px solid #e0e0e0;border-radius:8px;padding:15px;">
-                <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                    <thead><tr style="background:#f8f9fa;"><th>Nombre</th><th>Cargo</th><th>Área</th><th>ID</th></tr></thead>
-                    <tbody>${empleadosImportados.map(emp => `<tr><td>${emp.nombre}</td><td>${emp.cargo}</td><td>${emp.area}</td><td>${emp.id}</td></tr>`).join('')}</tbody>
-                </table>
-            </div>
-            <div style="display:flex;gap:10px;justify-content:flex-end;">
-                <button id="btn-cancelar-import" class="btn btn-secondary">Cancelar</button>
-                <button id="btn-confirmar-import" class="btn btn-success">Importar ${empleadosImportados.length}</button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    document.getElementById('btn-cancelar-import').onclick = () => document.body.removeChild(modal);
-    document.getElementById('btn-confirmar-import').onclick = () => {
-        empleados.push(...empleadosImportados);
-        actualizarTabla();
-        mostrarMensaje(`Importados ${empleadosImportados.length} empleados`);
-        document.body.removeChild(modal);
-    };
-    modal.onclick = (e) => { if (e.target === modal) document.body.removeChild(modal); };
 }
 
 function importarEmpleados() { crearInputCSV(); csvInput.click(); }
@@ -1079,6 +1098,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     btnNuevo.addEventListener('click', nuevoEmpleado);
     btnCancelar.addEventListener('click', cancelarEdicion);
+    if (btnAgregarPrimero) btnAgregarPrimero.addEventListener('click', nuevoEmpleado);
     
     cargarPersonal();
 });

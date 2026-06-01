@@ -1,0 +1,10 @@
+nombre,numero_documento,email,cargo,area,tipo_sede,nombre_sede,dispositivo,nivel_seguridad,metodo_adicional
+Juan Perez,12345678,juan.perez@biometrika.com,Analista,ti,sede,Sede Central,huella,alto,pin
+Maria Gomez,23456789,maria.gomez@biometrika.com,Jefe RH,rh,sede,Sede Central,tarjeta,medio,huella
+Carlos Lopez,34567890,carlos.lopez@biometrika.com,Gerente,finanzas,sede,Sede Central,pin,alto,tarjeta
+Ana Martinez,45678901,ana.martinez@biometrika.com,Soporte,ti,oficina,Sede Norte,huella,medio,
+Luis Rodriguez,56789012,luis.rodriguez@biometrika.com,Ventas,ventas,area,Sede Sur,tarjeta,bajo,pin
+Laura Fernandez,67890123,laura.fernandez@biometrika.com,Marketing,marketing,sede,Sede Central,huella,medio,
+Miguel Sanchez,78901234,miguel.sanchez@biometrika.com,Operaciones,operaciones,oficina,Sede Norte,pin,alto,huella
+Sofia Ramirez,89012345,sofia.ramirez@biometrika.com,Recepcionista,rh,sede,Sede Central,huella,bajo,
+Diego Torres,90123456,diego.torres@biometrika.com,Desarrollador,ti,sede,Sede Central,huella,alto,tarjeta

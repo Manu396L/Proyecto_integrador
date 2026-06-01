@@ -1,0 +1,31 @@
+nombre,numero_serie,tipo_dispositivo,direccion_ip,estado
+Terminal Recepción,BIO-001,huella,192.168.1.10,activo
+Terminal Oficinas,BIO-002,tarjeta,192.168.1.11,activo
+Terminal Laboratorio,BIO-003,huella,192.168.1.12,activo
+Terminal Piso 2,BIO-004,pin,192.168.1.13,activo
+Terminal Gerencia,BIO-005,huella,192.168.1.14,activo
+Terminal RH,BIO-006,tarjeta,192.168.1.15,activo
+Terminal Finanzas,BIO-007,pin,192.168.1.16,activo
+Terminal Marketing,BIO-008,huella,192.168.1.17,inactivo
+Terminal Ventas,BIO-009,huella,192.168.1.18,activo
+Terminal Operaciones,BIO-010,tarjeta,192.168.1.19,activo
+Terminal Recepción Norte,BIO-011,huella,192.168.2.10,activo
+Terminal Oficinas Norte,BIO-012,tarjeta,192.168.2.11,inactivo
+Terminal Bodega Norte,BIO-013,huella,192.168.2.12,activo
+Terminal Call Center Norte,BIO-014,pin,192.168.2.13,activo
+Terminal Ventas Sur,BIO-015,pin,192.168.3.10,activo
+Terminal Almacén Sur,BIO-016,tarjeta,192.168.3.11,activo
+Terminal Logística Sur,BIO-017,huella,192.168.3.12,activo
+Terminal Data Center Este,BIO-018,huella,192.168.4.10,activo
+Terminal Call Center Oeste,BIO-019,huella,192.168.5.10,activo
+Terminal Control Logístico,BIO-020,huella,192.168.8.10,activo
+Terminal Planta Producción,BIO-021,pin,192.168.7.10,activo
+Terminal Capacitación,BIO-022,huella,192.168.6.10,inactivo
+Terminal Torre Corporativa,BIO-023,huella,192.168.10.10,activo
+Terminal Sede Regional Norte,BIO-024,tarjeta,192.168.11.10,activo
+Terminal Sede Regional Sur,BIO-025,huella,192.168.12.10,activo
+Terminal Comercial,BIO-026,pin,192.168.13.10,activo
+Dispositivo Móvil 1,BIO-027,huella,10.0.0.1,activo
+Dispositivo Móvil 2,BIO-028,huella,10.0.0.2,inactivo
+Dispositivo Móvil 3,BIO-029,tarjeta,10.0.0.3,activo
+Terminal Emergencia,BIO-030,huella,192.168.99.10,activo

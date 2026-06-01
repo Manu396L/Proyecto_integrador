@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from django.utils import timezone
 from datetime import date, timedelta
 import json
@@ -112,3 +114,58 @@ def dashboard(request):
     }
     
     return render(request, 'dashboard/index.html', context)
+
+
+# ========== SIMULADOR DE ACCESOS EN TIEMPO REAL ==========
+@csrf_exempt
+@login_required
+def simular_acceso(request):
+    """API para recibir accesos simulados en tiempo real"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            print(f"📡 Acceso simulado recibido: {data.get('usuario')} - {data.get('tipo_acceso')}")
+            
+            # Buscar o crear persona temporal para simulación
+            nombre_completo = data.get('usuario', 'Usuario Simulado')
+            nombres = nombre_completo.split()[0] if ' ' in nombre_completo else nombre_completo
+            apellidos = ' '.join(nombre_completo.split()[1:]) if ' ' in nombre_completo else 'Simulado'
+            
+            persona, _ = Persona.objects.get_or_create(
+                numero_documento=f"SIM_{data.get('id', 0)}",
+                defaults={
+                    'nombres': nombres,
+                    'apellidos': apellidos,
+                    'email': f"simulado_{data.get('id', 0)}@simulacion.com",
+                    'activo': True
+                }
+            )
+            
+            # Buscar o crear dispositivo simulado
+            dispositivo_nombre = data.get('dispositivo', 'Terminal Simulada')
+            dispositivo, _ = Dispositivo.objects.get_or_create(
+                nombre=dispositivo_nombre,
+                defaults={
+                    'estado': 'activo',
+                    'tipo_dispositivo': 'huella',
+                    'direccion_ip': '127.0.0.1',
+                    'numero_serie': f"SIM_{data.get('id', 0)}"
+                }
+            )
+            
+            # Crear registro de acceso
+            acceso = RegistroAcceso.objects.create(
+                persona=persona,
+                dispositivo=dispositivo,
+                tipo_acceso=data.get('tipo_acceso', 'exitoso'),
+                fecha_hora=timezone.now(),
+                motivo_denegado=data.get('mensaje', '') if data.get('tipo_acceso') == 'fallido' else ''
+            )
+            
+            return JsonResponse({'success': True, 'acceso_id': acceso.id})
+        except Exception as e:
+            print(f"Error en simulación: {e}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)

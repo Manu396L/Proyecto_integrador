@@ -1,0 +1,31 @@
+numero_documento,nombres,apellidos,email,cargo,area,tipo_sede,nombre_sede,dispositivo_biometrico,nivel_seguridad,activo
+12345678,Juan Carlos,Pérez Rodríguez,juan.perez@biometrika.com,Gerente General,ti,sede,Sede Central,huella,alto,true
+23456789,María Elena,González Fernández,maria.gonzalez@biometrika.com,Jefe de RH,rh,sede,Sede Central,tarjeta,medio,true
+34567890,Carlos Alberto,López Martínez,carlos.lopez@biometrika.com,Analista de Sistemas,ti,sede,Sede Central,huella,alto,true
+45678901,Ana Patricia,Martínez Silva,ana.martinez@biometrika.com,Contadora,finanzas,sede,Sede Central,pin,alto,true
+56789012,Luis Fernando,Rodríguez Torres,luis.rodriguez@biometrika.com,Operador,operaciones,oficina,Sede Norte,huella,bajo,true
+67890123,Laura Isabel,Fernández Rojas,laura.fernandez@biometrika.com,Marketing,marketing,oficina,Sede Norte,tarjeta,medio,true
+78901234,Miguel Ángel,Sánchez Castro,miguel.sanchez@biometrika.com,Ventas,ventas,area,Sede Sur,huella,medio,true
+89012345,Sofía Alejandra,Ramírez Ortega,sofia.ramirez@biometrika.com,Recepcionista,rh,sede,Sede Central,huella,bajo,true
+90123456,David Eduardo,Torres Mendoza,david.torres@biometrika.com,Soporte Técnico,ti,sede,Sede Central,pin,medio,true
+01234567,Carmen Rosa,Vargas Paredes,carmen.vargas@biometrika.com,Auxiliar RH,rh,sede,Sede Central,tarjeta,bajo,true
+11223344,Andrés Felipe,Castro Herrera,andres.castro@biometrika.com,Analista Financiero,finanzas,sede,Sede Central,huella,alto,true
+22334455,Camila Andrea,Ortega Jiménez,camila.ortega@biometrika.com,Diseñadora,marketing,oficina,Sede Norte,huella,medio,true
+33445566,Javier Emilio,Morales Ruiz,javier.morales@biometrika.com,Vendedor,ventas,area,Sede Sur,pin,bajo,true
+44556677,Lucía Fernanda,Reyes Gómez,lucia.reyes@biometrika.com,Operadora,operaciones,sede,Sede Central,tarjeta,medio,true
+55667788,Fernando José,Guzmán Díaz,fernando.guzman@biometrika.com,Programador,ti,sede,Sede Central,huella,alto,true
+66778899,Daniela Marcela,Rojas Peña,daniela.rojas@biometrika.com,Auxiliar Contable,finanzas,sede,Sede Central,huella,medio,true
+77889900,Ricardo Alberto,Mendoza Vargas,ricardo.mendoza@biometrika.com,Supervisor,operaciones,oficina,Sede Norte,pin,alto,true
+88990011,Paola Andrea,Silva Castro,paola.silva@biometrika.com,Community Manager,marketing,area,Sede Sur,huella,bajo,true
+99001122,Alejandro David,Vega López,alejandro.vega@biometrika.com,Ejecutivo Ventas,ventas,sede,Sede Central,tarjeta,medio,true
+10111213,Natalia Carolina,Paredes Torres,natalia.paredes@biometrika.com,Analista RH,rh,sede,Sede Central,huella,alto,true
+11121314,Gabriel Esteban,Fuentes Ríos,gabriel.fuentes@biometrika.com,Técnico,ti,oficina,Sede Norte,pin,medio,true
+12131415,Isabel Cristina,Carrasco Díaz,isabel.carrasco@biometrika.com,Diseñadora Gráfica,marketing,sede,Sede Central,huella,bajo,true
+13141516,Raúl Andrés,Herrera Mora,raul.herrera@biometrika.com,Vendedor Senior,ventas,area,Sede Sur,tarjeta,medio,true
+14151617,Patricia Elena,Cabrera Solís,patricia.cabrera@biometrika.com,Coordinadora,operaciones,sede,Sede Central,huella,alto,true
+15161718,Mario Alejandro,Campos Vargas,mario.campos@biometrika.com,Analista Financiero,finanzas,sede,Sede Central,pin,alto,true
+16171819,Valentina Sofía,Flores Jiménez,valentina.flores@biometrika.com,Recepcionista,rh,sede,Sede Central,huella,bajo,true
+17181920,Diego Alejandro,Torres Ríos,diego.torres@biometrika.com,Desarrollador,ti,sede,Sede Central,huella,alto,true
+18192021,Paula Andrea,Méndez Castro,paula.mendez@biometrika.com,Analista de Calidad,operaciones,sede,Sede Central,tarjeta,medio,true
+19202122,Ricardo José,Acosta Vargas,ricardo.acosta@biometrika.com,Gerente de Ventas,ventas,sede,Sede Central,huella,alto,true
+20212223,Carolina María,Espinosa Rojas,carolina.espinosa@biometrika.com,Jefe de Marketing,marketing,sede,Sede Central,pin,alto,true

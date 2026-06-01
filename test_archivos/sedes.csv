@@ -1,0 +1,16 @@
+nombre,codigo_unico,direccion,activo
+Sede Central,SED-001,Av. Principal 123,true
+Sede Norte,SED-002,Calle Norte 456,true
+Sede Sur,SED-003,Calle Sur 789,true
+Sede Este,SED-004,Av. Este 101,true
+Sede Oeste,SED-005,Av. Oeste 202,true
+Oficina Gubernamental,SED-006,Plaza Principal 303,true
+Planta Industrial,SED-007,Parque Industrial 404,true
+Centro Logístico,SED-008,Av. Logística 505,true
+Centro de Servicios,SED-009,Calle Servicios 606,true
+Torre Corporativa,SED-010,Av. Empresarial 707,true
+Sede Regional Norte,SED-011,Autopista Norte km 5,true
+Sede Regional Sur,SED-012,Autopista Sur km 8,true
+Oficina Comercial,SED-013,Calle Comercio 909,true
+Centro de Capacitación,SED-014,Av. Educación 1010,true
+Sede Administrativa,SED-015,Calle Administración 1111,true
