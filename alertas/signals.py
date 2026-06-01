@@ -11,34 +11,18 @@ from sedes.models import Sede, Area
 
 @receiver(post_save, sender=Dispositivo)
 def alerta_cambio_estado_dispositivo(sender, instance, created, **kwargs):
-    """Genera alerta cuando un dispositivo cambia de estado"""
+    """Genera alerta cuando un dispositivo cambia de estado o se crea"""
     
-    if not created:
-        # Obtener el estado anterior (esto requiere un poco más de trabajo)
-        # Por simplicidad, comparamos con el estado actual
-        pass
+    if created:
+        Alerta.objects.create(
+            tipo='MANTENIMIENTO',
+            nivel='BAJA',
+            mensaje=f" Nuevo dispositivo registrado: '{instance.nombre}'",
+            dispositivo=instance,
+        )
+        return
     
-    # Alerta por dispositivo offline (última conexión > 5 minutos)
-    if instance.ultima_conexion:
-        tiempo_sin_conexion = timezone.now() - instance.ultima_conexion
-        if tiempo_sin_conexion > timedelta(minutes=5):
-            # Verificar si ya existe una alerta similar no resuelta
-            alerta_existente = Alerta.objects.filter(
-                dispositivo=instance,
-                tipo='DISPOSITIVO_OFFLINE',
-                resuelta=False
-            ).first()
-            
-            if not alerta_existente:
-                Alerta.objects.create(
-                    tipo='DISPOSITIVO_OFFLINE',
-                    nivel='ALTA',
-                    mensaje=f"Dispositivo '{instance.nombre}' sin conexión desde hace {tiempo_sin_conexion.seconds//60} minutos",
-                    dispositivo=instance,
-                )
-    
-    # Alerta por dispositivo en estado error
-    if instance.estado in ['error', 'sin_conexion', 'apagado']:
+    if instance.estado in ['error', 'sin_conexion', 'apagado', 'inactivo']:
         alerta_existente = Alerta.objects.filter(
             dispositivo=instance,
             tipo='DISPOSITIVO_OFFLINE',
@@ -49,17 +33,31 @@ def alerta_cambio_estado_dispositivo(sender, instance, created, **kwargs):
             Alerta.objects.create(
                 tipo='DISPOSITIVO_OFFLINE',
                 nivel='CRITICA',
-                mensaje=f"Dispositivo '{instance.nombre}' está en estado: {instance.get_estado_display()}",
+                mensaje=f" DISPOSITIVO CRÍTICO: '{instance.nombre}' - Estado: {instance.get_estado_display()}",
+                dispositivo=instance,
+            )
+    
+    elif instance.estado == 'pausado':
+        alerta_existente = Alerta.objects.filter(
+            dispositivo=instance,
+            tipo='MANTENIMIENTO',
+            resuelta=False
+        ).first()
+        
+        if not alerta_existente:
+            Alerta.objects.create(
+                tipo='MANTENIMIENTO',
+                nivel='MEDIA',
+                mensaje=f"🔧 Dispositivo '{instance.nombre}' en mantenimiento",
                 dispositivo=instance,
             )
 
 
 @receiver(post_save, sender=RegistroAcceso)
 def alerta_intentos_fallidos(sender, instance, created, **kwargs):
-    """Genera alerta cuando hay múltiples intentos fallidos de una persona"""
+    """Genera alerta cuando hay múltiples intentos fallidos"""
     
     if instance.tipo_acceso == 'fallido' and created:
-        # Contar intentos fallidos en los últimos 10 minutos
         hace_10_min = timezone.now() - timedelta(minutes=10)
         intentos_fallidos = RegistroAcceso.objects.filter(
             persona=instance.persona,
@@ -67,7 +65,6 @@ def alerta_intentos_fallidos(sender, instance, created, **kwargs):
             fecha_hora__gte=hace_10_min
         ).count()
         
-        # Si hay más de 3 intentos fallidos en 10 minutos
         if intentos_fallidos >= 3:
             alerta_existente = Alerta.objects.filter(
                 persona=instance.persona,
@@ -80,40 +77,46 @@ def alerta_intentos_fallidos(sender, instance, created, **kwargs):
                 Alerta.objects.create(
                     tipo='INTENTO_FALLIDO',
                     nivel='MEDIA',
-                    mensaje=f"La persona '{instance.persona.nombre_completo}' tiene {intentos_fallidos} intentos fallidos en los últimos 10 minutos",
+                    mensaje=f" {intentos_fallidos} intentos fallidos de '{instance.persona.nombre_completo}'",
                     persona=instance.persona,
                     dispositivo=instance.dispositivo,
                 )
 
 
 @receiver(post_save, sender=Sede)
-def alerta_sede_creada(sender, instance, created, **kwargs):
-    """Genera alerta informativa cuando se crea una nueva sede"""
+def alerta_cambio_sede(sender, instance, created, **kwargs):
     if created:
         Alerta.objects.create(
             tipo='MANTENIMIENTO',
             nivel='BAJA',
-            mensaje=f"Nueva sede creada: '{instance.nombre}'",
+            mensaje=f" Nueva sede creada: '{instance.nombre}'",
         )
 
 
 @receiver(post_save, sender=Area)
-def alerta_area_creada(sender, instance, created, **kwargs):
-    """Genera alerta informativa cuando se crea una nueva área"""
+def alerta_cambio_area(sender, instance, created, **kwargs):
     if created:
         Alerta.objects.create(
             tipo='MANTENIMIENTO',
             nivel='BAJA',
-            mensaje=f"Nueva área '{instance.nombre}' creada en la sede '{instance.sede.nombre}'",
+            mensaje=f" Nueva área '{instance.nombre}' en sede '{instance.sede.nombre}'",
         )
 
 
 @receiver(post_save, sender=Persona)
-def alerta_persona_creada(sender, instance, created, **kwargs):
-    """Genera alerta informativa cuando se registra una nueva persona"""
+def alerta_cambio_personal(sender, instance, created, **kwargs):
     if created:
         Alerta.objects.create(
             tipo='MANTENIMIENTO',
             nivel='BAJA',
-            mensaje=f"Nuevo personal registrado: '{instance.nombre_completo}' - Área: {instance.get_area_display()}",
+            mensaje=f"👤 Nuevo personal: '{instance.nombre_completo}'",
         )
+
+
+@receiver(post_delete, sender=Dispositivo)
+def alerta_dispositivo_eliminado(sender, instance, **kwargs):
+    Alerta.objects.create(
+        tipo='MANTENIMIENTO',
+        nivel='BAJA',
+        mensaje=f" Dispositivo eliminado: '{instance.nombre}'",
+    )

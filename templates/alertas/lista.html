@@ -1,11 +1,9 @@
-<!-- templates/alertas/lista.html -->
 {% extends 'dashboard/base.html' %}
 {% load static %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/style_alertas.css' %}">
 
-<!-- Contenido principal de la pagina -->
 <main class="contenido">
     <header>
         <h1><i class="fa-solid fa-triangle-exclamation"></i> <b>Alertas - Dispositivos</b></h1>
@@ -14,16 +12,19 @@
     <!-- Resumen de alertas -->
     <section class="resumen-alertas">
         <div class="resumen-item criticas">
-            <div class="resumen-valor">{{ criticos }}</div>
+            <div class="resumen-valor">{{ criticos|default:"0" }}</div>
             <div class="resumen-label">Dispositivos Críticos</div>
+            <small>Error/Sin conexión</small>
         </div>
         <div class="resumen-item advertencias">
-            <div class="resumen-valor">{{ problemas }}</div>
+            <div class="resumen-valor">{{ problemas|default:"0" }}</div>
             <div class="resumen-label">Con Problemas</div>
+            <small>Pausados/Mantenimiento</small>
         </div>
         <div class="resumen-item estables">
-            <div class="resumen-valor">{{ estables }}</div>
+            <div class="resumen-valor">{{ estables|default:"0" }}</div>
             <div class="resumen-label">Dispositivos Estables</div>
+            <small>Activos/Online</small>
         </div>
     </section>
     
@@ -36,40 +37,39 @@
                 <select id="filtro-sede">
                     <option value="">Todas las sedes</option>
                     {% for sede in sedes %}
-                    <option value="{{ sede }}">{{ sede }}</option>
+                    <option value="{{ sede.nombre }}">{{ sede.nombre }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="filtro-group">
-                <label for="filtro-estado">Estado</label>
+                <label for="filtro-estado">Estado Alerta</label>
                 <select id="filtro-estado">
-                    <option value="">Todos los estados</option>
-                    <option value="caido">Caído</option>
-                    <option value="inestable">Inestable</option>
-                    <option value="online">Online</option>
+                    <option value="">Todos</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="resuelta">Resuelta</option>
                 </select>
             </div>
             <div class="filtro-group">
-                <label for="filtro-autenticacion">Tipo de Autenticación</label>
-                <select id="filtro-autenticacion">
-                    <option value="">Todos los tipos</option>
-                    <option value="huella">Huella</option>
-                    <option value="tarjeta">Tarjeta</option>
-                    <option value="pin">PIN</option>
-                    <option value="facial">Reconocimiento Facial</option>
+                <label for="filtro-nivel">Nivel</label>
+                <select id="filtro-nivel">
+                    <option value="">Todos</option>
+                    <option value="critica">Crítica</option>
+                    <option value="alta">Alta</option>
+                    <option value="media">Media</option>
+                    <option value="baja">Baja</option>
                 </select>
             </div>
             <div class="filtro-group">
                 <label for="filtro-dispositivo">Dispositivo</label>
-                <input type="text" id="filtro-dispositivo" placeholder="Buscar por dispositivo...">
+                <input type="text" id="filtro-dispositivo" placeholder="Buscar...">
             </div>
         </div>
         <div class="botones-filtro">
-            <button class="btn-filtro btn-limpiar">
-                <i class="fa-solid fa-eraser"></i> Limpiar Filtros
+            <button class="btn-filtro btn-limpiar" id="btn-limpiar-filtros">
+                <i class="fa-solid fa-eraser"></i> Limpiar
             </button>
-            <button class="btn-filtro btn-aplicar">
-                <i class="fa-solid fa-filter"></i> Aplicar Filtros
+            <button class="btn-filtro btn-aplicar" id="btn-aplicar-filtros">
+                <i class="fa-solid fa-filter"></i> Aplicar
             </button>
         </div>
     </section>
@@ -78,22 +78,22 @@
     <section class="tabla-alertas">
         <h2><i class="fa-solid fa-list"></i> Alertas Activas</h2>
         <div class="desplazamiento">
-            <table>
+            <table id="tablaAlertas">
                 <thead>
                     <tr>
-                        <th>Tipo de Alerta</th>
+                        <th>Tipo</th>
                         <th>Nivel</th>
                         <th>Dispositivo</th>
                         <th>Persona</th>
                         <th>Mensaje</th>
-                        <th>Fecha y Hora</th>
+                        <th>Fecha/Hora</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
-                </thead>    
-                <tbody>
+                </thead>
+                <tbody id="tbodyAlertas">
                     {% for alerta in alertas %}
-                    <tr>
+                    <tr data-id="{{ alerta.id }}" data-nivel="{{ alerta.nivel }}">
                         <td><strong>{{ alerta.get_tipo_display }}</strong></td>
                         <td>
                             <span class="nivel-alerta nivel-{{ alerta.nivel|lower }}">
@@ -113,17 +113,24 @@
                                 {% if alerta.resuelta %}Resuelta{% elif alerta.leida %}Leída{% else %}Pendiente{% endif %}
                             </span>
                         </td>
-                        <td>
-                            <button class="btn-reportar" onclick="marcarAlertaResuelta({{ alerta.id }})">
+                        <td class="acciones">
+                            {% if not alerta.resuelta %}
+                            <button class="btn-resolver" data-id="{{ alerta.id }}">
                                 <i class="fa-solid fa-check"></i> Resolver
                             </button>
+                            {% else %}
+                            <span class="resuelto-badge">
+                                <i class="fa-solid fa-check-circle"></i> Resuelta
+                            </span>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
+                    <tr class="empty-row">
                         <td colspan="8" style="text-align: center; padding: 40px;">
-                            <i class="fa-solid fa-inbox"></i>
+                            <i class="fa-solid fa-inbox" style="font-size: 48px;"></i>
                             <p>No hay alertas registradas</p>
+                            <small>Las alertas se generan automáticamente cuando hay problemas</small>
                         </td>
                     </tr>
                     {% endfor %}
@@ -131,10 +138,10 @@
             </table>
         </div>
         <div class="total-registros">
-            Total: <strong>{{ alertas|length }}</strong> alertas | 
-            <span class="text-success">{{ estables }} dispositivos activos</span> | 
-            <span class="text-warning">{{ problemas }} pausados</span> | 
-            <span class="text-danger">{{ criticos }} con error</span>
+            Total: <strong>{{ total_alertas|default:"0" }}</strong> alertas |
+            <span class="text-danger">⚠️ {{ alertas_criticas|default:"0" }} críticas</span> |
+            <span class="text-warning">⚡ {{ alertas_media|default:"0" }} medias</span> |
+            <span class="text-success">ℹ️ {{ alertas_baja|default:"0" }} bajas</span>
         </div>
     </section>
 
@@ -150,22 +157,24 @@
                     <input type="text" id="dispositivo_nombre_reportar" readonly>
                 </div>
                 <div class="form-group">
-                    <label>Descripción del Problema:</label>
-                    <textarea id="descripcion_reporte" required placeholder="Describe el problema aquí..."></textarea>
+                    <label>Descripción:</label>
+                    <textarea id="descripcion_reporte" required placeholder="Describe el problema..."></textarea>
                 </div>
                 <button type="submit" class="btn">Enviar Reporte</button>
             </form>
         </div>
     </div>
 
-    <!-- Información de Soporte -->
     <div class="soporte-info">
         <i class="fa-solid fa-headset"></i>
-        <strong>¿Necesita ayuda?</strong><br>
-        Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
-        <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+        <div>
+            <strong>¿Necesita ayuda?</strong><br>
+            Tel: <strong>4666-1212</strong> | Email: <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+        </div>
     </div>
 </main>
+
+<div id="notificacion" class="notificacion" style="display: none;"></div>
 
 <script src="{% static 'js/alertas.js' %}"></script>
 {% endblock %}

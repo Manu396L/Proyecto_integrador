@@ -1,24 +1,25 @@
-// static/js/alertas.js - COMPLETO
-
+// static/js/alertas.js
 document.addEventListener('DOMContentLoaded', function() {
-    inicializarEventos();
-});
-
-function inicializarEventos() {
-    const btnAplicar = document.querySelector('.btn-aplicar');
-    const btnLimpiar = document.querySelector('.btn-limpiar');
-    const filtroSede = document.getElementById('filtro-sede');
-    const filtroEstado = document.getElementById('filtro-estado');
-    const filtroAutenticacion = document.getElementById('filtro-autenticacion');
-    const filtroDispositivo = document.getElementById('filtro-dispositivo');
+    console.log('Alertas JS cargado');
+    
+    // Botones de filtro
+    const btnAplicar = document.getElementById('btn-aplicar-filtros');
+    const btnLimpiar = document.getElementById('btn-limpiar-filtros');
     
     if (btnAplicar) btnAplicar.addEventListener('click', aplicarFiltros);
     if (btnLimpiar) btnLimpiar.addEventListener('click', limpiarFiltros);
     
-    if (filtroSede) filtroSede.addEventListener('change', aplicarFiltros);
-    if (filtroEstado) filtroEstado.addEventListener('change', aplicarFiltros);
-    if (filtroAutenticacion) filtroAutenticacion.addEventListener('change', aplicarFiltros);
-    if (filtroDispositivo) filtroDispositivo.addEventListener('input', aplicarFiltros);
+    // Delegación de eventos para botones Resolver (funciona incluso con elementos dinámicos)
+    document.getElementById('tbodyAlertas').addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-resolver');
+        if (btn) {
+            const fila = btn.closest('tr');
+            const alertaId = fila.getAttribute('data-id');
+            if (alertaId) {
+                marcarAlertaResuelta(alertaId);
+            }
+        }
+    });
     
     // Formulario de reporte
     const form = document.getElementById('formReportar');
@@ -28,74 +29,47 @@ function inicializarEventos() {
             enviarReporte();
         });
     }
-}
+});
 
 function aplicarFiltros() {
     const filtroSede = document.getElementById('filtro-sede')?.value.toLowerCase() || '';
     const filtroEstado = document.getElementById('filtro-estado')?.value.toLowerCase() || '';
-    const filtroAutenticacion = document.getElementById('filtro-autenticacion')?.value.toLowerCase() || '';
+    const filtroNivel = document.getElementById('filtro-nivel')?.value.toLowerCase() || '';
     const filtroDispositivo = document.getElementById('filtro-dispositivo')?.value.toLowerCase() || '';
     
-    const filas = document.querySelectorAll('.tabla-alertas tbody tr:not(.sin-resultados)');
+    const filas = document.querySelectorAll('#tbodyAlertas tr:not(.empty-row)');
     let visibles = 0;
     
     filas.forEach(fila => {
-        const textoDispositivo = fila.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
-        const textoEstado = fila.querySelector('.estado-alerta')?.textContent.toLowerCase() || '';
-        const textoNivel = fila.querySelector('.nivel-alerta')?.textContent.toLowerCase() || '';
+        const celdas = fila.querySelectorAll('td');
+        if (celdas.length === 0) return;
+        
+        const textoDispositivo = celdas[2]?.textContent.toLowerCase() || '';
+        const textoEstadoSpan = celdas[6]?.textContent.toLowerCase() || '';
+        const textoNivelSpan = celdas[1]?.textContent.toLowerCase() || '';
         
         let mostrar = true;
-        
         if (filtroDispositivo && !textoDispositivo.includes(filtroDispositivo)) mostrar = false;
-        if (filtroEstado && !textoEstado.includes(filtroEstado)) mostrar = false;
+        if (filtroEstado && !textoEstadoSpan.includes(filtroEstado)) mostrar = false;
+        if (filtroNivel && !textoNivelSpan.includes(filtroNivel)) mostrar = false;
         
         fila.style.display = mostrar ? '' : 'none';
         if (mostrar) visibles++;
     });
     
-    mostrarNotificacion(`Filtros aplicados: ${visibles} alertas visibles`, 'info');
-    
-    if (visibles === 0) {
-        mostrarMensajeSinResultados();
-    } else {
-        ocultarMensajeSinResultados();
-    }
+    mostrarNotificacion(`${visibles} alertas visibles`, 'info');
 }
 
 function limpiarFiltros() {
     document.getElementById('filtro-sede').value = '';
     document.getElementById('filtro-estado').value = '';
-    document.getElementById('filtro-autenticacion').value = '';
+    document.getElementById('filtro-nivel').value = '';
     document.getElementById('filtro-dispositivo').value = '';
     
-    const filas = document.querySelectorAll('.tabla-alertas tbody tr');
+    const filas = document.querySelectorAll('#tbodyAlertas tr');
     filas.forEach(fila => fila.style.display = '');
     
-    ocultarMensajeSinResultados();
     mostrarNotificacion('Filtros limpiados', 'info');
-}
-
-function mostrarMensajeSinResultados() {
-    let mensaje = document.querySelector('.sin-resultados');
-    if (!mensaje) {
-        const tbody = document.querySelector('.tabla-alertas tbody');
-        if (tbody) {
-            mensaje = document.createElement('tr');
-            mensaje.className = 'sin-resultados';
-            mensaje.innerHTML = `
-                <td colspan="8" style="text-align: center; padding: 40px;">
-                    <i class="fa-solid fa-search" style="font-size: 48px;"></i>
-                    <p>No se encontraron alertas con los filtros seleccionados</p>
-                </td>
-            `;
-            tbody.appendChild(mensaje);
-        }
-    }
-}
-
-function ocultarMensajeSinResultados() {
-    const mensaje = document.querySelector('.sin-resultados');
-    if (mensaje) mensaje.remove();
 }
 
 function marcarAlertaResuelta(alertaId) {
@@ -104,43 +78,23 @@ function marcarAlertaResuelta(alertaId) {
     fetch(`/alertas/api/resolver/${alertaId}/`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
         }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            location.reload();
+            mostrarNotificacion('Alerta resuelta correctamente', 'success');
+            setTimeout(() => location.reload(), 1000);
         } else {
             mostrarNotificacion('Error: ' + data.message, 'error');
         }
     })
-    .catch(error => mostrarNotificacion('Error al resolver alerta', 'error'));
-}
-
-function marcarAlertaLeida(alertaId) {
-    fetch(`/alertas/api/leida/${alertaId}/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const alertaRow = document.querySelector(`tr[data-id="${alertaId}"]`);
-            if (alertaRow) {
-                const estadoSpan = alertaRow.querySelector('.estado-alerta');
-                if (estadoSpan) {
-                    estadoSpan.innerHTML = '<i class="fa-solid fa-circle"></i> Leída';
-                    estadoSpan.classList.remove('estado-pendiente');
-                    estadoSpan.classList.add('estado-leida');
-                }
-            }
-            mostrarNotificacion('Alerta marcada como leída', 'success');
-        }
-    })
-    .catch(error => mostrarNotificacion('Error', 'error'));
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error al conectar con el servidor', 'error');
+    });
 }
 
 function reportarDispositivo(id, nombre) {
@@ -184,7 +138,10 @@ function enviarReporte() {
             mostrarNotificacion('Error: ' + data.message, 'error');
         }
     })
-    .catch(error => mostrarNotificacion('Error al enviar reporte', 'error'));
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error al enviar reporte', 'error');
+    });
 }
 
 function mostrarNotificacion(mensaje, tipo = 'info') {
@@ -193,9 +150,11 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
         notificacion.textContent = mensaje;
         notificacion.className = `notificacion notificacion-${tipo}`;
         notificacion.style.display = 'block';
-        setTimeout(() => notificacion.style.display = 'none', 3000);
+        setTimeout(() => {
+            notificacion.style.display = 'none';
+        }, 3000);
     } else {
-        alert(mensaje);
+        console.log(mensaje);
     }
 }
 
