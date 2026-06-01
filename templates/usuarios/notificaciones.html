@@ -1,4 +1,3 @@
-<!-- templates/usuarios/notificaciones.html -->
 {% extends 'dashboard/base.html' %}
 {% load static %}
 
@@ -10,46 +9,44 @@
         <h1><i class="fa-solid fa-bell"></i> <b>Notificaciones del Sistema</b></h1>
     </header>
     
-    <!-- Resumen de notificaciones -->
     <section class="resumen-notificaciones">
-        <div class="resumen-item no-leidas">
-            <div class="resumen-valor">12</div>
+        <div class="resumen-item no-leidas" data-filtro="no-leidas">
+            <div class="resumen-valor" id="total-no-leidas">{{ total_no_leidas }}</div>
             <div class="resumen-label">No Leídas</div>
         </div>
-        <div class="resumen-item criticas">
-            <div class="resumen-valor">5</div>
+        <div class="resumen-item criticas" data-filtro="criticas">
+            <div class="resumen-valor" id="total-criticas">{{ total_criticas }}</div>
             <div class="resumen-label">Críticas</div>
         </div>
-        <div class="resumen-item hoy">
-            <div class="resumen-valor">8</div>
+        <div class="resumen-item hoy" data-filtro="hoy">
+            <div class="resumen-valor" id="total-hoy">{{ total_hoy }}</div>
             <div class="resumen-label">Hoy</div>
         </div>
-        <div class="resumen-item total">
-            <div class="resumen-valor">47</div>
+        <div class="resumen-item total" data-filtro="total">
+            <div class="resumen-valor" id="total-general">{{ total_general }}</div>
             <div class="resumen-label">Total</div>
         </div>
     </section>
     
-    <!-- Filtros y acciones -->
     <section class="filtros-notificaciones">
         <h3><i class="fa-solid fa-filter"></i> Filtros y Acciones</h3>
         <div class="filtros-grid">
             <div class="filtro-group">
-                <label for="filtro-tipo">Tipo de Notificación</label>
+                <label for="filtro-tipo">Tipo</label>
                 <select id="filtro-tipo">
-                    <option value="">Todos los tipos</option>
-                    <option value="Alerta de Dispositivo">Alertas del Sistema</option>
-                    <option value="Evento de Seguridad">Eventos de Seguridad</option>
-                    <option value="Mantenimiento del Sistema">Mantenimiento</option>
-                    <option value="Gestión de Usuarios">Actividad de Usuarios</option>
-                    <option value="Actualización del Sistema">Actualizaciones</option>
-                    <option value="Problema de Red">Problemas de Red</option>
+                    <option value="">Todos</option>
+                    <option value="ALERTA">Alertas</option>
+                    <option value="DISPOSITIVO">Dispositivos</option>
+                    <option value="PERSONAL">Personal</option>
+                    <option value="SEDE">Sedes/Áreas</option>
+                    <option value="REPORTE">Reportes</option>
+                    <option value="SEGURIDAD">Seguridad</option>
                 </select>
             </div>
             <div class="filtro-group">
                 <label for="filtro-prioridad">Prioridad</label>
                 <select id="filtro-prioridad">
-                    <option value="">Todas las prioridades</option>
+                    <option value="">Todas</option>
                     <option value="critica">Crítica</option>
                     <option value="alta">Alta</option>
                     <option value="media">Media</option>
@@ -60,130 +57,108 @@
             <div class="filtro-group">
                 <label for="filtro-estado">Estado</label>
                 <select id="filtro-estado">
-                    <option value="">Todos los estados</option>
-                    <option value="no-leida">No Leída</option>
-                    <option value="leida">Leída</option>
-                </select>
-            </div>
-            <div class="filtro-group">
-                <label for="filtro-fecha">Fecha</label>
-                <select id="filtro-fecha">
-                    <option value="">Cualquier fecha</option>
-                    <option value="hoy">Hoy</option>
-                    <option value="ayer">Ayer</option>
-                    <option value="semana">Esta semana</option>
+                    <option value="">Todos</option>
+                    <option value="no-leida">No Leídas</option>
+                    <option value="leida">Leídas</option>
                 </select>
             </div>
         </div>
         <div class="botones-filtro">
             <button class="btn-filtro btn-marcar-todas" id="btnMarcarTodas">
-                <i class="fa-solid fa-check-double"></i> Marcar Todas como Leídas
+                <i class="fa-solid fa-check-double"></i> Marcar todas como leídas
+            </button>
+            <button class="btn-filtro btn-config" id="btnConfiguracion">
+                <i class="fa-solid fa-gear"></i> Configurar
             </button>
             <button class="btn-filtro btn-limpiar" id="btnLimpiar">
-                <i class="fa-solid fa-eraser"></i> Limpiar Filtros
+                <i class="fa-solid fa-eraser"></i> Limpiar filtros
             </button>
             <button class="btn-filtro btn-aplicar" id="btnAplicar">
-                <i class="fa-solid fa-filter"></i> Aplicar Filtros
+                <i class="fa-solid fa-filter"></i> Aplicar
             </button>
         </div>
     </section>
     
-    <!-- Lista de notificaciones -->
     <section class="lista-notificaciones">
         <h2><i class="fa-solid fa-list"></i> Notificaciones Recientes</h2>
-        
-        <div class="notificaciones-container">
-            <!-- Las notificaciones se cargan dinámicamente con JS -->
-        </div>
-        
-        <!-- Paginación -->
+        <div class="notificaciones-container" id="notificacionesContainer"></div>
         <div class="paginacion">
-            <div class="paginacion-info">
-                Mostrando 6 de 6 notificaciones
-            </div>
-            <div class="paginacion-controles">
-                <button class="btn-pagina anterior" disabled>
-                    <i class="fa-solid fa-chevron-left"></i> Anterior
-                </button>
-                <button class="btn-pagina activa">1</button>
-                <button class="btn-pagina siguiente" disabled>
-                    Siguiente <i class="fa-solid fa-chevron-right"></i>
-                </button>
-            </div>
+            <div class="paginacion-info" id="paginacionInfo"></div>
+            <div class="paginacion-controles" id="paginacionControles"></div>
         </div>
     </section>
 
-    <!-- Información de Soporte -->
     <div class="soporte-info">
         <i class="fa-solid fa-headset"></i>
         <div>
             <strong>¿Necesita ayuda?</strong><br>
-            Contacte con Soporte Técnico al <strong>4666-1212</strong> o al correo 
-            <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
+            Tel: <strong>4666-1212</strong> | Email: <a href="mailto:soporte@biometrika.com">soporte@biometrika.com</a>
         </div>
     </div>
     
-    <!-- Footer -->
     <div class="footer">
         <div>Copyright© Sistema Biométrico 2025</div>
         <div>Versión 1.0</div>
     </div>
 </main>
 
-<!-- Modal de Detalles de Notificación -->
-<div id="modalDetalle" class="modal">
+<!-- Modal Configuración -->
+<div id="modalConfig" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-circle-info"></i> Detalles de Notificación</h3>
-            <span class="close">&times;</span>
+            <h3><i class="fa-solid fa-gear"></i> Configurar Notificaciones</h3>
+            <span class="close close-config">&times;</span>
         </div>
         <div class="modal-body">
-            <div class="detalle-notificacion">
-                <div class="detalle-header">
-                    <h4 id="detalle-titulo">Título de la Notificación</h4>
-                    <div class="detalle-meta">
-                        <span class="detalle-fecha" id="detalle-fecha">Fecha</span>
-                        <span class="detalle-prioridad" id="detalle-prioridad">Prioridad</span>
-                    </div>
+            <form id="formConfig">
+                <h4>Tipos de Notificaciones</h4>
+                <div class="config-grid">
+                    <label><input type="checkbox" id="cfg-alertas"> Alertas del Sistema</label>
+                    <label><input type="checkbox" id="cfg-dispositivos"> Dispositivos</label>
+                    <label><input type="checkbox" id="cfg-personal"> Personal</label>
+                    <label><input type="checkbox" id="cfg-sedes"> Sedes y Áreas</label>
+                    <label><input type="checkbox" id="cfg-reportes"> Reportes</label>
+                    <label><input type="checkbox" id="cfg-seguridad"> Seguridad</label>
                 </div>
-                <div class="detalle-contenido">
-                    <p id="detalle-mensaje">Mensaje de la notificación...</p>
-                    <div class="detalle-adicional">
-                        <h5>Información Adicional</h5>
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <label>Tipo:</label>
-                                <span id="detalle-tipo">Tipo</span>
-                            </div>
-                            <div class="info-item">
-                                <label>Origen:</label>
-                                <span id="detalle-origen">Origen</span>
-                            </div>
-                            <div class="info-item">
-                                <label>Usuario:</label>
-                                <span id="detalle-usuario">Usuario</span>
-                            </div>
-                            <div class="info-item">
-                                <label>Dispositivo:</label>
-                                <span id="detalle-dispositivo">Dispositivo</span>
-                            </div>
-                        </div>
-                    </div>
+                
+                <h4>Prioridad Mínima</h4>
+                <select id="cfg-prioridad" class="config-select">
+                    <option value="informativa">Informativa (Todas)</option>
+                    <option value="baja">Baja</option>
+                    <option value="media">Media y superior</option>
+                    <option value="alta">Alta y superior</option>
+                    <option value="critica">Solo críticas</option>
+                </select>
+                
+                <h4>Notificaciones por Email</h4>
+                <label><input type="checkbox" id="cfg-email"> Enviar por email</label>
+                <div id="email-config" style="display:none; margin-top:10px;">
+                    <input type="email" id="cfg-email-destino" class="config-input" placeholder="correo@ejemplo.com">
                 </div>
-            </div>
+            </form>
         </div>
         <div class="modal-footer">
-            <button class="btn-secundario" id="btnCerrarDetalle">
-                <i class="fa-solid fa-xmark"></i> Cerrar
-            </button>
-            <button class="btn-primario" id="btnAccionDetalle">
-                <i class="fa-solid fa-gear"></i> Tomar Acción
-            </button>
+            <button class="btn-secundario close-config">Cancelar</button>
+            <button class="btn-primario" id="btnGuardarConfig">Guardar</button>
         </div>
     </div>
 </div>
 
-<!-- Notificación del sistema -->
+<!-- Modal Detalle -->
+<div id="modalDetalle" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-circle-info"></i> Detalle</h3>
+            <span class="close close-detalle">&times;</span>
+        </div>
+        <div class="modal-body" id="detalleBody"></div>
+        <div class="modal-footer">
+            <button class="btn-secundario close-detalle">Cerrar</button>
+            <button class="btn-primario" id="btnMarcarLeida">Marcar como leída</button>
+        </div>
+    </div>
+</div>
+
 <div id="notificacionSistema" class="notificacion-sistema" style="display: none;"></div>
 
 <script src="{% static 'js/notificaciones.js' %}"></script>

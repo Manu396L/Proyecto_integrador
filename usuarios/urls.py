@@ -9,6 +9,11 @@ urlpatterns = [
     path('cambiar-password/', views.cambiar_password, name='cambiar_password'),
     path('configuracion/', views.configuracion, name='configuracion'),
     path('notificaciones/', views.notificaciones, name='notificaciones'),
+    path('api/notificaciones/', views.api_notificaciones, name='api_notificaciones'),
+    path('api/marcar/<int:notificacion_id>/', views.api_marcar_notificacion_leida, name='marcar_notificacion'),
+    path('api/marcar-todas/', views.api_marcar_todas_leidas, name='marcar_todas'),
+    path('api/config-notificaciones/', views.api_guardar_config_notificaciones, name='guardar_config'),
+    path('api/config-notificaciones/obtener/', views.api_obtener_config_notificaciones, name='obtener_config'),
 ]
 
 # URLs para recuperación de contraseña

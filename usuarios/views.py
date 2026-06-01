@@ -9,6 +9,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
+from django.utils import timezone
 from django.db import models
 import json
 import re
@@ -57,10 +58,10 @@ def crear_ticket_solicitud(solicitud):
             remitente_email=solicitud.email
         )
         
-        print(f"✅ Ticket creado automáticamente - ID: {ticket.id}")
+        print(f" Ticket creado automáticamente - ID: {ticket.id}")
         return ticket
     except Exception as e:
-        print(f"❌ Error al crear ticket: {e}")
+        print(f" Error al crear ticket: {e}")
         return None
 
 # ===== VISTAS CON LOGIN =====
@@ -90,8 +91,57 @@ def configuracion(request):
 
 @login_required
 def notificaciones(request):
-    return render(request, 'usuarios/notificaciones.html')
-
+    """Vista para mostrar notificaciones del usuario"""
+    from .models import Notificacion, ConfiguracionNotificacion
+    
+    # Obtener o crear configuración
+    config, _ = ConfiguracionNotificacion.objects.get_or_create(usuario=request.user)
+    
+    # Obtener notificaciones del usuario
+    notificaciones = Notificacion.objects.filter(usuario_destino=request.user)
+    
+    # Aplicar filtros según configuración
+    if not config.notificar_alertas:
+        notificaciones = notificaciones.exclude(tipo='ALERTA')
+    if not config.notificar_dispositivos:
+        notificaciones = notificaciones.exclude(tipo='DISPOSITIVO')
+    if not config.notificar_personal:
+        notificaciones = notificaciones.exclude(tipo='PERSONAL')
+    if not config.notificar_sedes:
+        notificaciones = notificaciones.exclude(tipo='SEDE')
+    if not config.notificar_reportes:
+        notificaciones = notificaciones.exclude(tipo='REPORTE')
+    if not config.notificar_backup:
+        notificaciones = notificaciones.exclude(tipo='BACKUP')
+    if not config.notificar_configuracion:
+        notificaciones = notificaciones.exclude(tipo='CONFIGURACION')
+    if not config.notificar_seguridad:
+        notificaciones = notificaciones.exclude(tipo='SEGURIDAD')
+    
+    # Filtrar por prioridad mínima
+    prioridades = ['informativa', 'baja', 'media', 'alta', 'critica']
+    prioridad_min = config.prioridad_minima
+    prioridades_permitidas = prioridades[prioridades.index(prioridad_min):]
+    notificaciones = notificaciones.filter(prioridad__in=prioridades_permitidas)
+    
+    notificaciones = notificaciones.order_by('-fecha_creacion')
+    
+    # Estadísticas (AHORA timezone está importado)
+    total_no_leidas = notificaciones.filter(leida=False).count()
+    total_criticas = notificaciones.filter(prioridad='critica', leida=False).count()
+    total_hoy = notificaciones.filter(fecha_creacion__date=timezone.now().date()).count()
+    total_general = notificaciones.count()
+    
+    context = {
+        'notificaciones': notificaciones[:50],
+        'total_no_leidas': total_no_leidas,
+        'total_criticas': total_criticas,
+        'total_hoy': total_hoy,
+        'total_general': total_general,
+        'configuracion': config,
+    }
+    
+    return render(request, 'usuarios/notificaciones.html', context)
 # ===== VISTAS SIN LOGIN (RECUPERACIÓN) =====
 
 def recuperar_contraseña(request):
@@ -136,11 +186,11 @@ def api_registro_usuario(request):
     if request.method == 'POST':
         try:
             print("\n" + "="*60)
-            print("🔍 INTENTANDO GUARDAR SOLICITUD")
+            print(" INTENTANDO GUARDAR SOLICITUD")
             print("="*60)
             
             data = json.loads(request.body)
-            print(f"✅ Datos recibidos: {data}")
+            print(f" Datos recibidos: {data}")
             
             nombre = data.get('nombre', '').strip()
             dni = data.get('dni', '').strip()
@@ -203,16 +253,16 @@ def api_registro_usuario(request):
                 estado='pendiente'
             )
             
-            print(f"✅ SOLICITUD GUARDADA - ID: {solicitud.id}")
+            print(f" SOLICITUD GUARDADA - ID: {solicitud.id}")
             print(f"  Nombre: {solicitud.nombre}")
             print(f"  DNI: {solicitud.dni}")
             print(f"  Email: {solicitud.email}")
             
-            # 🆕 CREAR TICKET AUTOMÁTICAMENTE
+            #  CREAR TICKET AUTOMÁTICAMENTE
             ticket = crear_ticket_solicitud(solicitud)
             
             if ticket:
-                print(f"✅ TICKET CREADO - ID: {ticket.id}")
+                print(f" TICKET CREADO - ID: {ticket.id}")
                 print(f"  Título: {ticket.titulo}")
             
             print("="*60 + "\n")
@@ -236,9 +286,9 @@ def api_registro_usuario(request):
                     ['admin@biometrika.com'],
                     fail_silently=True,
                 )
-                print("✅ Email de notificación enviado")
+                print(" Email de notificación enviado")
             except Exception as e:
-                print(f"⚠️ Error al enviar email: {e}")
+                print(f" Error al enviar email: {e}")
             
             return JsonResponse({
                 'success': True, 
@@ -250,7 +300,7 @@ def api_registro_usuario(request):
         except json.JSONDecodeError:
             return JsonResponse({'success': False, 'message': 'Datos inválidos'}, status=400)
         except Exception as e:
-            print(f"❌ ERROR: {str(e)}")
+            print(f" ERROR: {str(e)}")
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     
     return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
@@ -282,3 +332,148 @@ def todas_solicitudes(request):
         'estados': estados,
         'estado_filtro': estado
     })
+    
+# usuarios/views.py - Agrega al final del archivo:
+
+@login_required
+def api_notificaciones(request):
+    """API para obtener notificaciones en JSON"""
+    from .models import Notificacion, ConfiguracionNotificacion
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    if request.method == 'GET':
+        config, _ = ConfiguracionNotificacion.objects.get_or_create(usuario=request.user)
+        
+        hace_7_dias = timezone.now() - timedelta(days=7)
+        notificaciones = Notificacion.objects.filter(
+            usuario_destino=request.user,
+            fecha_creacion__gte=hace_7_dias
+        ).order_by('-fecha_creacion')[:50]
+        
+        # Aplicar filtros de configuración
+        if not config.notificar_alertas:
+            notificaciones = notificaciones.exclude(tipo='ALERTA')
+        if not config.notificar_dispositivos:
+            notificaciones = notificaciones.exclude(tipo='DISPOSITIVO')
+        if not config.notificar_personal:
+            notificaciones = notificaciones.exclude(tipo='PERSONAL')
+        if not config.notificar_sedes:
+            notificaciones = notificaciones.exclude(tipo='SEDE')
+        
+        data = []
+        for n in notificaciones:
+            # Tiempo relativo
+            delta = timezone.now() - n.fecha_creacion
+            if delta.days > 0:
+                fecha_rel = f"hace {delta.days} día{'s' if delta.days > 1 else ''}"
+            elif delta.seconds > 3600:
+                horas = delta.seconds // 3600
+                fecha_rel = f"hace {horas} hora{'s' if horas > 1 else ''}"
+            elif delta.seconds > 60:
+                minutos = delta.seconds // 60
+                fecha_rel = f"hace {minutos} minuto{'s' if minutos > 1 else ''}"
+            else:
+                fecha_rel = "hace unos segundos"
+            
+            data.append({
+                'id': n.id,
+                'titulo': n.titulo,
+                'mensaje': n.mensaje,
+                'tipo': n.get_tipo_display(),
+                'prioridad': n.prioridad,
+                'leida': n.leida,
+                'fecha': n.fecha_creacion.strftime('%d/%m/%Y %H:%M'),
+                'fecha_relative': fecha_rel,
+            })
+        
+        return JsonResponse({'success': True, 'notificaciones': data})
+    
+    return JsonResponse({'success': False}, status=405)
+
+
+@login_required
+@csrf_exempt
+def api_marcar_notificacion_leida(request, notificacion_id):
+    """Marcar notificación como leída"""
+    from .models import Notificacion
+    
+    if request.method == 'POST':
+        try:
+            notificacion = Notificacion.objects.get(id=notificacion_id, usuario_destino=request.user)
+            notificacion.leida = True
+            notificacion.save()
+            return JsonResponse({'success': True})
+        except Notificacion.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Notificación no encontrada'}, status=404)
+    
+    return JsonResponse({'success': False}, status=405)
+
+
+@login_required
+@csrf_exempt
+def api_marcar_todas_leidas(request):
+    """Marcar todas las notificaciones como leídas"""
+    from .models import Notificacion
+    
+    if request.method == 'POST':
+        Notificacion.objects.filter(usuario_destino=request.user, leida=False).update(leida=True)
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False}, status=405)
+
+
+@login_required
+@csrf_exempt
+def api_guardar_config_notificaciones(request):
+    """Guardar configuración de notificaciones"""
+    from .models import ConfiguracionNotificacion
+    
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            config, _ = ConfiguracionNotificacion.objects.get_or_create(usuario=request.user)
+            
+            config.notificar_alertas = data.get('notificar_alertas', config.notificar_alertas)
+            config.notificar_dispositivos = data.get('notificar_dispositivos', config.notificar_dispositivos)
+            config.notificar_personal = data.get('notificar_personal', config.notificar_personal)
+            config.notificar_sedes = data.get('notificar_sedes', config.notificar_sedes)
+            config.notificar_reportes = data.get('notificar_reportes', config.notificar_reportes)
+            config.notificar_backup = data.get('notificar_backup', config.notificar_backup)
+            config.notificar_configuracion = data.get('notificar_configuracion', config.notificar_configuracion)
+            config.notificar_seguridad = data.get('notificar_seguridad', config.notificar_seguridad)
+            config.prioridad_minima = data.get('prioridad_minima', config.prioridad_minima)
+            config.email_notificaciones = data.get('email_notificaciones', config.email_notificaciones)
+            config.email_destino = data.get('email_destino', config.email_destino)
+            
+            config.save()
+            return JsonResponse({'success': True, 'message': 'Configuración guardada'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=400)
+    
+    return JsonResponse({'success': False}, status=405)
+
+
+@login_required
+def api_obtener_config_notificaciones(request):
+    """Obtener configuración de notificaciones"""
+    from .models import ConfiguracionNotificacion
+    
+    if request.method == 'GET':
+        config, _ = ConfiguracionNotificacion.objects.get_or_create(usuario=request.user)
+        return JsonResponse({
+            'success': True,
+            'notificar_alertas': config.notificar_alertas,
+            'notificar_dispositivos': config.notificar_dispositivos,
+            'notificar_personal': config.notificar_personal,
+            'notificar_sedes': config.notificar_sedes,
+            'notificar_reportes': config.notificar_reportes,
+            'notificar_backup': config.notificar_backup,
+            'notificar_configuracion': config.notificar_configuracion,
+            'notificar_seguridad': config.notificar_seguridad,
+            'prioridad_minima': config.prioridad_minima,
+            'email_notificaciones': config.email_notificaciones,
+            'email_destino': config.email_destino or '',
+        })
+    
+    return JsonResponse({'success': False}, status=405)
