@@ -1,0 +1,144 @@
+/* static/css/style_theme.css
+   Capa de diseño compartida para todo el sistema BIOMETRIKA.
+   Se carga una sola vez desde dashboard/base.html y define:
+   - Tipografía y paleta de color unificadas
+   - El banner "hero" con la imagen de fondo, reutilizado en todas las
+     páginas que usan el patrón existente <div class="contenido"><header>...
+   No modifica ningún id, clase de JS ni estructura de formularios.
+*/
+
+:root {
+    --azul: #1767c8;
+    --azul-oscuro: #0f59af;
+    --marino: #1e2f55;
+    --marino-claro: #26395f;
+    --marino-sidebar-1: #1d2f8f;
+    --marino-sidebar-2: #101c64;
+    --gris-texto: #667895;
+    --gris-texto-claro: #465a78;
+    --fondo: #f4f7fb;
+    --borde: #dde6f2;
+    --borde-claro: #edf1f7;
+    --borde-input: #d9e3f1;
+}
+
+* {
+    font-family: 'Nunito Sans', sans-serif;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--fondo);
+}
+
+a {
+    color: var(--azul);
+}
+
+/* ===== ICONOS (Bootstrap Icons usados en el chrome del sistema) ===== */
+.bi {
+    vertical-align: middle;
+    color: inherit;
+}
+
+/* ===== BANNER "HERO" CON IMAGEN DE FONDO =====
+   Se aplica automáticamente a cualquier encabezado existente dentro de
+   ".contenido" (la gran mayoría de páginas ya usan ese patrón), así como
+   al encabezado propio de Dispositivos y al hero del Dashboard.
+   No requiere tocar el HTML de cada plantilla. */
+.contenido > header,
+.contenido > h1,
+.dispositivos-header,
+.dashboard-hero {
+    background-image:
+        linear-gradient(rgba(13, 32, 94, .82), rgba(22, 93, 184, .72)),
+        url("../img/fondo-login.jpg");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+
+    color: #ffffff;
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin: 0 0 22px 0;
+    box-shadow: 0 6px 18px rgba(21, 85, 173, .18);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+    min-height: 88px;
+}
+
+.contenido > header h1,
+.contenido > h1,
+.dispositivos-header h1,
+.dashboard-hero h1 {
+    color: #ffffff !important;
+    font-size: 24px;
+    font-weight: 900;
+    margin: 0 0 4px 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-start;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+}
+
+.contenido > header h1 i,
+.contenido > h1 i,
+.dispositivos-header h1 i,
+.dashboard-hero h1 i {
+    color: #ffffff !important;
+}
+
+.contenido > header p,
+.dispositivos-header p,
+.dashboard-hero p {
+    color: #eaf3ff !important;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 !important;
+}
+
+.contenido > header b,
+.dispositivos-header b {
+    color: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .contenido > header,
+    .contenido > h1,
+    .dispositivos-header,
+    .dashboard-hero {
+        padding: 18px 20px;
+    }
+
+    .contenido > header h1,
+    .contenido > h1,
+    .dispositivos-header h1,
+    .dashboard-hero h1 {
+        font-size: 20px;
+    }
+}
+
+/* ===== SCROLLBAR (tono acorde a la paleta) ===== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--borde-claro);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #b9cde6;
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--azul);
+}

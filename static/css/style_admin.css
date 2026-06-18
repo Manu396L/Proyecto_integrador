@@ -1,0 +1,196 @@
+/* static/css/style_admin.css
+   Retema el admin propio de Django (/admin/) con la misma identidad visual
+   (azul BIOMETRIKA + Nunito Sans) usando las variables CSS que el admin de
+   Django ya expone, en vez de reescribir sus estilos desde cero. Esto no
+   toca ninguna vista, formulario ni lógica: es solo la capa visual. */
+
+html[data-theme="light"],
+:root {
+    --primary: #1767c8;
+    --secondary: #1e2f55;
+    --accent: #ffb020;
+    --primary-fg: #ffffff;
+
+    --body-fg: #1e2f55;
+    --body-bg: #f4f7fb;
+    --body-quiet-color: #667895;
+    --body-medium-color: #465a78;
+    --body-loud-color: #1e2f55;
+
+    --header-color: #ffffff;
+    --header-branding-color: #ffffff;
+    --header-bg: #101c64;
+    --header-link-color: #ffffff;
+
+    --breadcrumbs-fg: #dbeaff;
+    --breadcrumbs-link-fg: #ffffff;
+    --breadcrumbs-bg: #1767c8;
+
+    --link-fg: #1767c8;
+    --link-hover-color: #0f59af;
+    --link-selected-fg: #0f59af;
+
+    --hairline-color: #edf1f7;
+    --border-color: #dde6f2;
+
+    --error-fg: #d94747;
+
+    --message-success-bg: #dff5e7;
+    --message-warning-bg: #fff3cd;
+    --message-error-bg: #ffe1e1;
+
+    --darkened-bg: #f8fbff;
+    --selected-bg: #e8f2ff;
+    --selected-row: #fff8e1;
+
+    --button-fg: #ffffff;
+    --button-bg: #1767c8;
+    --button-hover-bg: #0f59af;
+    --default-button-bg: #101c64;
+    --default-button-hover-bg: #1767c8;
+    --close-button-bg: #667895;
+    --close-button-hover-bg: #465a78;
+    --delete-button-bg: #d94747;
+    --delete-button-hover-bg: #c0392b;
+
+    --object-tools-bg: #667895;
+    --object-tools-hover-bg: #465a78;
+
+    --font-family-primary:
+        'Nunito Sans', "Segoe UI", system-ui, Roboto, "Helvetica Neue",
+        Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+        "Segoe UI Symbol", "Noto Color Emoji";
+
+    color-scheme: light;
+}
+
+/* Modo oscuro: misma identidad de marca, fondo oscuro */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary: #1767c8;
+        --primary-fg: #ffffff;
+
+        --body-fg: #e8efff;
+        --body-bg: #0d1530;
+        --body-quiet-color: #aebbd6;
+        --body-medium-color: #cdd6ec;
+        --body-loud-color: #ffffff;
+
+        --header-bg: #101c64;
+        --breadcrumbs-bg: #1767c8;
+        --breadcrumbs-link-fg: #ffffff;
+
+        --link-fg: #6fb1ff;
+        --link-hover-color: #9ecbff;
+        --link-selected-fg: #9ecbff;
+
+        --hairline-color: #1f2a52;
+        --border-color: #2a3768;
+
+        --darkened-bg: #111b40;
+        --selected-bg: #16215073;
+        --selected-row: #1c2a59;
+
+        color-scheme: dark;
+    }
+}
+
+html[data-theme="dark"] {
+    --primary: #1767c8;
+    --primary-fg: #ffffff;
+
+    --body-fg: #e8efff;
+    --body-bg: #0d1530;
+    --body-quiet-color: #aebbd6;
+    --body-medium-color: #cdd6ec;
+    --body-loud-color: #ffffff;
+
+    --header-bg: #101c64;
+    --breadcrumbs-bg: #1767c8;
+    --breadcrumbs-link-fg: #ffffff;
+
+    --link-fg: #6fb1ff;
+    --link-hover-color: #9ecbff;
+    --link-selected-fg: #9ecbff;
+
+    --hairline-color: #1f2a52;
+    --border-color: #2a3768;
+
+    --darkened-bg: #111b40;
+    --selected-bg: #16215073;
+    --selected-row: #1c2a59;
+
+    color-scheme: dark;
+}
+
+/* ===== Encabezado con el mismo degradado que el resto del sistema ===== */
+#header {
+    background-image: linear-gradient(90deg, #1767c8 0%, #0e62bb 100%);
+    box-shadow: 0 3px 15px rgba(0, 0, 0, .08);
+}
+
+#branding #site-name {
+    font-weight: 800;
+    letter-spacing: .5px;
+}
+
+#branding #site-name a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#branding #site-name .bi-fingerprint {
+    font-size: 1.3rem;
+}
+
+#branding #site-name .site-name-sub {
+    font-weight: 600;
+    opacity: .85;
+    font-size: .8rem;
+}
+
+/* ===== Esquinas y botones más suaves, acorde al resto del sistema ===== */
+.module,
+.dashboard .module,
+#changelist-filter,
+.calendar caption,
+.calendarbox {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.button, input[type=submit], input[type=button], .submit-row input,
+a.button {
+    border-radius: 8px;
+}
+
+select, textarea, input[type=text], input[type=password],
+input[type=email], input[type=url], input[type=number],
+input[type=tel], .vTextField {
+    border-radius: 8px;
+    border-color: var(--border-color);
+}
+
+/* ===== Página de inicio de sesión con la misma imagen de fondo ===== */
+body.login {
+    background-image:
+        linear-gradient(rgba(13, 32, 94, .85), rgba(22, 93, 184, .75)),
+        url("../img/fondo-login.jpg");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+body.login #header {
+    background: transparent;
+    box-shadow: none;
+}
+
+body.login #container {
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(13, 32, 94, .35);
+    border: none;
+    margin: 80px auto;
+}

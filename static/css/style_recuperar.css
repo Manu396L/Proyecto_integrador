@@ -2,11 +2,17 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Nunito Sans', sans-serif;
 }
 
 body {
-    background-color: #f4f6f9;
+    background-image:
+        linear-gradient(rgba(13, 32, 94, .82), rgba(22, 93, 184, .72)),
+        url("../img/fondo-login.jpg");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -14,12 +20,12 @@ body {
 
 /* Encabezado */
 .Encabezado {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    background: linear-gradient(135deg, #1e2f55 0%, #101c64 100%);
     padding: 20px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(20, 45, 90, 0.2);
 }
 
 .Logo-1 {
@@ -31,7 +37,7 @@ body {
 .icono-logo {
     width: 55px;
     height: 55px;
-    background: #1abc9c;
+    background: #1767c8;
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -59,7 +65,7 @@ body {
 }
 
 .logo-2 {
-    color: #1abc9c;
+    color: #1767c8;
     font-weight: 700;
     font-size: 24px;
     letter-spacing: 1px;
@@ -68,7 +74,7 @@ body {
 /* Título principal */
 h1 {
     text-align: center;
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 32px;
     font-weight: 700;
     margin: 50px 0 20px;
@@ -87,19 +93,19 @@ h1 {
     background: white;
     border-radius: 12px;
     padding: 50px 40px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(20, 45, 90, 0.1);
     border: 2px solid transparent;
     transition: all 0.3s ease;
 }
 
 .form-card:hover {
-    border-color: #1abc9c;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    border-color: #1767c8;
+    box-shadow: 0 12px 30px rgba(20, 45, 90, 0.15);
 }
 
 .form-titulo {
     text-align: center;
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 24px;
     font-weight: 600;
     margin-bottom: 40px;
@@ -110,7 +116,7 @@ h1 {
 }
 
 .form-titulo i {
-    color: #1abc9c;
+    color: #1767c8;
     font-size: 26px;
 }
 
@@ -124,13 +130,13 @@ label {
     align-items: center;
     gap: 8px;
     margin-bottom: 10px;
-    color: #2c3e50;
+    color: #1e2f55;
     font-weight: 600;
     font-size: 15px;
 }
 
 label i {
-    color: #1abc9c;
+    color: #1767c8;
     font-size: 16px;
 }
 
@@ -143,23 +149,23 @@ input[type="text"],
 input[type="email"] {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #ddd;
+    border: 2px solid #d9e3f1;
     border-radius: 8px;
     font-size: 14px;
     transition: all 0.3s ease;
     background: #fff;
-    color: #2c3e50;
+    color: #1e2f55;
 }
 
 input[type="text"]:hover,
 input[type="email"]:hover {
-    border-color: #34495e;
+    border-color: #101c64;
 }
 
 input[type="text"]:focus,
 input[type="email"]:focus {
     outline: none;
-    border-color: #1abc9c;
+    border-color: #1767c8;
     box-shadow: 0 2px 8px rgba(26, 188, 156, 0.2);
 }
 
@@ -171,7 +177,7 @@ input::placeholder {
 .btn-enviar {
     width: 100%;
     padding: 14px;
-    background: #1abc9c;
+    background: #1767c8;
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -193,7 +199,7 @@ input::placeholder {
 }
 
 .btn-enviar:hover {
-    background: #16a085;
+    background: #0f59af;
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(26, 188, 156, 0.3);
 }
@@ -232,7 +238,7 @@ input::placeholder {
 }
 
 .link-volver a {
-    color: #2c3e50;
+    color: #1e2f55;
     text-decoration: none;
     font-size: 14px;
     display: inline-flex;
@@ -242,7 +248,7 @@ input::placeholder {
 }
 
 .link-volver a:hover {
-    color: #1abc9c;
+    color: #1767c8;
 }
 
 .link-volver i {
@@ -253,34 +259,34 @@ input::placeholder {
 .soporte-info {
     text-align: center;
     margin: 40px 0;
-    color: #7f8c8d;
+    color: #667895;
     font-size: 14px;
     line-height: 1.8;
     padding: 20px;
     background: white;
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(20, 45, 90, 0.05);
 }
 
 .soporte-info i {
-    color: #1abc9c;
+    color: #1767c8;
     margin-right: 5px;
 }
 
 .soporte-info a {
-    color: #2c3e50;
+    color: #1e2f55;
     font-weight: 600;
     text-decoration: none;
 }
 
 .soporte-info a:hover {
-    color: #1abc9c;
+    color: #1767c8;
 }
 
 /* Footer */
 .footer {
     margin-top: auto;
-    background: #2c3e50;
+    background: #1e2f55;
     padding: 20px 40px;
     display: flex;
     justify-content: space-between;

@@ -17,12 +17,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Accesos',
                     data: datosHoras,
-                    borderColor: '#1abc9c',
-                    backgroundColor: 'rgba(26, 188, 156, 0.1)',
+                    borderColor: '#1767c8',
+                    backgroundColor: 'rgba(23, 103, 200, 0.12)',
                     borderWidth: 2,
                     fill: true,
                     tension: 0.4,
-                    pointBackgroundColor: '#1abc9c',
+                    pointBackgroundColor: '#1767c8',
                     pointBorderColor: '#fff',
                     pointRadius: 4,
                     pointHoverRadius: 6

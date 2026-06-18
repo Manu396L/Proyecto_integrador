@@ -151,7 +151,7 @@ function detenerAutomatico(tipo, btnAuto, btnManual, colorOriginal) {
     
     if (btnAuto) {
         btnAuto.textContent = 'Auto';
-        btnAuto.style.background = '#2c3e50';
+        btnAuto.style.background = '#1e2f55';
     }
     if (btnManual) {
         btnManual.disabled = false;
@@ -170,7 +170,7 @@ function crearPanelSimuladores() {
         bottom: 95px;
         left: 20px;
         z-index: 9997;
-        background: #2c3e50;
+        background: #1e2f55;
         padding: 8px 12px;
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -185,7 +185,7 @@ function crearPanelSimuladores() {
         ticket: '#f39c12',
         sede: '#2ecc71',
         notificacion: '#9b59b6',
-        usuario: '#1abc9c'
+        usuario: '#1767c8'
     };
     
     const iconos = {
@@ -214,7 +214,7 @@ function crearPanelSimuladores() {
                         <button id="manual-${tipo}" class="btn-manual" data-tipo="${tipo}" data-color="${colores[tipo]}" style="background: ${colores[tipo]}; border: none; padding: 2px 5px; border-radius: 3px; color: white; cursor: pointer; font-size: 8px;">
                             M
                         </button>
-                        <button id="auto-${tipo}" class="btn-auto" data-tipo="${tipo}" style="background: #2c3e50; border: 1px solid ${colores[tipo]}; padding: 2px 5px; border-radius: 3px; color: white; cursor: pointer; font-size: 8px;">
+                        <button id="auto-${tipo}" class="btn-auto" data-tipo="${tipo}" style="background: #1e2f55; border: 1px solid ${colores[tipo]}; padding: 2px 5px; border-radius: 3px; color: white; cursor: pointer; font-size: 8px;">
                             A
                         </button>
                     </div>

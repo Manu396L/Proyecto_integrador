@@ -1,9 +1,9 @@
 /* detalle.css - Estilos específicos para la página de detalle de reporte */
 
 .contenido {
-    margin-left: 250px;
+    width: 100%;
+    max-width: 100%;
     padding: 20px;
-    width: calc(100% - 250px);
 }
 
 header {
@@ -11,7 +11,7 @@ header {
 }
 
 header h1 {
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 24px;
     font-weight: 600;
     display: flex;
@@ -20,12 +20,12 @@ header h1 {
 }
 
 header h1 i {
-    color: #1abc9c;
+    color: #1767c8;
     font-size: 24px;
 }
 
 header p {
-    color: #7f8c8d;
+    color: #667895;
     font-size: 14px;
     margin-top: 5px;
 }
@@ -50,7 +50,7 @@ header p {
 }
 
 .btn-volver:hover {
-    background: #7f8c8d;
+    background: #667895;
     transform: translateY(-2px);
 }
 
@@ -66,7 +66,7 @@ header p {
     background: white;
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(20, 45, 90,0.08);
     text-align: center;
     transition: transform 0.3s ease;
 }
@@ -82,13 +82,13 @@ header p {
 .resumen-valor {
     font-size: 32px;
     font-weight: 700;
-    color: #2c3e50;
+    color: #1e2f55;
     margin-bottom: 5px;
 }
 
 .resumen-label {
     font-size: 13px;
-    color: #7f8c8d;
+    color: #667895;
     font-weight: 500;
 }
 
@@ -96,7 +96,7 @@ header p {
 .info-reporte {
     background: white;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(20, 45, 90,0.08);
     margin-bottom: 25px;
     overflow: hidden;
 }
@@ -104,7 +104,7 @@ header p {
 .info-reporte h2 {
     padding: 15px 20px;
     margin: 0;
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 16px;
     display: flex;
     align-items: center;
@@ -129,7 +129,7 @@ header p {
 
 .info-label {
     font-weight: 600;
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 12px;
     min-width: 120px;
 }
@@ -168,7 +168,7 @@ header p {
 .metricas-reporte {
     background: white;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(20, 45, 90,0.08);
     margin-bottom: 25px;
     overflow: hidden;
 }
@@ -176,7 +176,7 @@ header p {
 .metricas-reporte h2 {
     padding: 15px 20px;
     margin: 0;
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 16px;
     display: flex;
     align-items: center;
@@ -202,12 +202,12 @@ header p {
 
 .metrica-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(20, 45, 90,0.1);
 }
 
 .metrica-titulo {
     font-size: 12px;
-    color: #7f8c8d;
+    color: #667895;
     margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -216,7 +216,7 @@ header p {
 .metrica-valor {
     font-size: 36px;
     font-weight: 700;
-    color: #2c3e50;
+    color: #1e2f55;
     margin-bottom: 15px;
 }
 
@@ -245,7 +245,7 @@ header p {
 .exportar-reporte {
     background: white;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(20, 45, 90,0.08);
     margin-bottom: 25px;
     overflow: hidden;
 }
@@ -253,7 +253,7 @@ header p {
 .exportar-reporte h2 {
     padding: 15px 20px;
     margin: 0;
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 16px;
     display: flex;
     align-items: center;
@@ -271,7 +271,7 @@ header p {
 }
 
 .btn-exportar {
-    background: #2c3e50;
+    background: #1e2f55;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -286,9 +286,9 @@ header p {
 }
 
 .btn-exportar:hover {
-    background: #34495e;
+    background: #101c64;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(20, 45, 90,0.15);
 }
 
 .btn-exportar i {
@@ -322,7 +322,7 @@ header p {
 
 /* Footer */
 .footer {
-    background: #2c3e50;
+    background: #1e2f55;
     padding: 12px 20px;
     display: flex;
     justify-content: space-between;
@@ -340,7 +340,7 @@ header p {
     right: 20px;
     padding: 12px 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(20, 45, 90,0.15);
     z-index: 10001;
     font-size: 13px;
     animation: slideIn 0.3s ease;
@@ -379,16 +379,12 @@ header p {
 /* Responsive */
 @media (max-width: 1024px) {
     .contenido {
-        margin-left: 250px;
         padding: 20px;
-        width: calc(100% - 250px);
     }
 }
 
 @media (max-width: 768px) {
     .contenido {
-        margin-left: 70px;
-        width: calc(100% - 70px);
         padding: 15px;
     }
 
@@ -422,8 +418,6 @@ header p {
 
 @media (max-width: 480px) {
     .contenido {
-        margin-left: 0;
-        width: 100%;
         padding: 10px;
     }
 

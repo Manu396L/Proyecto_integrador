@@ -5,8 +5,10 @@
 <link rel="stylesheet" href="{% static 'css/style_usuario_nuevo.css' %}">
 
 <div class="contenido">
-    <h1><i class="fa-solid fa-file-circle-check"></i> Mis Solicitudes de Registro</h1>
-    <p class="subtitulo">Estado de tus solicitudes de acceso al sistema</p>
+    <header>
+        <h1><i class="fa-solid fa-file-circle-check"></i> Mis Solicitudes de Registro</h1>
+        <p class="subtitulo">Estado de tus solicitudes de acceso al sistema</p>
+    </header>
 
     <div class="tabla-container">
         {% if solicitudes %}

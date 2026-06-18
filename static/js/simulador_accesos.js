@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
         bottom: 20px;
         left: 20px;
         z-index: 9998;
-        background: #2c3e50;
+        background: #1e2f55;
         padding: 8px 15px;
         border-radius: 30px;
         display: flex;
@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     
     controlPanel.innerHTML = `
-        <i class="fas fa-microchip" style="color: #1abc9c;"></i>
+        <i class="fas fa-microchip" style="color: #1767c8;"></i>
         <span style="color: white; font-size: 12px;">Simulador:</span>
         <button id="btnIniciarSimulador" style="background: #27ae60; border: none; padding: 5px 12px; border-radius: 20px; color: white; cursor: pointer; font-size: 11px;">
             <i class="fas fa-play"></i> Iniciar

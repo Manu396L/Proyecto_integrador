@@ -4,7 +4,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Nunito Sans', sans-serif;
 }
 
 /* Fondo general */
@@ -14,7 +14,13 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #f4f6f9;
+    background-image:
+        linear-gradient(rgba(13, 32, 94, .82), rgba(22, 93, 184, .72)),
+        url("../img/fondo-login.jpg");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     padding: 20px;
 }
 
@@ -23,11 +29,11 @@ body {
     background: #fff;
     padding: 40px 30px;
     border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    box-shadow: 0 6px 18px rgba(20, 45, 90,0.12);
     width: 100%;
     max-width: 400px;
     text-align: center;
-    border-top: 6px solid #1abc9c;
+    border-top: 6px solid #1767c8;
     margin-bottom: 20px;
 }
 
@@ -38,13 +44,13 @@ body {
 
 .fingerprint-scanner i {
     font-size: 48px;
-    color: #1abc9c;
+    color: #1767c8;
     margin-bottom: 10px;
 }
 
 .logo h1 {
     font-size: 22px;
-    color: #2c3e50;
+    color: #1e2f55;
     font-weight: 600;
 }
 
@@ -57,7 +63,7 @@ body {
 .input-group label {
     display: block;
     font-size: 14px;
-    color: #2c3e50;
+    color: #1e2f55;
     margin-bottom: 6px;
     font-weight: 600;
 }
@@ -65,14 +71,14 @@ body {
 .input-group input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ccc;
+    border: 1px solid #d9e3f1;
     border-radius: 8px;
     font-size: 14px;
     transition: border-color 0.3s;
 }
 
 .input-group input:focus {
-    border-color: #1abc9c;
+    border-color: #1767c8;
     outline: none;
     box-shadow: 0 0 6px rgba(26,188,156,0.25);
 }
@@ -93,26 +99,26 @@ body {
 }
 
 .options .remember label {
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 13px;
 }
 
 .forgot-password {
     text-decoration: none;
-    color: #1abc9c;
+    color: #1767c8;
     font-weight: 600;
     transition: color 0.3s;
 }
 
 .forgot-password:hover {
-    color: #16a085;
+    color: #0f59af;
 }
 
 /* Botón de login */
 .login-button {
     width: 100%;
     padding: 14px;
-    background: #2c3e50;
+    background: #1e2f55;
     color: #fff;
     font-size: 15px;
     font-weight: bold;
@@ -123,7 +129,7 @@ body {
 }
 
 .login-button:hover {
-    background: #34495e;
+    background: #101c64;
     transform: translateY(-2px);
 }
 
@@ -139,51 +145,51 @@ body {
 .register {
     margin-top: 22px;
     font-size: 14px;
-    color: #2c3e50;
+    color: #1e2f55;
 }
 
 .register a {
-    color: #1abc9c;
+    color: #1767c8;
     text-decoration: none;
     font-weight: 600;
     transition: color 0.3s;
 }
 
 .register a:hover {
-    color: #16a085;
+    color: #0f59af;
 }
 
 /* Información de soporte */
 .soporte-info {
     text-align: center;
     margin-top: 30px;
-    color: #7f8c8d;
+    color: #667895;
     font-size: 14px;
     line-height: 1.8;
     padding: 20px;
     background: white;
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(20, 45, 90, 0.05);
 }
 
 .soporte-info i {
-    color: #1abc9c;
+    color: #1767c8;
     margin-right: 5px;
 }
 
 .soporte-info a {
-    color: #2c3e50;
+    color: #1e2f55;
     font-weight: 600;
     text-decoration: none;
 }
 
 .soporte-info a:hover {
-    color: #1abc9c;
+    color: #1767c8;
 }
 
 /* Footer */
 .footer {
-    background: #2c3e50;
+    background: #1e2f55;
     padding: 20px 40px;
     display: flex;
     justify-content: space-between;

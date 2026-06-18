@@ -3,7 +3,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Nunito Sans', sans-serif;
 }
 
 body {
@@ -12,7 +12,13 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #f4f6f9;
+    background-image:
+        linear-gradient(rgba(13, 32, 94, .82), rgba(22, 93, 184, .72)),
+        url("../img/fondo-login.jpg");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     padding: 20px;
 }
 
@@ -20,11 +26,11 @@ body {
     background: #fff;
     padding: 40px 30px;
     border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    box-shadow: 0 6px 18px rgba(20, 45, 90,0.12);
     width: 100%;
     max-width: 500px;
     text-align: center;
-    border-top: 6px solid #1abc9c;
+    border-top: 6px solid #1767c8;
     margin-bottom: 20px;
 }
 
@@ -34,25 +40,25 @@ body {
 
 .fingerprint-scanner i {
     font-size: 48px;
-    color: #1abc9c;
+    color: #1767c8;
     margin-bottom: 10px;
 }
 
 .logo h1 {
     font-size: 22px;
-    color: #2c3e50;
+    color: #1e2f55;
     font-weight: 600;
 }
 
 h2 {
-    color: #2c3e50;
+    color: #1e2f55;
     margin-bottom: 8px;
     font-size: 20px;
     font-weight: 600;
 }
 
 .subtitulo {
-    color: #7f8c8d;
+    color: #667895;
     margin-bottom: 25px;
     font-size: 14px;
 }
@@ -96,27 +102,27 @@ h2 {
     align-items: center;
     gap: 8px;
     font-size: 14px;
-    color: #2c3e50;
+    color: #1e2f55;
     margin-bottom: 6px;
     font-weight: 600;
 }
 
 .input-group label i {
-    color: #1abc9c;
+    color: #1767c8;
     width: 18px;
 }
 
 .input-group input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ccc;
+    border: 1px solid #d9e3f1;
     border-radius: 8px;
     font-size: 14px;
     transition: all 0.3s;
 }
 
 .input-group input:focus {
-    border-color: #1abc9c;
+    border-color: #1767c8;
     outline: none;
     box-shadow: 0 0 0 2px rgba(26,188,156,0.1);
 }
@@ -128,7 +134,7 @@ h2 {
 .login-button {
     width: 100%;
     padding: 14px;
-    background: #2c3e50;
+    background: #1e2f55;
     color: #fff;
     font-size: 15px;
     font-weight: bold;
@@ -144,7 +150,7 @@ h2 {
 }
 
 .login-button:hover {
-    background: #1abc9c;
+    background: #1767c8;
     transform: translateY(-2px);
 }
 
@@ -160,7 +166,7 @@ h2 {
 }
 
 .link-volver a {
-    color: #2c3e50;
+    color: #1e2f55;
     text-decoration: none;
     font-size: 14px;
     display: inline-flex;
@@ -170,13 +176,13 @@ h2 {
 }
 
 .link-volver a:hover {
-    color: #1abc9c;
+    color: #1767c8;
 }
 
 .soporte-info {
     text-align: center;
     margin-top: 25px;
-    color: #7f8c8d;
+    color: #667895;
     font-size: 14px;
     line-height: 1.6;
     padding: 15px;
@@ -186,12 +192,12 @@ h2 {
 }
 
 .soporte-info i {
-    color: #1abc9c;
+    color: #1767c8;
     margin-right: 5px;
 }
 
 .soporte-info a {
-    color: #1abc9c;
+    color: #1767c8;
     text-decoration: none;
     font-weight: 600;
 }
@@ -201,7 +207,7 @@ h2 {
 }
 
 .footer {
-    background: #2c3e50;
+    background: #1e2f55;
     padding: 15px 30px;
     display: flex;
     justify-content: space-between;

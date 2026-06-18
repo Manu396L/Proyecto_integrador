@@ -4,19 +4,19 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Nunito Sans', sans-serif;
 }
 
 body {
-    background-color: #f4f6f9;
+    background-color: #f4f7fb;
     min-height: 100vh;
 }
 
 /* ===== CONTENIDO PRINCIPAL - AJUSTADO PARA SIDEBAR ===== */
 .contenido {
-    margin-left: 50px;
-    padding: 0px 10px;
-    width: calc(100% - 200px);
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
 }
 
 /* Header */
@@ -26,7 +26,7 @@ header {
 }
 
 header h1 {
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 28px;
     font-weight: 600;
     margin-bottom: 10px;
@@ -37,36 +37,38 @@ header h1 {
 }
 
 header h1 i {
-    color: #1abc9c;
+    color: #1767c8;
     font-size: 28px;
 }
 
 header p {
-    color: #7f8c8d;
+    color: #667895;
     font-size: 14px;
 }
 
-/* ===== MAIN CONTAINER - FLEX CORRECTO ===== */
+/* ===== MAIN CONTAINER =====
+   Los paneles van uno debajo del otro a todo el ancho disponible, igual
+   que en Dispositivos, para que el formulario y la tabla tengan espacio
+   suficiente y no queden comprimidos. */
 .main-container {
     display: flex;
-    gap: 30px;
+    flex-direction: column;
+    gap: 24px;
     margin-bottom: 30px;
-    flex-wrap: wrap;
 }
 
 /* ===== FORM PANEL ===== */
 .form-panel {
-    flex: 1;
-    min-width: 400px;
+    width: 100%;
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(20, 45, 90, 0.1);
     padding: 25px;
-    border-top: 4px solid #1abc9c;
+    border-top: 4px solid #1767c8;
 }
 
 .form-panel h2 {
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 22px;
     margin-bottom: 20px;
     display: flex;
@@ -75,22 +77,21 @@ header p {
 }
 
 .form-panel h2 i {
-    color: #1abc9c;
+    color: #1767c8;
 }
 
 /* ===== LIST PANEL ===== */
 .list-panel {
-    flex: 2;
-    min-width: 500px;
+    width: 100%;
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(20, 45, 90, 0.1);
     padding: 25px;
-    border-top: 4px solid #1abc9c;
+    border-top: 4px solid #1767c8;
 }
 
 .list-panel h2 {
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 22px;
     margin-bottom: 20px;
     display: flex;
@@ -100,14 +101,14 @@ header p {
 
 /* ===== FORMULARIO ===== */
 fieldset {
-    border: 1px solid #ddd;
+    border: 1px solid #d9e3f1;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
 }
 
 legend {
-    color: #2c3e50;
+    color: #1e2f55;
     font-weight: 600;
     padding: 0 10px;
     width: auto;
@@ -131,12 +132,12 @@ legend {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 13px;
 }
 
 .form-group label i {
-    color: #1abc9c;
+    color: #1767c8;
     margin-right: 5px;
 }
 
@@ -149,7 +150,7 @@ legend {
 .form-group textarea {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #d9e3f1;
     border-radius: 6px;
     font-size: 14px;
     transition: all 0.3s;
@@ -158,19 +159,19 @@ legend {
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-    border-color: #1abc9c;
+    border-color: #1767c8;
     outline: none;
     box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.1);
 }
 
 .form-group input:hover,
 .form-group select:hover {
-    border-color: #1abc9c;
+    border-color: #1767c8;
 }
 
 .helper-text {
     font-size: 11px;
-    color: #7f8c8d;
+    color: #667895;
     margin-top: 5px;
     display: block;
 }
@@ -191,13 +192,13 @@ legend {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    border: 2px solid #ddd;
+    border: 2px solid #d9e3f1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     background: #f8f9fa;
-    color: #7f8c8d;
+    color: #667895;
     overflow: hidden;
 }
 
@@ -266,7 +267,7 @@ legend {
     padding: 6px 10px;
     border-radius: 5px;
     background: #f8f9fa;
-    border: 1px solid #ddd;
+    border: 1px solid #d9e3f1;
     font-size: 11px;
     display: inline-flex;
     align-items: center;
@@ -293,12 +294,12 @@ legend {
 }
 
 .btn-success {
-    background: #1abc9c;
+    background: #1767c8;
     color: white;
 }
 
 .btn-success:hover {
-    background: #16a085;
+    background: #0f59af;
     transform: translateY(-2px);
 }
 
@@ -308,7 +309,7 @@ legend {
 }
 
 .btn-secondary:hover {
-    background: #7f8c8d;
+    background: #667895;
 }
 
 .btn-info {
@@ -343,7 +344,7 @@ legend {
 }
 
 .btn-selection {
-    background: #2c3e50;
+    background: #1e2f55;
     color: white;
     border: none;
     padding: 8px 12px;
@@ -358,7 +359,7 @@ legend {
 }
 
 .btn-selection:hover {
-    background: #1abc9c;
+    background: #1767c8;
     transform: translateY(-1px);
 }
 
@@ -377,7 +378,7 @@ legend {
 }
 
 .dropdown-toggle {
-    background: #2c3e50;
+    background: #1e2f55;
     color: white;
     padding: 8px 15px;
     border: none;
@@ -392,7 +393,7 @@ legend {
 }
 
 .dropdown-toggle:hover {
-    background: #1abc9c;
+    background: #1767c8;
 }
 
 .dropdown-toggle::after {
@@ -408,11 +409,11 @@ legend {
     top: 100%;
     background: white;
     min-width: 200px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(20, 45, 90,0.15);
     border-radius: 6px;
     z-index: 1000;
     margin-top: 5px;
-    border: 1px solid #ddd;
+    border: 1px solid #d9e3f1;
 }
 
 .dropdown-menu.show {
@@ -425,14 +426,14 @@ legend {
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 13px;
     transition: all 0.2s;
 }
 
 .dropdown-item:hover {
     background: #f0f0f0;
-    color: #1abc9c;
+    color: #1767c8;
 }
 
 /* ===== FILTROS ===== */
@@ -448,7 +449,7 @@ legend {
     flex: 1;
     min-width: 150px;
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #d9e3f1;
     border-radius: 6px;
 }
 
@@ -477,7 +478,7 @@ table {
 }
 
 thead {
-    background: #2c3e50;
+    background: #1e2f55;
     color: white;
 }
 
@@ -507,14 +508,14 @@ tbody tr:hover {
     width: 18px;
     height: 18px;
     cursor: pointer;
-    accent-color: #1abc9c;
+    accent-color: #1767c8;
 }
 
 #checkbox-seleccionar-todos {
     width: 18px;
     height: 18px;
     cursor: pointer;
-    accent-color: #1abc9c;
+    accent-color: #1767c8;
 }
 
 /* ===== FOOTER DE SELECCIÓN ===== */
@@ -532,7 +533,7 @@ tbody tr:hover {
 
 .selection-footer span {
     font-weight: bold;
-    color: #1abc9c;
+    color: #1767c8;
     font-size: 16px;
 }
 
@@ -580,7 +581,7 @@ tr.seleccionado:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #7f8c8d;
+    color: #667895;
 }
 
 .badge-area, .badge-sede, .badge-dispositivo {
@@ -663,7 +664,7 @@ tr.seleccionado:hover {
 .empty-state {
     text-align: center;
     padding: 40px;
-    color: #7f8c8d;
+    color: #667895;
 }
 
 .empty-state i {
@@ -681,14 +682,14 @@ tr.seleccionado:hover {
 }
 
 .soporte-info i {
-    color: #1abc9c;
+    color: #1767c8;
     margin-right: 5px;
 }
 
 /* ===== FOOTER ===== */
 .footer {
     margin-top: 20px;
-    background: #2c3e50;
+    background: #1e2f55;
     padding: 12px 20px;
     display: flex;
     justify-content: space-between;
@@ -716,7 +717,7 @@ tr.seleccionado:hover {
 }
 
 .adicional-header i {
-    color: #1abc9c;
+    color: #1767c8;
     font-size: 18px;
 }
 
@@ -726,7 +727,7 @@ tr.seleccionado:hover {
     gap: 10px;
     cursor: pointer;
     font-weight: 500;
-    color: #2c3e50;
+    color: #1e2f55;
     flex-wrap: wrap;
 }
 
@@ -734,7 +735,7 @@ tr.seleccionado:hover {
     width: 18px;
     height: 18px;
     cursor: pointer;
-    accent-color: #1abc9c;
+    accent-color: #1767c8;
 }
 
 .adicional-label span {
@@ -743,7 +744,7 @@ tr.seleccionado:hover {
 
 .adicional-label .helper-text {
     font-size: 11px;
-    color: #7f8c8d;
+    color: #667895;
     font-weight: normal;
 }
 
@@ -840,11 +841,11 @@ tr.seleccionado:hover {
 
 .id-cell {
     font-weight: 500;
-    color: #2c3e50;
+    color: #1e2f55;
 }
 
 .nombre-cell strong {
-    color: #2c3e50;
+    color: #1e2f55;
 }
 
 .metodo-adicional-cell {
@@ -854,9 +855,7 @@ tr.seleccionado:hover {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
     .contenido {
-        margin-left: 250px;
         padding: 20px;
-        width: calc(100% - 250px);
     }
     
     .main-container {
@@ -870,8 +869,6 @@ tr.seleccionado:hover {
 
 @media (max-width: 768px) {
     .contenido {
-        margin-left: 70px;
-        width: calc(100% - 70px);
         padding: 15px;
     }
     
@@ -925,8 +922,6 @@ tr.seleccionado:hover {
 
 @media (max-width: 480px) {
     .contenido {
-        margin-left: 0;
-        width: 100%;
         padding: 10px;
     }
     

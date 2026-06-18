@@ -1,232 +1,329 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BIOMETRIKA - Sistema Biométrico para Edificios</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style_theme.css' %}">
+
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-        }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f9;
+            margin: 0;
+            background: #f4f7fb;
+            color: #1e2f55;
         }
-        
-        .sidebar {
+
+        .layout {
+            display: flex;
             min-height: 100vh;
-            background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%);
-            color: white;
         }
-        
+
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1d2f8f 0%, #101c64 100%);
+            color: #ffffff;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1030;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 28px 20px 24px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,.12);
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .logo i {
+            display: block;
+            font-size: 34px;
+            color: #7ec8ff;
+            margin-bottom: 10px;
+        }
+
+        .sidebar nav {
+            padding: 18px 10px 24px;
+        }
+
         .sidebar .nav-link {
-            color: rgba(255,255,255,0.8);
-            padding: 12px 20px;
-            margin: 5px 0;
-            border-radius: 8px;
-            transition: all 0.3s;
+            color: #e8efff !important;
+            padding: 13px 18px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            transition: .2s ease;
         }
-        
-        .sidebar .nav-link:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            transform: translateX(5px);
-        }
-        
-        .sidebar .nav-link.active {
-            background: var(--secondary-color);
-            color: white;
-        }
-        
+
         .sidebar .nav-link i {
-            margin-right: 10px;
-            width: 20px;
+            width: 24px;
+            margin-right: 12px;
+            color: #ffffff;
+            font-size: 16px;
         }
-        
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: #1767c8;
+            color: #ffffff !important;
+        }
+
+        .main-area {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            min-height: 100vh;
+            background: #f4f7fb;
+        }
+
         .navbar-custom {
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            min-height: 64px;
+            background: linear-gradient(90deg, #1767c8 0%, #0e62bb 100%);
+            color: #ffffff;
+            padding: 10px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 3px 15px rgba(0,0,0,.08);
+            position: sticky;
+            top: 0;
+            z-index: 1020;
         }
-        
+
+        .navbar-custom h5 {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 900;
+            margin: 0;
+        }
+
+        .navbar-custom small {
+            color: #dbeaff !important;
+            font-weight: 600;
+        }
+
         .user-menu {
+            color: #ffffff;
             cursor: pointer;
-            padding: 8px 15px;
-            border-radius: 20px;
-            transition: background 0.3s;
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-weight: 800;
+            transition: .2s ease;
         }
-        
+
         .user-menu:hover {
-            background: #f0f2f5;
+            background: rgba(255,255,255,.12);
         }
-        
+
         .dropdown-menu-custom {
             position: absolute;
             right: 0;
             top: 100%;
-            min-width: 200px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 210px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 28px rgba(20,45,90,.18);
             display: none;
             z-index: 1000;
+            overflow: hidden;
+            padding: 8px 0;
         }
-        
+
         .dropdown-menu-custom.show {
             display: block;
         }
-        
-        .dropdown-item {
-            padding: 10px 20px;
-            color: #333;
+
+        .dropdown-menu-custom .dropdown-item {
+            padding: 11px 18px;
+            color: #1e2f55;
             text-decoration: none;
             display: block;
+            font-weight: 700;
         }
-        
-        .dropdown-item:hover {
-            background: #f0f2f5;
+
+        .dropdown-menu-custom .dropdown-item i {
+            color: #1767c8;
+            margin-right: 8px;
         }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+
+        .dropdown-menu-custom .dropdown-item:hover {
+            background: #e8f2ff;
         }
-        
-        .logo i {
-            margin-right: 10px;
-            color: var(--secondary-color);
-        }
-        
+
         .main-content {
-            padding: 20px;
+            padding: 26px;
         }
-        
-        .card-stats {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s;
-            cursor: pointer;
+
+        /* Responsive: colapsa el sidebar en pantallas chicas, igual que ya
+           contemplan las hojas de estilo de cada página (70px). */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .sidebar .logo span,
+            .sidebar .nav-link span {
+                display: none;
+            }
+
+            .main-area {
+                margin-left: 70px;
+                width: calc(100% - 70px);
+            }
         }
-        
-        .card-stats:hover {
-            transform: translateY(-5px);
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 0;
+                overflow: hidden;
+            }
+
+            .main-area {
+                margin-left: 0;
+                width: 100%;
+            }
         }
     </style>
 </head>
+
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 p-0 sidebar">
-                <div class="logo">
-                    <i class="fas fa-fingerprint"></i>
-                    BIOMETRIKA
-                </div>
-                <nav class="nav flex-column mt-3">
-                    <a class="nav-link" href="{% url 'dashboard:dashboard' %}">
-                        <i class="fas fa-chart-line"></i> Dashboard
-                    </a>
-                    <a class="nav-link" href="{% url 'sedes:lista' %}">
-                        <i class="fas fa-building"></i> Sedes y Areas
-                    </a>
-                    <a class="nav-link" href="{% url 'personal:lista' %}">
-                        <i class="fas fa-users"></i> Gestion de Personal
-                    </a>
-                    <a class="nav-link" href="{% url 'dispositivos:lista' %}">
-                        <i class="fas fa-microchip"></i> Dispositivos
-                    </a>
-                    <a class="nav-link" href="{% url 'soporte:index' %}">
-                        <i class="fas fa-headset"></i> Soporte
-                    </a>
-                    <a class="nav-link" href="{% url 'reportes:index' %}">
-                        <i class="fas fa-chart-bar"></i> Reportes
-                    </a>
-                    <a class="nav-link" href="{% url 'alertas:lista' %}">
-                        <i class="fas fa-bell"></i> Alertas
-                    </a>
-                    <a class="nav-link" href="{% url 'tickets:lista' %}">
-                        <i class="fas fa-ticket-alt"></i> Tickets
-                    </a>
-                </nav>
+    <div class="layout">
+
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="bi bi-fingerprint"></i>
+                <span>BIOMETRIKA</span>
             </div>
-            
-            <!-- Main Content -->
-            <div class="col-md-10 p-0">
-                <!-- Top Navbar -->
-                <nav class="navbar navbar-custom px-4 py-2">
-                    <div>
-                        <h5 class="mb-0">Bienvenido, {{ user.get_full_name|default:user.username }}</h5>
-                        <small class="text-muted">Sistema Biométrico para Edificios</small>
-                    </div>
-                    
-                    <!-- User Menu -->
-                    <div class="position-relative">
-                        <div class="user-menu d-flex align-items-center" onclick="toggleUserMenu()">
-                            <i class="fas fa-user-circle fa-2x me-2"></i>
-                            <span>{{ user.username }}</span>
-                            <i class="fas fa-chevron-down ms-2 small"></i>
-                        </div>
-                        <div id="userDropdown" class="dropdown-menu-custom">
-                            <a class="dropdown-item" href="{% url 'usuarios:notificaciones' %}">
-                                <i class="fas fa-bell"></i> Notificaciones
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{% url 'usuarios:perfil' %}">
-                                <i class="fas fa-user"></i> Perfil
-                            </a>
-                            <a class="dropdown-item" href="{% url 'usuarios:cambiar_password' %}">
-                                <i class="fas fa-key"></i> Contraseña
-                            </a>
-                            <a class="dropdown-item" href="{% url 'usuarios:configuracion' %}">
-                                <i class="fas fa-cog"></i> Configuración
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <form method="post" action="{% url 'logout' %}" style="display: inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="dropdown-item text-danger" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
-                                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </nav>
-                
-                <!-- Page Content -->
-                <div class="main-content">
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                    
-                    {% block content %}
-                    {% endblock %}
+
+            <nav class="nav flex-column">
+                <a class="nav-link {% if request.resolver_match.app_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard:dashboard' %}">
+                    <i class="bi bi-house-door"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a class="nav-link {% if request.resolver_match.app_name == 'sedes' %}active{% endif %}" href="{% url 'sedes:lista' %}">
+                    <i class="bi bi-building"></i>
+                    <span>Sedes y Areas</span>
+                </a>
+
+                <a class="nav-link {% if request.resolver_match.app_name == 'personal' %}active{% endif %}" href="{% url 'personal:lista' %}">
+                    <i class="bi bi-people"></i>
+                    <span>Gestion de Personal</span>
+                </a>
+
+                <a class="nav-link {% if request.resolver_match.app_name == 'dispositivos' %}active{% endif %}" href="{% url 'dispositivos:lista' %}">
+                    <i class="bi bi-cpu"></i>
+                    <span>Dispositivos</span>
+                </a>
+
+                <a class="nav-link {% if request.resolver_match.app_name == 'alertas' %}active{% endif %}" href="{% url 'alertas:lista' %}">
+                    <i class="bi bi-bell"></i>
+                    <span>Alertas</span>
+                </a>
+
+                <a class="nav-link {% if request.resolver_match.app_name == 'tickets' %}active{% endif %}" href="{% url 'tickets:lista' %}">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <span>Tickets</span>
+                </a>
+
+                <a class="nav-link {% if request.resolver_match.app_name == 'reportes' %}active{% endif %}" href="{% url 'reportes:index' %}">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Reportes</span>
+                </a>
+
+                <a class="nav-link {% if request.resolver_match.app_name == 'soporte' %}active{% endif %}" href="{% url 'soporte:index' %}">
+                    <i class="bi bi-headset"></i>
+                    <span>Soporte</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-area">
+            <nav class="navbar-custom">
+                <div>
+                    <h5>Te damos la Bienvenida, {{ user.get_full_name|default:user.username }}</h5>
+                    <small>Sistema Biométrico para Edificios</small>
                 </div>
+
+                <div class="position-relative">
+                    <div class="user-menu d-flex align-items-center" onclick="toggleUserMenu()">
+                        <i class="bi bi-person-circle me-2" style="font-size: 1.4rem;"></i>
+                        <span>{{ user.username }}</span>
+                        <i class="bi bi-chevron-down ms-2" style="font-size: .8rem;"></i>
+                    </div>
+
+                    <div id="userDropdown" class="dropdown-menu-custom">
+                        <a class="dropdown-item" href="{% url 'usuarios:notificaciones' %}">
+                            <i class="bi bi-bell"></i> Notificaciones
+                        </a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item" href="{% url 'usuarios:perfil' %}">
+                            <i class="bi bi-person"></i> Perfil
+                        </a>
+
+                        <a class="dropdown-item" href="{% url 'usuarios:cambiar_password' %}">
+                            <i class="bi bi-key"></i> Contraseña
+                        </a>
+
+                        <a class="dropdown-item" href="{% url 'usuarios:configuracion' %}">
+                            <i class="bi bi-gear"></i> Configuración
+                        </a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item text-danger" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;">
+                                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="main-content">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block content %}
+                {% endblock %}
             </div>
-        </div>
+        </main>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function toggleUserMenu() {
             const dropdown = document.getElementById('userDropdown');
             dropdown.classList.toggle('show');
         }
-        
+
         document.addEventListener('click', function(event) {
             const dropdown = document.getElementById('userDropdown');
             const userMenu = document.querySelector('.user-menu');
-            if (!userMenu.contains(event.target) && dropdown.classList.contains('show')) {
+
+            if (userMenu && !userMenu.contains(event.target) && dropdown.classList.contains('show')) {
                 dropdown.classList.remove('show');
             }
         });

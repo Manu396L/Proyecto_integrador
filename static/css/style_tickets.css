@@ -7,17 +7,15 @@
 }
 
 body {
-    background-color: #f4f6f9;
+    background-color: #f4f7fb;
     overflow-x: hidden;
 }
 
 /* ===== CONTENIDO PRINCIPAL ===== */
 .contenido {
-    margin-left: -20px;
-    padding: 5px 30px;
-    width: calc(100% - 55);
-    min-height: 100vh;
-    position: relative;
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
 }
 
 /* Header */
@@ -27,51 +25,49 @@ header {
 }
 
 header h1 {
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 28px;
     margin-bottom: 10px;
 }
 
 header h1 i {
-    color: #1abc9c;
+    color: #1767c8;
 }
 
 header p {
-    color: #7f8c8d;
+    color: #667895;
     font-size: 14px;
 }
 
 /* ===== ESTRUCTURA DE PANELES ===== */
 .main-container {
     display: flex;
-    gap: 30px;
+    flex-direction: column;
+    gap: 24px;
     margin-bottom: 40px;
-    flex-wrap: wrap;
     width: 100%;
 }
 
 .add-panel {
-    flex: 1;
-    min-width: 350px;
+    width: 100%;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(20, 45, 90,0.1);
     padding: 25px;
-    border-top: 4px solid #1abc9c;
+    border-top: 4px solid #1767c8;
 }
 
 .list-panel {
-    flex: 2;
-    min-width: 500px;
+    width: 100%;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(20, 45, 90,0.1);
     padding: 25px;
-    border-top: 4px solid #1abc9c;
+    border-top: 4px solid #1767c8;
 }
 
 .add-panel h2, .list-panel h2 {
-    color: #2c3e50;
+    color: #1e2f55;
     margin-bottom: 20px;
     font-size: 22px;
     display: flex;
@@ -80,19 +76,19 @@ header p {
 }
 
 .add-panel h2 i, .list-panel h2 i {
-    color: #1abc9c;
+    color: #1767c8;
 }
 
 /* Formulario */
 fieldset {
-    border: 1px solid #ddd;
+    border: 1px solid #d9e3f1;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
 }
 
 legend {
-    color: #2c3e50;
+    color: #1e2f55;
     font-weight: 600;
     padding: 0 10px;
     width: auto;
@@ -116,12 +112,12 @@ legend {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #2c3e50;
+    color: #1e2f55;
     font-size: 13px;
 }
 
 .form-group label i {
-    color: #1abc9c;
+    color: #1767c8;
     margin-right: 5px;
 }
 
@@ -134,7 +130,7 @@ legend {
 .form-group textarea {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #d9e3f1;
     border-radius: 6px;
     font-size: 14px;
     transition: all 0.3s;
@@ -143,7 +139,7 @@ legend {
 .form-group input:focus, 
 .form-group select:focus, 
 .form-group textarea:focus {
-    border-color: #1abc9c;
+    border-color: #1767c8;
     outline: none;
     box-shadow: 0 0 0 2px rgba(26,188,156,0.1);
 }
@@ -167,12 +163,12 @@ legend {
 }
 
 .btn-primary, .btn-success {
-    background: #1abc9c;
+    background: #1767c8;
     color: white;
 }
 
 .btn-primary:hover, .btn-success:hover {
-    background: #16a085;
+    background: #0f59af;
     transform: translateY(-2px);
 }
 
@@ -182,7 +178,7 @@ legend {
 }
 
 .btn-secondary:hover {
-    background: #7f8c8d;
+    background: #667895;
 }
 
 .form-actions {
@@ -207,7 +203,7 @@ legend {
 }
 
 .dropdown-toggle {
-    background: #2c3e50;
+    background: #1e2f55;
     color: white;
     border: none;
     padding: 8px 15px;
@@ -221,7 +217,7 @@ legend {
 }
 
 .dropdown-toggle:hover {
-    background: #1abc9c;
+    background: #1767c8;
 }
 
 .dropdown-toggle::after {
@@ -235,9 +231,9 @@ legend {
     right: 0;
     top: 100%;
     background: white;
-    border: 1px solid #ddd;
+    border: 1px solid #d9e3f1;
     border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(20, 45, 90,0.1);
     display: none;
     z-index: 1000;
     min-width: 180px;
@@ -251,7 +247,7 @@ legend {
     display: block;
     padding: 10px 15px;
     text-decoration: none;
-    color: #2c3e50;
+    color: #1e2f55;
     cursor: pointer;
     font-size: 13px;
     transition: all 0.2s;
@@ -259,7 +255,7 @@ legend {
 
 .dropdown-item:hover {
     background: #f0f0f0;
-    color: #1abc9c;
+    color: #1767c8;
 }
 
 /* Filtros */
@@ -277,7 +273,7 @@ legend {
 .filter-section select {
     flex: 1;
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #d9e3f1;
     border-radius: 6px;
     min-width: 150px;
 }
@@ -308,7 +304,7 @@ table {
 }
 
 table th {
-    background: #2c3e50;
+    background: #1e2f55;
     color: white;
     padding: 12px 10px;
     text-align: left;
@@ -325,7 +321,7 @@ tbody tr:hover {
 }
 
 .remitente-cell small {
-    color: #7f8c8d;
+    color: #667895;
     font-size: 11px;
 }
 
@@ -367,7 +363,7 @@ tbody tr:hover {
     font-size: 11px;
     font-weight: 600;
     background: #f8f9fa;
-    color: #7f8c8d;
+    color: #667895;
 }
 
 /* Prioridades */
@@ -468,7 +464,7 @@ tbody tr:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(20, 45, 90,0.5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -497,7 +493,7 @@ tbody tr:hover {
 }
 
 .modal-header {
-    background: #1abc9c;
+    background: #1767c8;
     color: white;
     padding: 15px 20px;
     border-radius: 12px 12px 0 0;
@@ -558,7 +554,7 @@ tbody tr:hover {
     padding: 15px;
     background: #e8f4fc;
     border-radius: 8px;
-    border-left: 4px solid #1abc9c;
+    border-left: 4px solid #1767c8;
 }
 
 .preview-content {
@@ -571,7 +567,7 @@ tbody tr:hover {
     padding: 10px;
     border-radius: 4px;
     margin-top: 5px;
-    border: 1px solid #ddd;
+    border: 1px solid #d9e3f1;
 }
 
 .modal-footer {
@@ -614,7 +610,7 @@ tbody tr:hover {
 .empty-state {
     text-align: center;
     padding: 50px 20px;
-    color: #7f8c8d;
+    color: #667895;
 }
 
 .empty-state i {
@@ -633,13 +629,13 @@ tbody tr:hover {
 }
 
 .soporte-info i {
-    color: #1abc9c;
+    color: #1767c8;
 }
 
 /* Footer */
 .footer {
     text-align: center;
-    color: #7f8c8d;
+    color: #667895;
     border-top: 1px solid #ecf0f1;
     padding-top: 20px;
 }
@@ -647,9 +643,7 @@ tbody tr:hover {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
     .contenido {
-        margin-left: 250px;
         padding: 20px;
-        width: calc(100% - 250px);
     }
     
     .main-container {
@@ -664,8 +658,6 @@ tbody tr:hover {
 
 @media (max-width: 768px) {
     .contenido {
-        margin-left: 70px;
-        width: calc(100% - 70px);
         padding: 15px;
     }
     
@@ -710,8 +702,6 @@ tbody tr:hover {
 
 @media (max-width: 480px) {
     .contenido {
-        margin-left: 0;
-        width: 100%;
         padding: 10px;
     }
     
