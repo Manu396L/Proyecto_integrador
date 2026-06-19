@@ -3,13 +3,75 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from .models import Persona
+from datetime import datetime
+from .models import Persona, RegistroAcceso
 import json
 
 @login_required
 def lista_personal(request):
     personal = Persona.objects.all()
     return render(request, 'personal/lista.html', {'personal': personal})
+
+
+@login_required
+def historial_persona(request, persona_id):
+    """Historial completo de ingresos y salidas de una persona puntual."""
+    persona = get_object_or_404(Persona, id=persona_id)
+
+    registros = RegistroAcceso.objects.filter(
+        persona=persona
+    ).select_related('dispositivo').order_by('-fecha_hora')
+
+    fecha_inicio = request.GET.get('fecha_inicio', '')
+    fecha_fin = request.GET.get('fecha_fin', '')
+    tipo_acceso = request.GET.get('tipo_acceso', '')
+
+    if fecha_inicio:
+        try:
+            fecha_inicio_dt = datetime.strptime(fecha_inicio, '%Y-%m-%d')
+            registros = registros.filter(fecha_hora__date__gte=fecha_inicio_dt)
+        except ValueError:
+            pass
+
+    if fecha_fin:
+        try:
+            fecha_fin_dt = datetime.strptime(fecha_fin, '%Y-%m-%d')
+            registros = registros.filter(fecha_hora__date__lte=fecha_fin_dt)
+        except ValueError:
+            pass
+
+    if tipo_acceso:
+        registros = registros.filter(tipo_acceso=tipo_acceso)
+
+    # Valores distintos de tipo_acceso realmente presentes en los datos de
+    # esta persona (el campo no siempre respeta los choices declarados en
+    # el modelo, así que se arma el filtro a partir de lo que hay en BD).
+    tipos_disponibles = (
+        RegistroAcceso.objects.filter(persona=persona)
+        .order_by('tipo_acceso')
+        .values_list('tipo_acceso', flat=True)
+        .distinct()
+    )
+
+    total = registros.count()
+    entradas = registros.filter(tipo_acceso__in=['ENTRADA', 'exitoso']).count()
+    salidas = registros.filter(tipo_acceso='SALIDA').count()
+    denegados = registros.filter(tipo_acceso__in=['DENEGADO', 'fallido']).count()
+
+    context = {
+        'persona': persona,
+        'registros': registros,
+        'total': total,
+        'entradas': entradas,
+        'salidas': salidas,
+        'denegados': denegados,
+        'fecha_inicio': fecha_inicio,
+        'fecha_fin': fecha_fin,
+        'tipo_acceso': tipo_acceso,
+        'tipos_disponibles': tipos_disponibles,
+    }
+    return render(request, 'personal/historial.html', context)
+
 
 @csrf_exempt
 @require_http_methods(["GET", "POST", "PUT", "DELETE"])

@@ -1,0 +1,316 @@
+/* static/css/style_historial.css */
+
+body {
+    background-color: #f4f7fb;
+    min-height: 100vh;
+}
+
+.contenido {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* El encabezado (.contenido > header) ya se estiliza de forma centralizada
+   en style_theme.css junto con el resto de páginas del sistema. */
+
+.historial-panel {
+    background: #ffffff;
+    border: 1px solid #dde6f2;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(20, 45, 90, .08);
+    padding: 22px;
+}
+
+/* ===== TARJETA DE LA PERSONA ===== */
+.persona-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #edf1f7;
+}
+
+.persona-foto {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #d9e3f1;
+}
+
+.persona-foto-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e5f4ff;
+    color: #1767c8;
+    font-size: 24px;
+}
+
+.persona-info {
+    flex: 1;
+}
+
+.persona-info h2 {
+    color: #1e2f55;
+    font-size: 20px;
+    font-weight: 900;
+    margin: 0 0 4px 0;
+}
+
+.persona-info p {
+    color: #667895;
+    font-size: 13px;
+    margin: 0;
+}
+
+.persona-info p i {
+    color: #1767c8;
+    margin-right: 4px;
+}
+
+.btn-volver {
+    background: #eef2fb;
+    color: #1e2f55;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: 800;
+    font-size: 13px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: .2s;
+    white-space: nowrap;
+}
+
+.btn-volver:hover {
+    background: #dde6f2;
+}
+
+/* ===== TARJETAS RESUMEN ===== */
+.resumen-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.resumen-card {
+    background: #f8fbff;
+    border: 1px solid #dde6f2;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.resumen-card i {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 11px;
+    background: #e5f4ff;
+    color: #1767c8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+}
+
+.resumen-entrada i { background: #dff5e7; color: #2d8a4d; }
+.resumen-salida i { background: #e3f2fd; color: #1767c8; }
+.resumen-denegado i { background: #ffe1e1; color: #d94747; }
+
+.resumen-valor {
+    display: block;
+    color: #1e2f55;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.1;
+}
+
+.resumen-label {
+    display: block;
+    color: #667895;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ===== FILTROS ===== */
+.filtros-historial {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    background: #f8fbff;
+    border: 1px solid #edf1f7;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 18px;
+}
+
+.filtro-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filtro-group label {
+    color: #667895;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.filtro-group input,
+.filtro-group select {
+    padding: 9px 12px;
+    border: 1px solid #d9e3f1;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1e2f55;
+    min-width: 160px;
+}
+
+.filtro-botones {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-filtro {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.btn-aplicar {
+    background: #1767c8;
+    color: #ffffff;
+}
+
+.btn-aplicar:hover {
+    background: #0f59af;
+}
+
+.btn-limpiar {
+    background: #eef2fb;
+    color: #1e2f55;
+}
+
+.btn-limpiar:hover {
+    background: #dde6f2;
+}
+
+/* ===== TABLA ===== */
+.tabla-container {
+    overflow-x: auto;
+}
+
+#tablaHistorial {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+#tablaHistorial thead {
+    background: #e5f4ff;
+    color: #1e2f55;
+}
+
+#tablaHistorial th {
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 900;
+}
+
+#tablaHistorial td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #edf1f7;
+    color: #26395f;
+}
+
+#tablaHistorial tbody tr:hover {
+    background: #f4f7fb;
+}
+
+.sin-registros {
+    text-align: center;
+    padding: 40px 20px !important;
+    color: #667895;
+}
+
+.sin-registros i {
+    color: #1767c8;
+    margin-right: 6px;
+}
+
+/* ===== BADGES DE TIPO DE ACCESO ===== */
+.badge-acceso {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.badge-entrada {
+    background: #dff5e7;
+    color: #2d8a4d;
+}
+
+.badge-salida {
+    background: #e3f2fd;
+    color: #1767c8;
+}
+
+.badge-denegado {
+    background: #ffe1e1;
+    color: #d94747;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+    .resumen-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .persona-card {
+        flex-wrap: wrap;
+    }
+
+    .btn-volver {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .filtros-historial {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtro-group input,
+    .filtro-group select {
+        min-width: 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .resumen-grid {
+        grid-template-columns: 1fr;
+    }
+}

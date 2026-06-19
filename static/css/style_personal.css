@@ -611,6 +611,7 @@ tr.seleccionado:hover {
 .acciones {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .btn-accion {
@@ -623,6 +624,15 @@ tr.seleccionado:hover {
     display: inline-flex;
     align-items: center;
     gap: 4px;
+}
+
+.btn-historial {
+    background: #1767c8;
+    color: white;
+}
+
+.btn-historial:hover {
+    background: #0f59af;
 }
 
 .btn-editar {

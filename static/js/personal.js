@@ -387,6 +387,9 @@ function actualizarTabla() {
                 <td class="dispositivo-cell"><span class="badge-dispositivo ${dispositivoBadgeClass}"><i class="fa-solid ${metodoIcono}"></i> ${metodoTexto}</span></td>
                 <td class="metodo-adicional-cell">${adicionalHtml}</td>
                 <td class="acciones">
+                    <button class="btn-accion btn-historial" data-id="${empleado.id}">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Historial
+                    </button>
                     <button class="btn-accion btn-editar" data-id="${empleado.id}">
                         <i class="fa-solid fa-pen"></i> Editar
                     </button>
@@ -397,6 +400,14 @@ function actualizarTabla() {
             `;
             
             cuerpoTabla.appendChild(fila);
+        });
+        
+        document.querySelectorAll('.btn-historial').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const empleadoId = btn.getAttribute('data-id');
+                window.location.href = `/personal/historial/${empleadoId}/`;
+            });
         });
         
         document.querySelectorAll('.btn-editar').forEach(btn => {

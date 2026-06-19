@@ -1,0 +1,131 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style_historial.css' %}">
+
+<div class="contenido">
+    <header>
+        <h1><i class="fa-solid fa-clock-rotate-left"></i> Historial de Accesos</h1>
+        <p>Ingresos y salidas registrados para esta persona</p>
+    </header>
+
+    <div class="historial-panel">
+
+        <div class="persona-card">
+            {% if persona.foto %}
+                <img src="{{ persona.foto.url }}" alt="Foto" class="persona-foto">
+            {% else %}
+                <div class="persona-foto persona-foto-placeholder"><i class="fa-solid fa-user"></i></div>
+            {% endif %}
+            <div class="persona-info">
+                <h2>{{ persona.nombre_completo }}</h2>
+                <p>
+                    <i class="fa-solid fa-id-card"></i> {{ persona.numero_documento|default:"Sin documento" }}
+                    {% if persona.cargo %} &middot; <i class="fa-solid fa-briefcase"></i> {{ persona.cargo }}{% endif %}
+                    {% if persona.nombre_sede %} &middot; <i class="fa-solid fa-building"></i> {{ persona.nombre_sede }}{% endif %}
+                </p>
+            </div>
+            <a href="{% url 'personal:lista' %}" class="btn-volver">
+                <i class="fa-solid fa-arrow-left"></i> Volver a Personal
+            </a>
+        </div>
+
+        <div class="resumen-grid">
+            <div class="resumen-card">
+                <i class="fa-solid fa-list-check"></i>
+                <div>
+                    <span class="resumen-valor">{{ total }}</span>
+                    <span class="resumen-label">Registros totales</span>
+                </div>
+            </div>
+            <div class="resumen-card resumen-entrada">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <div>
+                    <span class="resumen-valor">{{ entradas }}</span>
+                    <span class="resumen-label">Entradas / exitosos</span>
+                </div>
+            </div>
+            <div class="resumen-card resumen-salida">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <div>
+                    <span class="resumen-valor">{{ salidas }}</span>
+                    <span class="resumen-label">Salidas</span>
+                </div>
+            </div>
+            <div class="resumen-card resumen-denegado">
+                <i class="fa-solid fa-ban"></i>
+                <div>
+                    <span class="resumen-valor">{{ denegados }}</span>
+                    <span class="resumen-label">Denegados / fallidos</span>
+                </div>
+            </div>
+        </div>
+
+        <form method="GET" class="filtros-historial">
+            <div class="filtro-group">
+                <label for="fecha_inicio">Desde</label>
+                <input type="date" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+            </div>
+            <div class="filtro-group">
+                <label for="fecha_fin">Hasta</label>
+                <input type="date" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
+            </div>
+            <div class="filtro-group">
+                <label for="tipo_acceso">Tipo de acceso</label>
+                <select id="tipo_acceso" name="tipo_acceso">
+                    <option value="">Todos</option>
+                    {% for tipo in tipos_disponibles %}
+                        <option value="{{ tipo }}" {% if tipo == tipo_acceso %}selected{% endif %}>{{ tipo }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtro-botones">
+                <button type="submit" class="btn-filtro btn-aplicar">
+                    <i class="fa-solid fa-filter"></i> Filtrar
+                </button>
+                <a href="{% url 'personal:historial' persona.id %}" class="btn-filtro btn-limpiar">
+                    <i class="fa-solid fa-broom"></i> Limpiar
+                </a>
+            </div>
+        </form>
+
+        <div class="tabla-container">
+            <table id="tablaHistorial">
+                <thead>
+                    <tr>
+                        <th>Fecha y Hora</th>
+                        <th>Tipo de Acceso</th>
+                        <th>Dispositivo</th>
+                        <th>Motivo / Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for registro in registros %}
+                    <tr>
+                        <td>{{ registro.fecha_hora|date:"d/m/Y H:i:s" }}</td>
+                        <td>
+                            {% if registro.tipo_acceso == 'ENTRADA' or registro.tipo_acceso == 'exitoso' %}
+                                <span class="badge-acceso badge-entrada"><i class="fa-solid fa-right-to-bracket"></i> {{ registro.get_tipo_acceso_display }}</span>
+                            {% elif registro.tipo_acceso == 'SALIDA' %}
+                                <span class="badge-acceso badge-salida"><i class="fa-solid fa-right-from-bracket"></i> {{ registro.get_tipo_acceso_display }}</span>
+                            {% else %}
+                                <span class="badge-acceso badge-denegado"><i class="fa-solid fa-ban"></i> {{ registro.get_tipo_acceso_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ registro.dispositivo.nombre|default:"-" }}</td>
+                        <td>{{ registro.motivo_denegado|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="sin-registros">
+                            <i class="fa-solid fa-inbox"></i> Esta persona todavía no tiene accesos registrados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
