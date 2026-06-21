@@ -12,7 +12,7 @@ SECRET_KEY = 'Proyectofinal2026'
 
 DEBUG = True
 
-ALLOWED_HOSTS = [Manu396L.pythonanywhere.com]
+ALLOWED_HOSTS = ['Manu396L.pythonanywhere.com']
 
 
 # Application definition
